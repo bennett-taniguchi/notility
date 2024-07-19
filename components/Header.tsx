@@ -127,6 +127,7 @@ const Header: React.FC = () => {
         <Link href="/notes" legacyBehavior>
           <a data-active={isActive("/notes")}>My Notes</a>
         </Link>
+
         <style jsx>{`
           .bold {
             font-weight: bold;

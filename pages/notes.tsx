@@ -4,6 +4,7 @@ import { useSession, getSession } from "next-auth/react";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
 import prisma from "../lib/prisma";
+import Router from "next/router";
 // shadcn imports
 import { ScrollArea } from "../components/ui/scroll-area";
 import { Separator } from "../components/ui/separator";
@@ -42,41 +43,80 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
   if (!session) {
     res.statusCode = 403;
-    return { props: { drafts: [] } };
+    return { props: { notes: [] } };
   }
 
-  const drafts = await prisma.post.findMany({
+  const notes = await prisma.notes.findMany({
     where: {
       author: { email: session?.user?.email },
-      published: false,
-    },
-    include: {
-      author: {
-        select: { name: true },
-      },
     },
   });
   return {
-    props: { drafts },
+    props: { notes },
   };
 };
+// const drafts = await prisma.post.findMany({
+//   where: {
+//     author: { email: session?.user?.email },
+//     published: false,
+//   },
+//   include: {
+//     author: {
+//       select: { name: true },
+//     },
+//   },
+// });
+// return {
+//   props: { drafts },
+// };
 
 type Props = {
-  drafts: PostProps[];
+  notes: PostProps[];
 };
 
-const Drafts: React.FC<Props> = (props) => {
+const Notes: React.FC<Props> = (props) => {
   const { data: session } = useSession();
 
   const testNotes = ["Today", "Yesterday", "The day before"]; // to be filled with db title of notes
   const [selected, setSelected] = useState<boolean[]>(Array(5).fill(false)); // state of button press
   const [title, setTitle] = useState<string>();
-  const [body, setBody] = useState<string>();
+  const [content, setContent] = useState<string>();
 
+  // todo : split into separate functions for each but not now cuz im lazy
   function handleSelected(num: number) {
     selected[num] = !selected[num];
-    console.log(selected);
   }
+
+  // saves notes to db
+  const saveNotes = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    try {
+      const body = { title, content };
+      await fetch("/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      await Router.push("/notes");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // write out api route and convert to backend, then use a fetch ehre instead
+  const loadNotes = async (e: React.SyntheticEvent) => {
+    const res = await prisma.notes.findFirst({
+      where: {
+        id: parseInt(e.currentTarget.id),
+      },
+    });
+    if (res) {
+      setTitle(res.title);
+      setContent(res.content);
+      console.log(res);
+    }
+    console.log("no res");
+  };
 
   if (!session) {
     return (
@@ -101,12 +141,13 @@ const Drafts: React.FC<Props> = (props) => {
                 <CommandList className="overflow-hidden ">
                   <CommandEmpty>No results found.</CommandEmpty>
                   <CommandGroup heading="Recent Notes">
-                    <CommandItem>
-                      <span>Today</span>
-                    </CommandItem>
-                    <CommandItem>
-                      <span>Yesterday</span>
-                    </CommandItem>
+                    {props.notes.map((note, index) => (
+                      <CommandItem>
+                        <span id={index + ""} onClick={loadNotes}>
+                          {note.title}
+                        </span>
+                      </CommandItem>
+                    ))}
                   </CommandGroup>
                   <CommandSeparator />
                   <CommandGroup heading="Suggestions">
@@ -176,7 +217,7 @@ const Drafts: React.FC<Props> = (props) => {
                     variant="outline"
                     value="paperplane"
                     aria-label="Toggle paperplane"
-                    onClick={() => handleSelected(3)}
+                    onClick={saveNotes}
                     className=""
                   >
                     <PaperPlaneIcon className="h-4 w-4" />
@@ -204,7 +245,7 @@ const Drafts: React.FC<Props> = (props) => {
               </ResizablePanel>
               <ResizablePanel>
                 <Textarea
-                  onChange={(e) => setBody(e.target.value)}
+                  onChange={(e) => setContent(e.target.value)}
                   className="min-h-screen resize-none focus-visible:ring-0 "
                 ></Textarea>
               </ResizablePanel>
@@ -231,4 +272,4 @@ const Drafts: React.FC<Props> = (props) => {
   );
 };
 
-export default Drafts;
+export default Notes;

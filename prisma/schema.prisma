@@ -57,6 +57,7 @@ model User {
   posts         Post[]
   accounts      Account[]
   sessions      Session[]
+  notes         Notes[]
   }
 
 model VerificationToken {
@@ -67,3 +68,12 @@ model VerificationToken {
 
   @@unique([identifier, token])
   }
+
+model Notes {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content       String
+  author    User? @relation(fields:[authorId], references:[id])
+  authorId  String?
+  
+}
