@@ -38,6 +38,7 @@ import {
 } from "@radix-ui/react-icons";
 
 import { ToggleGroup, ToggleGroupItem } from "../components/ui/toggle-group";
+import { resolve } from "path/win32";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
@@ -77,10 +78,11 @@ type Props = {
 const Notes: React.FC<Props> = (props) => {
   const { data: session } = useSession();
 
-  const testNotes = ["Today", "Yesterday", "The day before"]; // to be filled with db title of notes
   const [selected, setSelected] = useState<boolean[]>(Array(5).fill(false)); // state of button press
-  const [title, setTitle] = useState<string>();
+  const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>();
+
+  const [ids, setIds] = useState<string[]>();
 
   // todo : split into separate functions for each but not now cuz im lazy
   function handleSelected(num: number) {
@@ -103,19 +105,31 @@ const Notes: React.FC<Props> = (props) => {
     }
   };
 
-  // write out api route and convert to backend, then use a fetch ehre instead
-  const loadNotes = async (e: React.SyntheticEvent) => {
-    const res = await prisma.notes.findFirst({
-      where: {
-        id: parseInt(e.currentTarget.id),
-      },
+  // currently we use search for db which we dont wanna stick with (use more logic)
+  const loadNotes = async (e: React.SyntheticEvent, title: string) => {
+    e.preventDefault();
+    const res = await fetch("/api/load_notes/" + title, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
     });
-    if (res) {
-      setTitle(res.title);
-      setContent(res.content);
-      console.log(res);
-    }
-    console.log("no res");
+    const data = await res.json();
+    setTitle(data.title);
+    setContent(data.content);
+    console.log(data);
+    await Router.push("/notes");
+  };
+
+  const deleteNotes = async (e: React.SyntheticEvent, title: string) => {
+    e.preventDefault();
+    const res = await fetch("/api/delete/" + title, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    setTitle("");
+    setContent("");
+    console.log(data);
+    await Router.push("/notes");
   };
 
   if (!session) {
@@ -143,7 +157,11 @@ const Notes: React.FC<Props> = (props) => {
                   <CommandGroup heading="Recent Notes">
                     {props.notes.map((note, index) => (
                       <CommandItem>
-                        <span id={index + ""} onClick={loadNotes}>
+                        <span
+                          onClick={(e) =>
+                            loadNotes(e, props.notes[index].title)
+                          }
+                        >
                           {note.title}
                         </span>
                       </CommandItem>
@@ -227,7 +245,7 @@ const Notes: React.FC<Props> = (props) => {
                     variant="outline"
                     value="cross"
                     aria-label="toggle cross"
-                    onClick={() => handleSelected(4)}
+                    onClick={(e) => deleteNotes(e, title)}
                     className="active:bg-zinc-400"
                   >
                     <Cross1Icon className="h-4 w-4" />
@@ -240,12 +258,14 @@ const Notes: React.FC<Props> = (props) => {
               >
                 <Textarea
                   onChange={(e) => setTitle(e.target.value)}
+                  value={title}
                   className="max-h-[75px] min-h-[75px] text-2xl resize-none  focus-visible:ring-0"
                 ></Textarea>
               </ResizablePanel>
               <ResizablePanel>
                 <Textarea
                   onChange={(e) => setContent(e.target.value)}
+                  value={content}
                   className="min-h-screen resize-none focus-visible:ring-0 "
                 ></Textarea>
               </ResizablePanel>
