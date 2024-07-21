@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { GetServerSideProps } from "next";
 import { useSession, getSession } from "next-auth/react";
 import Layout from "../components/Layout";
@@ -35,10 +35,10 @@ import {
   UnderlineIcon,
   PaperPlaneIcon,
   Cross1Icon,
+  PlusCircledIcon,
 } from "@radix-ui/react-icons";
 
 import { ToggleGroup, ToggleGroupItem } from "../components/ui/toggle-group";
-import { resolve } from "path/win32";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
@@ -56,28 +56,13 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     props: { notes },
   };
 };
-// const drafts = await prisma.post.findMany({
-//   where: {
-//     author: { email: session?.user?.email },
-//     published: false,
-//   },
-//   include: {
-//     author: {
-//       select: { name: true },
-//     },
-//   },
-// });
-// return {
-//   props: { drafts },
-// };
-
 type Props = {
   notes: PostProps[];
 };
 
 const Notes: React.FC<Props> = (props) => {
   const { data: session } = useSession();
-
+  const ref = useRef<HTMLDivElement>(null); // this up here somehow fixes a useref error...
   const [selected, setSelected] = useState<boolean[]>(Array(5).fill(false)); // state of button press
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>();
@@ -103,6 +88,17 @@ const Notes: React.FC<Props> = (props) => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const [hoveredNew, setHoveredNew] = React.useState(false);
+
+  const handleHoverEnter = (e: React.SyntheticEvent) => {
+    setHoveredNew(true);
+    console.log(hoveredNew);
+  };
+  const handleHoverLeave = (e: React.SyntheticEvent) => {
+    setHoveredNew(false);
+    console.log(hoveredNew);
   };
 
   // currently we use search for db which we dont wanna stick with (use more logic)
@@ -141,20 +137,43 @@ const Notes: React.FC<Props> = (props) => {
     );
   }
 
+  // how we want to append to dom
+  // append new italics node **
+  // print content of all nested tags
+  //    potential error if tags are nested...
+  function handleClick() {
+    // access and append div parent node
+    const italicNode = document.createElement("i");
+    italicNode.innerText = "here we have italics";
+    ref.current!.appendChild(italicNode);
+
+    // prints inner text
+    let strs: string[] = [];
+    [...ref.current.children].map((x) => strs.push(x.innerText));
+    console.log(strs);
+  }
+
+  // command h is hardcoded... (figure out how css works..)
   return (
     <Layout>
       <div className="page ">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
             defaultSize={20}
-            className="min-h-screen min-w-[250px] rounded-lg border"
+            className="min-h-[900px] min-w-[250px] rounded-lg border"
           >
-            <ScrollArea className="rounded-md border">
-              <Command className="h-100 rounded-lg border shadow-md overflow-hidden">
+            <ScrollArea className="rounded-md border p-0 h-[900px]">
+              <Command className="h-[1000px] rounded-lg border shadow-md overflow-y-auto">
                 <CommandInput placeholder="Type a command or search..." />
-                <CommandList className="overflow-hidden ">
+                <CommandList className="overflow-hidden h-[900px]">
                   <CommandEmpty>No results found.</CommandEmpty>
-                  <CommandGroup heading="Recent Notes">
+                  <CommandGroup>
+                    <CommandItem className="">
+                      <span className="text-xs text-zinc-600 font-medium ">
+                        Recent Notes
+                      </span>
+                      <PlusCircledIcon className="right-5 position: absolute"></PlusCircledIcon>
+                    </CommandItem>
                     {props.notes.map((note, index) => (
                       <CommandItem>
                         <span
@@ -166,6 +185,20 @@ const Notes: React.FC<Props> = (props) => {
                         </span>
                       </CommandItem>
                     ))}
+
+                    <CommandItem
+                      onMouseEnter={handleHoverEnter}
+                      onMouseLeave={handleHoverLeave}
+                    >
+                      <span
+                        className={
+                          "text-xs " +
+                          (hoveredNew ? "text-zinc-200" : "text-zinc-400")
+                        }
+                      >
+                        New Note
+                      </span>
+                    </CommandItem>
                   </CommandGroup>
                   <CommandSeparator />
                   <CommandGroup heading="Suggestions">
@@ -203,7 +236,7 @@ const Notes: React.FC<Props> = (props) => {
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel
                 defaultSize={10}
-                className="max-h-[200px] min-h-[100px]  border-0"
+                className="max-h-[200px] min-h-[100px] "
               >
                 <ToggleGroup type="multiple">
                   <ToggleGroupItem
@@ -254,16 +287,26 @@ const Notes: React.FC<Props> = (props) => {
               </ResizablePanel>
               <ResizablePanel
                 defaultSize={10}
-                className="max-h-[75px] min-h-[75px] border-0"
+                className="max-h-[60px] min-h-[60px] "
               >
+                <Separator />
+
                 <Textarea
+                  placeholder="Write a Title to save Note"
                   onChange={(e) => setTitle(e.target.value)}
                   value={title}
-                  className="max-h-[75px] min-h-[75px] text-2xl resize-none  focus-visible:ring-0"
+                  className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0"
                 ></Textarea>
               </ResizablePanel>
               <ResizablePanel>
+                <div ref={ref} contentEditable={true} onClick={handleClick}>
+                  <blockquote className="mt-6 border-l-2 pl-6 italic">
+                    "After all," he said, "everyone enjoys a good joke, so it's
+                    only fair that they should pay for the privilege."
+                  </blockquote>
+                </div>
                 <Textarea
+                  placeholder="Write your notes here"
                   onChange={(e) => setContent(e.target.value)}
                   value={content}
                   className="min-h-screen resize-none focus-visible:ring-0 "
