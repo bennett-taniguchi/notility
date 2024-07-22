@@ -36,6 +36,7 @@ import {
   PaperPlaneIcon,
   Cross1Icon,
   PlusCircledIcon,
+  MinusCircledIcon,
 } from "@radix-ui/react-icons";
 
 import { ToggleGroup, ToggleGroupItem } from "../components/ui/toggle-group";
@@ -90,8 +91,59 @@ const Notes: React.FC<Props> = (props) => {
     }
   };
 
-  const [hoveredNew, setHoveredNew] = React.useState(false);
+  // *** attempt this far at updating ***
+  const maintainTitle = (e: React.SyntheticEvent) => {
+    if (initialEdit) {
+      setMaintainedTitle(e.target.innerText);
+      setInitialEdit(false);
+    }
+  };
 
+  const [initialEdit, setInitialEdit] = useState(true);
+  const [maintainedTitle, setMaintainedTitle] = useState("");
+
+  const updateNote = async (
+    e: React.SyntheticEvent,
+    givenTitle,
+    givenContent
+  ) => {
+    e.preventDefault();
+    setInitialEdit(true);
+    try {
+      const title = givenTitle;
+      const content = givenContent;
+      const oldTitle = { maintainedTitle };
+      const body = { title, content };
+
+      await fetch("/api/update", {
+        method: "UPDATE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      await Router.push("/notes");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  // *** attempt this far at updating ***
+  const createNewNote = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    try {
+      const title = "New Note " + (props.notes.length + 1);
+      const content = "New Note";
+      const body = { title, content };
+      await fetch("/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      await Router.push("/notes");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  // for new note command item (Hover Text Effect)
+  const [hoveredNew, setHoveredNew] = React.useState(false);
   const handleHoverEnter = (e: React.SyntheticEvent) => {
     setHoveredNew(true);
     console.log(hoveredNew);
@@ -99,6 +151,27 @@ const Notes: React.FC<Props> = (props) => {
   const handleHoverLeave = (e: React.SyntheticEvent) => {
     setHoveredNew(false);
     console.log(hoveredNew);
+  };
+
+  // for minus icon
+  const handleMinusClick = (e: React.SyntheticEvent) => {
+    if (props.notes[e.target.id]) {
+      console.log(props.notes[e.target.id].title);
+      deleteNotes(e, props.notes[e.target.id].title);
+    }
+  };
+
+  // for plus icon
+  const handlePlusClick = (e: React.SyntheticEvent) => {
+    createNewNote(e);
+  };
+
+  const handleUpdateTitle = (e: React.SyntheticEvent) => {
+    console.log(e.currentTarget.innerText);
+    if (e.currentTarget.innerText) {
+      updateNote(e, e.currentTarget.innerText, "");
+      console.log("here");
+    }
   };
 
   // currently we use search for db which we dont wanna stick with (use more logic)
@@ -163,7 +236,7 @@ const Notes: React.FC<Props> = (props) => {
             className="min-h-[900px] min-w-[250px] rounded-lg border"
           >
             <ScrollArea className="rounded-md border p-0 h-[900px]">
-              <Command className="h-[1000px] rounded-lg border shadow-md overflow-y-auto">
+              <Command className="h-[1000px] rounded-lg border shadow-md overflow-y-auto pr-[5px]">
                 <CommandInput placeholder="Type a command or search..." />
                 <CommandList className="overflow-hidden h-[900px]">
                   <CommandEmpty>No results found.</CommandEmpty>
@@ -172,17 +245,28 @@ const Notes: React.FC<Props> = (props) => {
                       <span className="text-xs text-zinc-600 font-medium ">
                         Recent Notes
                       </span>
-                      <PlusCircledIcon className="right-5 position: absolute"></PlusCircledIcon>
+                      <PlusCircledIcon
+                        onClick={handlePlusClick}
+                        className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
+                      ></PlusCircledIcon>
                     </CommandItem>
                     {props.notes.map((note, index) => (
                       <CommandItem>
                         <span
+                          onChange={maintainTitle}
+                          onBlur={handleUpdateTitle}
+                          contentEditable={true}
                           onClick={(e) =>
                             loadNotes(e, props.notes[index].title)
                           }
                         >
                           {note.title}
                         </span>
+                        <MinusCircledIcon
+                          id={index + ""}
+                          onClick={handleMinusClick}
+                          className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
+                        />
                       </CommandItem>
                     ))}
 
