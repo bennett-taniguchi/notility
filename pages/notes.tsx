@@ -214,8 +214,9 @@ const Notes: React.FC<Props> = (props) => {
   // append new italics node **
   // print content of all nested tags
   //    potential error if tags are nested...
-  function handleClick() {
+  const handleClick = (e: React.SyntheticEvent) => {
     // access and append div parent node
+    console.log("ree");
     const italicNode = document.createElement("i");
     italicNode.innerText = "here we have italics";
     ref.current!.appendChild(italicNode);
@@ -224,8 +225,11 @@ const Notes: React.FC<Props> = (props) => {
     let strs: string[] = [];
     [...ref.current.children].map((x) => strs.push(x.innerText));
     console.log(strs);
-  }
+  };
 
+  const handleTest = (e: React.SyntheticEvent) => {
+    console.log("clickedon", e);
+  };
   // command h is hardcoded... (figure out how css works..)
   return (
     <Layout>
@@ -233,7 +237,7 @@ const Notes: React.FC<Props> = (props) => {
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
             defaultSize={20}
-            className="min-h-[900px] min-w-[250px] rounded-lg border"
+            className="min-h-[900px] min-w-[250px] max-w-[500px] rounded-lg border"
           >
             <ScrollArea className="rounded-md border p-0 h-[900px]">
               <Command className="h-[1000px] rounded-lg border shadow-md overflow-y-auto pr-[5px]">
@@ -282,33 +286,6 @@ const Notes: React.FC<Props> = (props) => {
                       >
                         New Note
                       </span>
-                    </CommandItem>
-                  </CommandGroup>
-                  <CommandSeparator />
-                  <CommandGroup heading="Suggestions">
-                    <CommandItem>
-                      <span>Calendar</span>
-                    </CommandItem>
-                    <CommandItem>
-                      <span>Search Emoji</span>
-                    </CommandItem>
-                    <CommandItem>
-                      <span>Launch</span>
-                    </CommandItem>
-                  </CommandGroup>
-                  <CommandSeparator />
-                  <CommandGroup heading="Settings">
-                    <CommandItem>
-                      <span>Profile</span>
-                      <CommandShortcut>⌘P</CommandShortcut>
-                    </CommandItem>
-                    <CommandItem>
-                      <span>Mail</span>
-                      <CommandShortcut>⌘B</CommandShortcut>
-                    </CommandItem>
-                    <CommandItem>
-                      <span>Settings</span>
-                      <CommandShortcut>⌘S</CommandShortcut>
                     </CommandItem>
                   </CommandGroup>
                 </CommandList>
@@ -384,7 +361,10 @@ const Notes: React.FC<Props> = (props) => {
               </ResizablePanel>
               <ResizablePanel>
                 <div ref={ref} contentEditable={true} onClick={handleClick}>
-                  <blockquote className="mt-6 border-l-2 pl-6 italic">
+                  <blockquote
+                    className="mt-6 border-l-2 pl-6 italic"
+                    onClick={handleTest}
+                  >
                     "After all," he said, "everyone enjoys a good joke, so it's
                     only fair that they should pay for the privilege."
                   </blockquote>
