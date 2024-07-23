@@ -76,4 +76,5 @@ model Notes {
   author    User? @relation(fields:[authorId], references:[id])
   authorId  String?
   
+  @@unique([title,authorId])
 }

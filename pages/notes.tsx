@@ -37,9 +37,11 @@ import {
   Cross1Icon,
   PlusCircledIcon,
   MinusCircledIcon,
+  QuestionMarkCircledIcon,
 } from "@radix-ui/react-icons";
 
 import { ToggleGroup, ToggleGroupItem } from "../components/ui/toggle-group";
+import { parse } from "path";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
@@ -94,7 +96,9 @@ const Notes: React.FC<Props> = (props) => {
   // *** attempt this far at updating ***
   const maintainTitle = (e: React.SyntheticEvent) => {
     if (initialEdit) {
+      console.log("intial edit");
       setMaintainedTitle(e.target.innerText);
+      console.log(e.target.innerText);
       setInitialEdit(false);
     }
   };
@@ -102,34 +106,53 @@ const Notes: React.FC<Props> = (props) => {
   const [initialEdit, setInitialEdit] = useState(true);
   const [maintainedTitle, setMaintainedTitle] = useState("");
 
-  const updateNote = async (
-    e: React.SyntheticEvent,
-    givenTitle,
-    givenContent
-  ) => {
+  const updateNote = async (e: React.SyntheticEvent, newTitle, newContent) => {
     e.preventDefault();
-    setInitialEdit(true);
     try {
-      const title = givenTitle;
-      const content = givenContent;
-      const oldTitle = { maintainedTitle };
-      const body = { title, content };
+      const title = newTitle;
+      const content = newContent;
+      const oldTitle = maintainedTitle;
+      const body = { title, content, oldTitle };
 
       await fetch("/api/update", {
-        method: "UPDATE",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      await Router.push("/notes");
+      setInitialEdit(true);
+      setTitle(newTitle);
+      //await Router.push("/notes");
     } catch (error) {
       console.error(error);
     }
   };
   // *** attempt this far at updating ***
+
+  // look at currently displayed props.note and make new note accordingly
+  // works as we refresh on every update, however this is api-call intensive
+  //      look into caching or more performant way of updating (on save or something)
+
   const createNewNote = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    let titles: string[] = [];
+    let numberMap = new Map<number, number>();
+    numberMap.set(0, 1);
+    let index = 1;
+    for (let i = 0; i < props.notes.length; i++) {
+      let currTitle = props.notes[i].title;
+      if (currTitle.startsWith("New Note ")) {
+        currTitle = currTitle.replace("New Note ", "");
+        if (!Number.isNaN(parseInt(currTitle))) {
+          numberMap.set(parseInt(currTitle), 1);
+          while (numberMap.has(index)) {
+            index++;
+            if (index == 100) break; // limit notes, remove this **
+          }
+        }
+      }
+    }
     try {
-      const title = "New Note " + (props.notes.length + 1);
+      const title = "New Note " + index;
       const content = "New Note";
       const body = { title, content };
       await fetch("/api/save", {
@@ -167,10 +190,8 @@ const Notes: React.FC<Props> = (props) => {
   };
 
   const handleUpdateTitle = (e: React.SyntheticEvent) => {
-    console.log(e.currentTarget.innerText);
-    if (e.currentTarget.innerText) {
-      updateNote(e, e.currentTarget.innerText, "");
-      console.log("here");
+    if (e.currentTarget.innerHTML) {
+      updateNote(e, e.currentTarget.innerHTML, "");
     }
   };
 
@@ -241,7 +262,7 @@ const Notes: React.FC<Props> = (props) => {
           >
             <ScrollArea className="rounded-md border p-0 h-[900px]">
               <Command className="h-[1000px] rounded-lg border shadow-md overflow-y-auto pr-[5px]">
-                <CommandInput placeholder="Type a command or search..." />
+                <CommandInput placeholder="Find Notes:" />
                 <CommandList className="overflow-hidden h-[900px]">
                   <CommandEmpty>No results found.</CommandEmpty>
                   <CommandGroup>
@@ -257,7 +278,7 @@ const Notes: React.FC<Props> = (props) => {
                     {props.notes.map((note, index) => (
                       <CommandItem>
                         <span
-                          onChange={maintainTitle}
+                          onFocus={maintainTitle}
                           onBlur={handleUpdateTitle}
                           contentEditable={true}
                           onClick={(e) =>
@@ -274,10 +295,11 @@ const Notes: React.FC<Props> = (props) => {
                       </CommandItem>
                     ))}
 
-                    <CommandItem
+                    {/* <CommandItem
                       onMouseEnter={handleHoverEnter}
                       onMouseLeave={handleHoverLeave}
-                    >
+                    > 
+                      // Fancy, left to implement later if time
                       <span
                         className={
                           "text-xs " +
@@ -286,7 +308,7 @@ const Notes: React.FC<Props> = (props) => {
                       >
                         New Note
                       </span>
-                    </CommandItem>
+                    </CommandItem> */}
                   </CommandGroup>
                 </CommandList>
               </Command>
