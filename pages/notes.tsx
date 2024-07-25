@@ -1,27 +1,28 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { GetServerSideProps } from "next";
 import { useSession, getSession } from "next-auth/react";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
 import prisma from "../lib/prisma";
 import Router from "next/router";
-// shadcn imports
-import { ScrollArea } from "../components/ui/scroll-area";
-import { Separator } from "../components/ui/separator";
-import { Button } from "../components/ui/button";
 
+// shadcn and icon imports
+import { Separator } from "../components/ui/separator";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "../components/ui/command";
+  FaFolder,
+  FaFolderOpen,
+  FaFolderPlus,
+  FaFolderMinus,
+} from "react-icons/fa";
 
 import { Textarea } from "../components/ui/textarea";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../components/ui/tooltip";
 
 import {
   ResizableHandle,
@@ -29,19 +30,9 @@ import {
   ResizablePanelGroup,
 } from "../components/ui/resizable";
 
-import {
-  FontBoldIcon,
-  FontItalicIcon,
-  UnderlineIcon,
-  PaperPlaneIcon,
-  Cross1Icon,
-  PlusCircledIcon,
-  MinusCircledIcon,
-  QuestionMarkCircledIcon,
-} from "@radix-ui/react-icons";
-
-import { ToggleGroup, ToggleGroupItem } from "../components/ui/toggle-group";
-import { parse } from "path";
+// refactored components:
+import Sidebar from "../components/notes/Sidebar";
+import Hoverbar from "../components/notes/HoverBar";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
@@ -66,16 +57,14 @@ type Props = {
 const Notes: React.FC<Props> = (props) => {
   const { data: session } = useSession();
   const ref = useRef<HTMLDivElement>(null); // this up here somehow fixes a useref error...
-  const [selected, setSelected] = useState<boolean[]>(Array(5).fill(false)); // state of button press
+
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>();
 
-  const [ids, setIds] = useState<string[]>();
-
-  // todo : split into separate functions for each but not now cuz im lazy
-  function handleSelected(num: number) {
-    selected[num] = !selected[num];
-  }
+  const [selected, setSelected] = useState<string>(); // more hook errors, if not up here
+  const [showTooltip, setShowTooltip] = useState(false); // ^^^
+  const [mouseX, setMouseX] = useState<number>(0);
+  const [mouseY, setMouseY] = useState<number>(0);
 
   // saves notes to db
   const saveNotes = async (e: React.SyntheticEvent) => {
@@ -108,6 +97,9 @@ const Notes: React.FC<Props> = (props) => {
 
   const updateNote = async (e: React.SyntheticEvent, newTitle, newContent) => {
     e.preventDefault();
+    if (newTitle === title) {
+      return;
+    }
     try {
       const title = newTitle;
       const content = newContent;
@@ -126,6 +118,7 @@ const Notes: React.FC<Props> = (props) => {
       console.error(error);
     }
   };
+
   // *** attempt this far at updating ***
 
   // look at currently displayed props.note and make new note accordingly
@@ -146,7 +139,7 @@ const Notes: React.FC<Props> = (props) => {
           numberMap.set(parseInt(currTitle), 1);
           while (numberMap.has(index)) {
             index++;
-            if (index == 100) break; // limit notes, remove this **
+            if (index == 10) break; // limit notes, remove this **
           }
         }
       }
@@ -163,35 +156,6 @@ const Notes: React.FC<Props> = (props) => {
       await Router.push("/notes");
     } catch (error) {
       console.error(error);
-    }
-  };
-  // for new note command item (Hover Text Effect)
-  const [hoveredNew, setHoveredNew] = React.useState(false);
-  const handleHoverEnter = (e: React.SyntheticEvent) => {
-    setHoveredNew(true);
-    console.log(hoveredNew);
-  };
-  const handleHoverLeave = (e: React.SyntheticEvent) => {
-    setHoveredNew(false);
-    console.log(hoveredNew);
-  };
-
-  // for minus icon
-  const handleMinusClick = (e: React.SyntheticEvent) => {
-    if (props.notes[e.target.id]) {
-      console.log(props.notes[e.target.id].title);
-      deleteNotes(e, props.notes[e.target.id].title);
-    }
-  };
-
-  // for plus icon
-  const handlePlusClick = (e: React.SyntheticEvent) => {
-    createNewNote(e);
-  };
-
-  const handleUpdateTitle = (e: React.SyntheticEvent) => {
-    if (e.currentTarget.innerHTML) {
-      updateNote(e, e.currentTarget.innerHTML, "");
     }
   };
 
@@ -236,22 +200,45 @@ const Notes: React.FC<Props> = (props) => {
   // print content of all nested tags
   //    potential error if tags are nested...
   const handleClick = (e: React.SyntheticEvent) => {
+    // print selected
+    // if (window) {
+    //   console.log(window?.getSelection()?.toString());
+    //   console.log(window);
+    // }
     // access and append div parent node
-    console.log("ree");
-    const italicNode = document.createElement("i");
-    italicNode.innerText = "here we have italics";
-    ref.current!.appendChild(italicNode);
-
-    // prints inner text
-    let strs: string[] = [];
-    [...ref.current.children].map((x) => strs.push(x.innerText));
-    console.log(strs);
+    // const italicNode = document.createElement("i");
+    // italicNode.innerText = "here we have italics";
+    // ref.current!.appendChild(italicNode);
+    // prints all inner text
+    // let strs: string[] = [];
+    // [...ref.current.children].map((x) => strs.push(x.innerText));
+    // console.log(strs);
   };
+
+  // perfectly does highlight and show tooltip
+  // need to position tooltip relative to client cursor
 
   const handleTest = (e: React.SyntheticEvent) => {
-    console.log("clickedon", e);
+    if (!window) return;
+    console.log(e.clientX, e.clientY);
+    setMouseX(e.clientX);
+    setMouseY(e.clientY);
+
+    let selectedString = window?.getSelection()?.toString();
+    setSelected(selectedString);
+
+    if (selectedString == selected) {
+      // last selection is current, was clicked again
+      setShowTooltip(false);
+    } else if (selectedString != "") {
+      // first not null selection, open tooltip
+      setShowTooltip(true);
+    } else {
+      // clearly empty selection, close tooltip
+      setShowTooltip(false);
+    }
   };
-  // command h is hardcoded... (figure out how css works..)
+
   return (
     <Layout>
       <div className="page ">
@@ -260,59 +247,15 @@ const Notes: React.FC<Props> = (props) => {
             defaultSize={20}
             className="min-h-[900px] min-w-[250px] max-w-[500px] rounded-lg border"
           >
-            <ScrollArea className="rounded-md border p-0 h-[900px]">
-              <Command className="h-[1000px] rounded-lg border shadow-md overflow-y-auto pr-[5px]">
-                <CommandInput placeholder="Find Notes:" />
-                <CommandList className="overflow-hidden h-[900px]">
-                  <CommandEmpty>No results found.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem className="">
-                      <span className="text-xs text-zinc-600 font-medium ">
-                        Recent Notes
-                      </span>
-                      <PlusCircledIcon
-                        onClick={handlePlusClick}
-                        className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
-                      ></PlusCircledIcon>
-                    </CommandItem>
-                    {props.notes.map((note, index) => (
-                      <CommandItem>
-                        <span
-                          onFocus={maintainTitle}
-                          onBlur={handleUpdateTitle}
-                          contentEditable={true}
-                          onClick={(e) =>
-                            loadNotes(e, props.notes[index].title)
-                          }
-                        >
-                          {note.title}
-                        </span>
-                        <MinusCircledIcon
-                          id={index + ""}
-                          onClick={handleMinusClick}
-                          className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
-                        />
-                      </CommandItem>
-                    ))}
-
-                    {/* <CommandItem
-                      onMouseEnter={handleHoverEnter}
-                      onMouseLeave={handleHoverLeave}
-                    > 
-                      // Fancy, left to implement later if time
-                      <span
-                        className={
-                          "text-xs " +
-                          (hoveredNew ? "text-zinc-200" : "text-zinc-400")
-                        }
-                      >
-                        New Note
-                      </span>
-                    </CommandItem> */}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </ScrollArea>
+            <Sidebar
+              setTitle={setTitle}
+              setContent={setContent}
+              createNewNote={createNewNote}
+              updateNote={updateNote}
+              maintainTitle={maintainTitle}
+              loadNotes={loadNotes}
+              props={props}
+            />
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel>
@@ -321,52 +264,7 @@ const Notes: React.FC<Props> = (props) => {
                 defaultSize={10}
                 className="max-h-[200px] min-h-[100px] "
               >
-                <ToggleGroup type="multiple">
-                  <ToggleGroupItem
-                    variant="outline"
-                    value="bold"
-                    aria-label="Toggle bold"
-                    className="[date-state]-1"
-                    onClick={() => handleSelected(0)}
-                  >
-                    <FontBoldIcon className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    variant="outline"
-                    value="italic"
-                    aria-label="Toggle italic"
-                    onClick={() => handleSelected(1)}
-                  >
-                    <FontItalicIcon className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    variant="outline"
-                    value="strikethrough"
-                    aria-label="Toggle strikethrough"
-                    onClick={() => handleSelected(2)}
-                  >
-                    <UnderlineIcon className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <Button
-                    variant="outline"
-                    value="paperplane"
-                    aria-label="Toggle paperplane"
-                    onClick={saveNotes}
-                    className=""
-                  >
-                    <PaperPlaneIcon className="h-4 w-4" />
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    value="cross"
-                    aria-label="toggle cross"
-                    onClick={(e) => deleteNotes(e, title)}
-                    className="active:bg-zinc-400"
-                  >
-                    <Cross1Icon className="h-4 w-4" />
-                  </Button>
-                </ToggleGroup>
+                <Hoverbar saveNotes={saveNotes} deleteNotes={deleteNotes} />
               </ResizablePanel>
               <ResizablePanel
                 defaultSize={10}
@@ -383,6 +281,35 @@ const Notes: React.FC<Props> = (props) => {
               </ResizablePanel>
               <ResizablePanel>
                 <div ref={ref} contentEditable={true} onClick={handleClick}>
+                  {/* <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger
+                        className={
+                          "" + (!showTooltip ? "invisible" : "visible")
+                        }
+                      ></TooltipTrigger>
+                      <TooltipContent
+                        align="start"
+                        forceMount={true}
+                        alignOffset={mouseX}
+                        sideOffset={mouseY - 10}
+                        hideWhenDetached
+                        className={
+                          "" +
+                          (!showTooltip
+                            ? "invisible"
+                            : "absolute visible top: [" +
+                              mouseY +
+                              "px] left: [" +
+                              mouseX +
+                              "px]")
+                        }
+                      >
+                        <p>Add to library</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider> */}
+
                   <blockquote
                     className="mt-6 border-l-2 pl-6 italic"
                     onClick={handleTest}
@@ -402,21 +329,6 @@ const Notes: React.FC<Props> = (props) => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-
-      <style jsx>{`
-        .post {
-          background: var(--geist-background);
-          transition: box-shadow 0.1s ease-in;
-        }
-
-        .post:hover {
-          box-shadow: 1px 1px 3px #aaa;
-        }
-
-        .post + .post {
-          margin-top: 2rem;
-        }
-      `}</style>
     </Layout>
   );
 };
