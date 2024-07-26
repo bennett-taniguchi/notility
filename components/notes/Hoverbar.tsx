@@ -16,13 +16,48 @@ export default function Hoverbar({ saveNotes, deleteNotes }) {
   function handleSelected(num: number) {
     selected[num] = !selected[num];
   }
+
+  function handleBold() {
+    if (!window.getSelection()) return;
+    var selection = window.getSelection();
+    console.log(window.getSelection()?.anchorNode?.parentNode);
+
+    var selection_text = selection?.toString();
+
+    console.log(selection?.anchorNode);
+    console.log(selection?.focusNode);
+    // How do I add a span around the selected text?
+    //const parent = document.querySelectorAll("[id='bold_tag']").item(0);
+
+    // Function to check if an element has a <b> tag with the ID "bold_tag"
+    //   function hasBoldTagWithId(node) {
+    //     // Traverse up the DOM tree to check for the <b> tag
+    //     while (node) {
+    //         if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'B' && node.id === 'bold_tag') {
+    //             return true;
+    //         }
+    //         node = node.parentNode;
+    //     }
+    //     return false;
+    // }
+
+    var b = document.createElement("b");
+    b.id = "bold_tag";
+    b.textContent = selection_text;
+
+    //console.log(selection_text);
+    var range = selection?.getRangeAt(0);
+    console.log(range?.commonAncestorContainer);
+    range?.deleteContents();
+    range?.insertNode(b);
+  }
   return (
     <ToggleGroup type="multiple" variant="outline">
       <ToggleGroupItem
         value="bold"
         aria-label="Toggle bold"
         className="[date-state]-1"
-        onClick={() => handleSelected(0)}
+        onClick={() => handleBold()}
       >
         <FontBoldIcon className="h-4 w-4" />
       </ToggleGroupItem>

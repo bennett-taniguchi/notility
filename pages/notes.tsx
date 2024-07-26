@@ -1,28 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { GetServerSideProps } from "next";
 import { useSession, getSession } from "next-auth/react";
 import Layout from "../components/Layout";
-import Post, { PostProps } from "../components/Post";
+import { PostProps } from "../components/Post";
 import prisma from "../lib/prisma";
 import Router from "next/router";
 
 // shadcn and icon imports
 import { Separator } from "../components/ui/separator";
-import {
-  FaFolder,
-  FaFolderOpen,
-  FaFolderPlus,
-  FaFolderMinus,
-} from "react-icons/fa";
-
-import { Textarea } from "../components/ui/textarea";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../components/ui/tooltip";
 
 import {
   ResizableHandle,
@@ -32,7 +17,8 @@ import {
 
 // refactored components:
 import Sidebar from "../components/notes/Sidebar";
-import Hoverbar from "../components/notes/HoverBar";
+import Hoverbar from "../components/notes/Hoverbar";
+import Tiptap from "../components/notes/Tiptap";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
@@ -66,6 +52,12 @@ const Notes: React.FC<Props> = (props) => {
   const [mouseX, setMouseX] = useState<number>(0);
   const [mouseY, setMouseY] = useState<number>(0);
 
+  // quill specific:
+  const [range, setRange] = useState();
+  const [lastChange, setLastChange] = useState();
+  const [readOnly, setReadOnly] = useState(false);
+  const quillRef = useRef();
+
   // saves notes to db
   const saveNotes = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -82,12 +74,10 @@ const Notes: React.FC<Props> = (props) => {
     }
   };
 
-  // *** attempt this far at updating ***
+  // for updating title in sidebar
   const maintainTitle = (e: React.SyntheticEvent) => {
     if (initialEdit) {
-      console.log("intial edit");
       setMaintainedTitle(e.target.innerText);
-      console.log(e.target.innerText);
       setInitialEdit(false);
     }
   };
@@ -119,12 +109,9 @@ const Notes: React.FC<Props> = (props) => {
     }
   };
 
-  // *** attempt this far at updating ***
-
   // look at currently displayed props.note and make new note accordingly
   // works as we refresh on every update, however this is api-call intensive
   //      look into caching or more performant way of updating (on save or something)
-
   const createNewNote = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     let titles: string[] = [];
@@ -169,7 +156,6 @@ const Notes: React.FC<Props> = (props) => {
     const data = await res.json();
     setTitle(data.title);
     setContent(data.content);
-    console.log(data);
     await Router.push("/notes");
   };
 
@@ -182,7 +168,6 @@ const Notes: React.FC<Props> = (props) => {
     const data = await res.json();
     setTitle("");
     setContent("");
-    console.log(data);
     await Router.push("/notes");
   };
 
@@ -201,26 +186,25 @@ const Notes: React.FC<Props> = (props) => {
   //    potential error if tags are nested...
   const handleClick = (e: React.SyntheticEvent) => {
     // print selected
-    // if (window) {
-    //   console.log(window?.getSelection()?.toString());
-    //   console.log(window);
-    // }
+    if (!window) return;
     // access and append div parent node
     // const italicNode = document.createElement("i");
     // italicNode.innerText = "here we have italics";
     // ref.current!.appendChild(italicNode);
     // prints all inner text
-    // let strs: string[] = [];
-    // [...ref.current.children].map((x) => strs.push(x.innerText));
-    // console.log(strs);
+    //console.log(ref.current);
+    let strs: string[] = [];
+
+    [...ref.current.children].map((x) => strs.push(x.innerText));
+
+    //console.log(strs);
   };
 
   // perfectly does highlight and show tooltip
-  // need to position tooltip relative to client cursor
-
-  const handleTest = (e: React.SyntheticEvent) => {
+  // **need to position tooltip relative to client cursor
+  const handleHighlight = (e: React.SyntheticEvent) => {
     if (!window) return;
-    console.log(e.clientX, e.clientY);
+
     setMouseX(e.clientX);
     setMouseY(e.clientY);
 
@@ -268,20 +252,78 @@ const Notes: React.FC<Props> = (props) => {
               </ResizablePanel>
               <ResizablePanel
                 defaultSize={10}
-                className="max-h-[60px] min-h-[60px] "
+                className="max-h-[900px] min-h-[900px] z-0"
               >
                 <Separator />
-
-                <Textarea
+                <Tiptap />
+                {/* <Textarea
                   placeholder="Write a Title to save Note"
                   onChange={(e) => setTitle(e.target.value)}
                   value={title}
-                  className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0"
-                ></Textarea>
+                  className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0 z-0"
+                ></Textarea> */}
               </ResizablePanel>
               <ResizablePanel>
-                <div ref={ref} contentEditable={true} onClick={handleClick}>
-                  {/* <TooltipProvider>
+                {/* <div
+                  ref={ref}
+                  contentEditable={true}
+                  onClick={handleClick}
+                  className="z-10"
+                >
+                  <h1>
+                    Reee
+                    <p>swagath</p>
+                  </h1>
+                  <p
+                    className="mt-6 border-l-2 pl-6 italic"
+                    onClick={handleHighlight}
+                  >
+                    "After all," he said, "everyone enjoys a good joke, so it's
+                    only fair that they should pay for the privilege."
+                  </p>
+                </div> */}
+
+                {/* <Textarea
+                  placeholder="Write your notes here"
+                  onChange={(e) => setContent(e.target.value)}
+                  value={content}
+                  className="min-h-screen resize-none focus-visible:ring-0 "
+                ></Textarea> */}
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+    </Layout>
+  );
+};
+
+export default Notes;
+{
+  /* 
+  Add into text editing area, some type of approach to have hover buttons on text highlight
+  <div
+                    className={
+                      "group position: absolute  display: inline-block  z-10 " +
+                      "left-[" +
+                      mouseX +
+                      "px] top-[" +
+                      mouseY +
+                      "px] "
+                    }
+                  >
+                    Here
+                    <span
+                      className={
+                        "invisible group-hover:visible position: absolute  display: inline-block  w-[120px] bg-zinc-900 text-white text-center padding-[5px] absolute z-20 "
+                      }
+                    >
+                      Interior Text
+                    </span>
+                  </div> */
+}
+{
+  /* <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger
                         className={
@@ -308,29 +350,5 @@ const Notes: React.FC<Props> = (props) => {
                         <p>Add to library</p>
                       </TooltipContent>
                     </Tooltip>
-                  </TooltipProvider> */}
-
-                  <blockquote
-                    className="mt-6 border-l-2 pl-6 italic"
-                    onClick={handleTest}
-                  >
-                    "After all," he said, "everyone enjoys a good joke, so it's
-                    only fair that they should pay for the privilege."
-                  </blockquote>
-                </div>
-                <Textarea
-                  placeholder="Write your notes here"
-                  onChange={(e) => setContent(e.target.value)}
-                  value={content}
-                  className="min-h-screen resize-none focus-visible:ring-0 "
-                ></Textarea>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </div>
-    </Layout>
-  );
-};
-
-export default Notes;
+                  </TooltipProvider> */
+}
