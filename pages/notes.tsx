@@ -19,6 +19,7 @@ import {
 import Sidebar from "../components/notes/Sidebar";
 import Hoverbar from "../components/notes/Hoverbar";
 import Tiptap from "../components/notes/Tiptap";
+import { Textarea } from "../components/ui/textarea";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
@@ -154,8 +155,10 @@ const Notes: React.FC<Props> = (props) => {
       headers: { "Content-Type": "application/json" },
     });
     const data = await res.json();
+
     setTitle(data.title);
     setContent(data.content);
+
     await Router.push("/notes");
   };
 
@@ -252,16 +255,17 @@ const Notes: React.FC<Props> = (props) => {
               </ResizablePanel>
               <ResizablePanel
                 defaultSize={10}
-                className="max-h-[900px] min-h-[900px] z-0"
+                className="max-h-[900px] min-h-[900px] z-0 "
               >
                 <Separator />
-                <Tiptap />
-                {/* <Textarea
-                  placeholder="Write a Title to save Note"
-                  onChange={(e) => setTitle(e.target.value)}
-                  value={title}
-                  className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0 z-0"
-                ></Textarea> */}
+                <Tiptap
+                  setTitle={setTitle}
+                  title={title}
+                  setContent={setContent}
+                  content={content}
+                  saveNotes={saveNotes}
+                  deleteNotes={deleteNotes}
+                />
               </ResizablePanel>
               <ResizablePanel>
                 {/* <div
