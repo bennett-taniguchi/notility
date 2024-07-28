@@ -2,8 +2,11 @@
 
 import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
+import Placeholder from "@tiptap/extension-placeholder";
+
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+
 import React from "react";
 import { Button as NextButton } from "../ui/button";
 import { Separator } from "../ui/separator";
@@ -163,6 +166,7 @@ const Tiptap = ({
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Placeholder.configure({ placeholder: "Write a Note" }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
@@ -173,7 +177,7 @@ const Tiptap = ({
         className: "shadow-inner",
       },
     },
-    content: `<p> Type a note </p>`,
+    content: ``,
   });
 
   // const [initialSet, setInitialSet] = useState(false);
@@ -224,14 +228,14 @@ const Tiptap = ({
         placeholder="Write a Title"
         onChange={(e) => setTitle(e.target.value)}
         value={title}
-        className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0 z-0"
+        className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0 z-0 bg-white"
       ></Textarea>
       <Separator />
       <EditorContent
         editor={editor}
         onChange={setContent(editor?.getHTML())}
         value={content}
-        className="focus-visible:ring-0 border-0"
+        className="focus-visible:ring-0 border-0 bg-white h-[900px]"
       />
     </>
   );
