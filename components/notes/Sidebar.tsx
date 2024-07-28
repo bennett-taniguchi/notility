@@ -10,9 +10,16 @@ import {
 } from "../ui/command";
 
 import { PlusCircledIcon, MinusCircledIcon } from "@radix-ui/react-icons";
+import { FaBoltLightning } from "react-icons/fa6";
 
 import Router from "next/router";
 
+import {
+  HTMLtoText,
+  chunkTextByMultiParagraphs,
+  embedChunks,
+  upsertData,
+} from "../../utils/parse_text";
 export default function Sidebar({
   setTitle,
   setContent,
@@ -37,9 +44,10 @@ export default function Sidebar({
 
   // for minus icon
   const handleMinusClick = (e: React.SyntheticEvent) => {
-    if (props.notes[e.target.id]) {
-      console.log(props.notes[e.target.id].title);
-      deleteNotes(e, props.notes[e.target.id].title);
+    let removedNote = props.notes[(e.target as HTMLElement).id];
+    if (removedNote) {
+      console.log(removedNote.title);
+      deleteNotes(e, removedNote.title);
     }
   };
 
@@ -53,6 +61,57 @@ export default function Sidebar({
       updateNote(e, e.currentTarget.innerHTML, "");
     }
   };
+
+  async function parseText(content: any) {
+    const parsed = HTMLtoText(props.notes[0].content);
+    const chunks = chunkTextByMultiParagraphs(parsed);
+    const res = await embedChunks(chunks);
+    const upserted = await upsertData(res, chunks, "notility");
+
+    console.log(res[0].embedding);
+    console.log(upserted);
+
+    // format:
+    // 0: {embedding (1536) [.1232,...], index:0, object:"embedding"},
+  }
+  // nested component for AI queries
+  function Promptbar() {
+    return (
+      <CommandGroup>
+        <CommandItem className="">
+          <span className="text-xs text-zinc-600 font-medium ">
+            Notes Analyzed
+          </span>
+          <FaBoltLightning
+            onClick={parseText}
+            className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 hover:fill-yellow-400"
+          />
+          {/* <PlusCircledIcon
+            onClick={handlePlusClick}
+            className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
+          ></PlusCircledIcon> */}
+        </CommandItem>
+        {/* {props.notes.map((note, index) => (
+          <CommandItem>
+            <span
+              className="outline-none"
+              onFocus={maintainTitle}
+              onBlur={handleUpdateTitle}
+              contentEditable={true}
+              onClick={(e) => loadNotes(e, props.notes[index].title)}
+            >
+              {note.title}
+            </span>
+            <MinusCircledIcon
+              id={index + ""}
+              onClick={handleMinusClick}
+              className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
+            />
+          </CommandItem>
+        ))} */}
+      </CommandGroup>
+    );
+  }
 
   // sizes of elements are hardcoded, figure out better way?
   return (
@@ -90,6 +149,7 @@ export default function Sidebar({
               </CommandItem>
             ))}
           </CommandGroup>
+          <Promptbar />
         </CommandList>
       </Command>
     </ScrollArea>

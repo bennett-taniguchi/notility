@@ -39,7 +39,7 @@ const Header: React.FC = () => {
     </div>
   );
 
-  let right = null;
+  let right = <div></div>;
 
   if (status === "loading") {
     left = (

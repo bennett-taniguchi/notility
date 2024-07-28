@@ -64,7 +64,7 @@ const Notes: React.FC<Props> = (props) => {
   // for updating title in sidebar
   const maintainTitle = (e: React.SyntheticEvent) => {
     if (initialEdit) {
-      setMaintainedTitle(e.target.innerText);
+      setMaintainedTitle((e.target as HTMLElement).innerText);
       setInitialEdit(false);
     }
   };
