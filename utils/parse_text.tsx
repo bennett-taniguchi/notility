@@ -140,34 +140,29 @@ type embedding = {
   object: string;
 };
 
-export async function upsertData(
-  embeddings: embedding[],
-  chunks: string[],
-  namespaceId: string
-) {
+type VectorRecord = {
+  id: number;
+  values: number[];
+  metadata?: string;
+};
+export async function upsertVectors(embeddings: embedding[], chunks: string[]) {
   // Get the Pinecone index
   //   let index = pc.index("notility");
-  //   const vectors: any[] = chunks.map((chunk, idx) => ({
-  //     ids: "vec" + idx + 1,
-  //     vals: embeddings[idx].embedding,
-  //   }));
-  //   for (let i = 0; i < vectors.length; i++) {
-  //     await index.upsert([
-  //       {
-  //         id: vectors[i].ids,
-  //         values: vectors[i].vals,
-  //       },
-  //     ]);
-  //   }
+  const vectors: any[] = chunks.map((chunk, idx) => ({
+    id: "vec" + idx,
+    values: embeddings[idx].embedding,
+  }));
+
   //Batch the upsert operation
-  //   const batchSize = 200;
-  //   for (let i = 0; i < vectors.length; i += batchSize) {
-  //     const batch = vectors.slice(i, i + batchSize);
-  //     await index.upsert(batch);
-  //   }
-  const res = await fetch("/api/pinecone_upsert/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
-  const data = await res.json();
+  const batchSize = 200;
+  for (let i = 0; i < vectors.length; i += batchSize) {
+    const batch = vectors.slice(i, i + batchSize) as VectorRecord[]; // {id: "vec1", values: [1536]}
+    const body = { batch };
+
+    const res = await fetch("/api/pinecone_upsert/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  }
 }

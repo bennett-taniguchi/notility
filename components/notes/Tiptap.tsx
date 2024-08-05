@@ -7,6 +7,9 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
+import BulletList from "@tiptap/extension-bullet-list";
+import ListItem from "@tiptap/extension-list-item";
+import { Indent } from "./tiptap/indent";
 import React from "react";
 import { Button as NextButton } from "../ui/button";
 import { Separator } from "../ui/separator";
@@ -15,7 +18,6 @@ import {
   FontItalicIcon,
   StrikethroughIcon,
   PilcrowIcon,
-  AlignLeftIcon,
   PaperPlaneIcon,
   Cross1Icon,
 } from "@radix-ui/react-icons";
@@ -26,9 +28,12 @@ import {
   TextAlignJustifyIcon,
 } from "@radix-ui/react-icons";
 import { LuHeading1, LuHeading2, LuHeading3 } from "react-icons/lu";
-import { FaHighlighter } from "react-icons/fa6";
+import { FaHighlighter, FaListOl, FaListUl } from "react-icons/fa6";
 import { useState, useEffect } from "react";
+
 import { Textarea } from "../ui/textarea";
+import { ScrollArea } from "../ui/scroll-area";
+import { ResizablePanel } from "../ui/resizable";
 
 const MenuBar = ({ editor }) => {
   if (!editor) {
@@ -149,6 +154,23 @@ const MenuBar = ({ editor }) => {
         >
           <TextAlignJustifyIcon />
         </NextButton>
+
+        <Separator orientation="vertical" />
+        <NextButton
+          variant="outline"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={editor.isActive("orderedList") ? "is-active" : ""}
+        >
+          <FaListOl />
+        </NextButton>
+        <Separator orientation="vertical" />
+        <NextButton
+          variant="outline"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={editor.isActive("bulletList") ? "is-active" : ""}
+        >
+          <FaListUl />
+        </NextButton>
       </div>
     </div>
   );
@@ -165,6 +187,13 @@ const Tiptap = ({
   const [initial, setInitial] = useState(true);
   const editor = useEditor({
     extensions: [
+      BulletList.configure({
+        HTMLAttributes: {
+          class: "list-disc",
+        },
+      }),
+      ListItem,
+      Indent,
       StarterKit,
       Placeholder.configure({ placeholder: "Write a Note" }),
       TextAlign.configure({
@@ -180,63 +209,67 @@ const Tiptap = ({
     content: ``,
   });
 
-  // const [initialSet, setInitialSet] = useState(false);
-
-  // if (!initialSet) {
-  //   editor?.commands.setContent(storedData);
-  //   setInitialSet(true);
-  // }
-  useEffect(() => {
-    console.log(title, content);
-  }, [content]);
-
   useEffect(() => {
     setInitial(false);
   }, []);
 
+  // updates on changed prop, 1st and third to maintain previous cursor positionining
   useEffect(() => {
-    editor?.commands.setContent(content);
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    editor?.commands.setContent(content, false);
+    editor.commands.setTextSelection({ from, to });
   }, [content]);
 
   return (
     <>
-      <MenuBar editor={editor} />
-      <div className="flex justify-center">
-        <NextButton
-          variant="outline"
-          value="paperplane"
-          aria-label="Toggle paperplane"
-          onClick={saveNotes}
-          className=""
-        >
-          <PaperPlaneIcon className="h-4 w-4" />
-        </NextButton>
+      <ResizablePanel className="min-h-[50px] max-h-[50px]" defaultSize={1}>
+        <div className="position: static flex justify-center top-0px">
+          <MenuBar editor={editor} />
 
-        <NextButton
-          variant="outline"
-          value="cross"
-          aria-label="toggle cross"
-          onClick={(e) => deleteNotes(e, title)}
-          className="active:bg-zinc-400"
-        >
-          <Cross1Icon className="h-4 w-4" />
-        </NextButton>
-      </div>
+          <NextButton
+            variant="outline"
+            value="paperplane"
+            aria-label="Toggle paperplane"
+            onClick={saveNotes}
+            className=""
+          >
+            <PaperPlaneIcon className="h-4 w-4" />
+          </NextButton>
 
-      <Separator />
-      <Textarea
-        placeholder="Write a Title"
-        onChange={(e) => setTitle(e.target.value)}
-        value={title}
-        className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0 z-0 bg-white"
-      ></Textarea>
-      <Separator />
-      <EditorContent
-        editor={editor}
-        onChange={setContent(editor?.getHTML())}
-        value={content}
-        className="focus-visible:ring-0 border-0 bg-white h-[900px]"
-      />
+          <NextButton
+            variant="outline"
+            value="cross"
+            aria-label="toggle cross"
+            onClick={(e) => deleteNotes(e, title)}
+            className="active:bg-zinc-400"
+          >
+            <Cross1Icon className="h-4 w-4" />
+          </NextButton>
+        </div>
+      </ResizablePanel>
+
+      <ResizablePanel className="bg-white ">
+        <Separator />
+
+        <ScrollArea>
+          <Textarea
+            placeholder="Write a Title"
+            onChange={(e) => setTitle(e.target.value)}
+            value={title}
+            className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0 z-0 bg-white"
+          />
+
+          <Separator />
+
+          <EditorContent
+            editor={editor}
+            onChange={setContent(editor?.getHTML())}
+            value={content}
+            className="focus-visible:ring-0 border-0 bg-white h-[700px] "
+          />
+        </ScrollArea>
+      </ResizablePanel>
     </>
   );
 };

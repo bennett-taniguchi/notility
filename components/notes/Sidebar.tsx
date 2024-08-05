@@ -18,7 +18,7 @@ import {
   HTMLtoText,
   chunkTextByMultiParagraphs,
   embedChunks,
-  upsertData,
+  upsertVectors,
 } from "../../utils/parse_text";
 export default function Sidebar({
   setTitle,
@@ -62,14 +62,17 @@ export default function Sidebar({
     }
   };
 
+  // takes current text (in first note) then
+  //  chunks it
+  //  split on paragraphs
+  //  and then embeds it
+  //  then upserts it
   async function parseText(content: any) {
     const parsed = HTMLtoText(props.notes[0].content);
     const chunks = chunkTextByMultiParagraphs(parsed);
-    const res = await embedChunks(chunks);
-    const upserted = await upsertData(res, chunks, "notility");
 
-    console.log(res[0].embedding);
-    console.log(upserted);
+    const res = await embedChunks(chunks);
+    const upserted = await upsertVectors(res, chunks);
 
     // format:
     // 0: {embedding (1536) [.1232,...], index:0, object:"embedding"},
@@ -115,7 +118,7 @@ export default function Sidebar({
 
   // sizes of elements are hardcoded, figure out better way?
   return (
-    <ScrollArea className="rounded-md border p-0 h-[900px] outline-none">
+    <ScrollArea className="rounded-md border p-0 h-[800px] outline-none">
       <Command className="h-[1000px] rounded-lg border shadow-md overflow-y-auto pr-[5px] outline-none">
         <CommandInput placeholder="Search Title:" />
         <CommandList className="overflow-hidden h-[900px]">

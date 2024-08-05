@@ -194,11 +194,11 @@ const Notes: React.FC<Props> = (props) => {
 
   return (
     <Layout>
-      <div className="page ">
+      <div className="page">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
             defaultSize={20}
-            className="min-h-[900px] min-w-[250px] max-w-[500px] rounded-lg border"
+            className="min-h-[700px] min-w-[250px] max-w-[500px] rounded-lg border"
           >
             <Sidebar
               setTitle={setTitle}
@@ -210,30 +210,20 @@ const Notes: React.FC<Props> = (props) => {
               props={props}
             />
           </ResizablePanel>
-          <ResizableHandle withHandle />
+          <ResizableHandle />
           <ResizablePanel>
             <ResizablePanelGroup direction="vertical">
-              <ResizablePanel
-                defaultSize={10}
-                className="max-h-[200px] min-h-[100px] "
-              >
-                <Hoverbar saveNotes={saveNotes} deleteNotes={deleteNotes} />
-              </ResizablePanel>
-              <ResizablePanel
-                defaultSize={10}
-                className="max-h-[900px] min-h-[900px] z-0 "
-              >
-                <Separator />
-                <Tiptap
-                  setTitle={setTitle}
-                  title={title}
-                  setContent={setContent}
-                  content={content}
-                  saveNotes={saveNotes}
-                  deleteNotes={deleteNotes}
-                />
-              </ResizablePanel>
-              <ResizablePanel></ResizablePanel>
+              {/* <ResizablePanel defaultSize={10} className=" min-h-[900px] z-0 "> */}
+
+              <Tiptap
+                setTitle={setTitle}
+                title={title}
+                setContent={setContent}
+                content={content}
+                saveNotes={saveNotes}
+                deleteNotes={deleteNotes}
+              />
+              {/* </ResizablePanel> */}
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
