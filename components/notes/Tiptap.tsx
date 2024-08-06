@@ -4,7 +4,7 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 
-import { EditorContent, Editor } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
 import BulletList from "@tiptap/extension-bullet-list";
@@ -185,7 +185,7 @@ const Tiptap = ({
   saveNotes,
 }) => {
   const [initial, setInitial] = useState(true);
-  const editor = new Editor({
+  const editor = useEditor({
     extensions: [
       BulletList.configure({
         HTMLAttributes: {

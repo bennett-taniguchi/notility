@@ -145,6 +145,8 @@ type VectorRecord = {
   values: number[];
   metadata?: string;
 };
+
+// batches appropriate vectors and upserts using api path into the namespace matching users email
 export async function upsertVectors(embeddings: embedding[], chunks: string[]) {
   // Get the Pinecone index
   //   let index = pc.index("notility");

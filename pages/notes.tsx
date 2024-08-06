@@ -43,7 +43,7 @@ type Props = {
 const Notes: React.FC<Props> = (props) => {
   const { data: session } = useSession();
   const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>();
+  const [content, setContent] = useState<string>("");
   const router = useRouter();
   // saves notes to db
   const saveNotes = async (e: React.SyntheticEvent) => {
@@ -55,7 +55,7 @@ const Notes: React.FC<Props> = (props) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      router.replace(router.asPath);
+      await Router.push("/notes");
     } catch (error) {
       console.error(error);
     }
@@ -90,7 +90,7 @@ const Notes: React.FC<Props> = (props) => {
       });
       setInitialEdit(true);
       setTitle(newTitle);
-      //await Router.push("/notes");
+      await Router.push("/notes");
     } catch (error) {
       console.error(error);
     }
@@ -127,7 +127,7 @@ const Notes: React.FC<Props> = (props) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      router.replace(router.asPath);
+      await Router.push("/notes");
     } catch (error) {
       console.error(error);
     }
@@ -145,7 +145,7 @@ const Notes: React.FC<Props> = (props) => {
     setTitle(data.title);
     setContent(data.content);
 
-    router.replace(router.asPath);
+    await Router.push("/notes");
     return false;
   };
 
@@ -158,7 +158,7 @@ const Notes: React.FC<Props> = (props) => {
     const data = await res.json();
     setTitle("");
     setContent("");
-    router.replace(router.asPath);
+    await Router.push("/notes");
   };
 
   if (!session) {

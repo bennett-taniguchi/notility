@@ -54,13 +54,14 @@ export default function Sidebar({
       setTitle("");
       setContent("");
     }
-    router.replace(router.asPath);
+    await Router.push("/notes");
     //await Router.push("/notes");
   };
 
   // for minus icon
   const handleMinusClick = (e: React.SyntheticEvent) => {
     let removedNote = props.notes[(e.target as HTMLElement).id];
+    console.log(removedNote);
     if (removedNote) {
       deleteNotes(e, removedNote.title);
     }
@@ -175,7 +176,7 @@ export default function Sidebar({
                     <Pencil1Icon
                       id={index + ""}
                       onClick={handlePencilClick}
-                      className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 translate-x-[-1.5rem] scale-110"
+                      className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 translate-x-[-1.5rem] scale-110 translate-y-[-.5rem]"
                       onMouseEnter={(e) => setPencilHover(true)}
                       onMouseLeave={(e) => setPencilHover(false)}
                     />
@@ -184,7 +185,7 @@ export default function Sidebar({
                     <MinusCircledIcon
                       id={index + ""}
                       onClick={handleMinusClick}
-                      className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110"
+                      className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110 translate-y-[-.5rem]"
                       onMouseEnter={(e) => setMinusHover(true)}
                       onMouseLeave={(e) => setMinusHover(false)}
                     />
