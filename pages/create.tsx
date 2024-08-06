@@ -3,8 +3,8 @@ import Layout from "../components/Layout";
 import Router from "next/router";
 
 const Draft: React.FC = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
 
   const submitData = async (e: React.SyntheticEvent) => {
     e.preventDefault();

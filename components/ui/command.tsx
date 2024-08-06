@@ -122,7 +122,7 @@ const CommandItem = React.forwardRef<
       ref={ref}
       //value="-999" // finnicky way to remove 1st highlight
       className={cn(
-        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-zinc-100 aria-selected:text-zinc-900 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 dark:aria-selected:bg-zinc-800 dark:aria-selected:text-zinc-50",
+        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-base outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled='true']:pointer-events-none data-[disabled='true']:opacity-50",
         className
       )}
       {...props}

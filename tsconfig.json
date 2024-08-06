@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@tiptap/core": ["./node_modules/@tiptap/core/src/index"]
     },
     "target": "es5",
+    "downlevelIteration": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -28,3 +29,5 @@
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "watch": true
 }
+
+// tried to change module and module resolution from esnext and node to NodeNext for both

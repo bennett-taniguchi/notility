@@ -7,6 +7,7 @@ module.exports = {
         resource.request = resource.request.replace(/^node:/, "");
       })
     );
+
     return config;
   },
 };

@@ -4,12 +4,12 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
 import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
-import { Indent } from "./tiptap/indent";
+// import { Indent } from "./tiptap/indent";
 import React from "react";
 import { Button as NextButton } from "../ui/button";
 import { Separator } from "../ui/separator";
@@ -185,7 +185,7 @@ const Tiptap = ({
   saveNotes,
 }) => {
   const [initial, setInitial] = useState(true);
-  const editor = useEditor({
+  const editor = new Editor({
     extensions: [
       BulletList.configure({
         HTMLAttributes: {
@@ -193,9 +193,11 @@ const Tiptap = ({
         },
       }),
       ListItem,
-      Indent,
+      // Indent,
       StarterKit,
-      Placeholder.configure({ placeholder: "Write a Note" }),
+      Placeholder.configure({
+        placeholder: "Write a Note                                ",
+      }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
@@ -223,7 +225,7 @@ const Tiptap = ({
 
   return (
     <>
-      <ResizablePanel className="min-h-[50px] max-h-[50px]" defaultSize={1}>
+      <ResizablePanel className="min-h-[50px] max-h-[50px] " defaultSize={1}>
         <div className="position: static flex justify-center top-0px">
           <MenuBar editor={editor} />
 
@@ -266,7 +268,7 @@ const Tiptap = ({
             editor={editor}
             onChange={setContent(editor?.getHTML())}
             value={content}
-            className="focus-visible:ring-0 border-0 bg-white h-[700px] "
+            className="focus-visible:ring-0 border-0 bg-white h-[600px] "
           />
         </ScrollArea>
       </ResizablePanel>
@@ -275,30 +277,3 @@ const Tiptap = ({
 };
 
 export default Tiptap;
-
-// `
-//       <h3 style="text-align:center">
-//         Devs Just Want to Have Fun by Cyndi Lauper
-//       </h3>
-//       <p style="text-align:center">
-//         I come home in the morning light<br>
-//         My mother says, <mark>“When you gonna live your life right?”</mark><br>
-//         Oh mother dear we’re not the fortunate ones<br>
-//         And devs, they wanna have fun<br>
-//         Oh devs just want to have fun</p>
-//       <p style="text-align:center">
-//         The phone rings in the middle of the night<br>
-//         My father yells, "What you gonna do with your life?"<br>
-//         Oh daddy dear, you know you’re still number one<br>
-//         But <s>girls</s>devs, they wanna have fun<br>
-//         Oh devs just want to have
-//       </p>
-//       <p style="text-align:center">
-//         That’s all they really want<br>
-//         Some fun<br>
-//         When the working day is done<br>
-//         Oh devs, they wanna have fun<br>
-//         Oh devs just wanna have fun<br>
-//         (devs, they wanna, wanna have fun, devs wanna have)
-//       </p>
-//     `

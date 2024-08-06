@@ -9,10 +9,14 @@ import {
   CommandEmpty,
 } from "../ui/command";
 
-import { PlusCircledIcon, MinusCircledIcon } from "@radix-ui/react-icons";
+import {
+  PlusCircledIcon,
+  MinusCircledIcon,
+  Pencil1Icon,
+} from "@radix-ui/react-icons";
 import { FaBoltLightning } from "react-icons/fa6";
 
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 
 import {
   HTMLtoText,
@@ -20,7 +24,11 @@ import {
   embedChunks,
   upsertVectors,
 } from "../../utils/parse_text";
+import { Button } from "../ui/button";
+import { Separator } from "@radix-ui/react-separator";
+import { useRef, useState } from "react";
 export default function Sidebar({
+  title,
   setTitle,
   setContent,
   createNewNote,
@@ -29,24 +37,31 @@ export default function Sidebar({
   loadNotes,
   props,
 }) {
-  const deleteNotes = async (e: React.SyntheticEvent, title: string) => {
+  const [pencilHover, setPencilHover] = useState(false);
+  const [minusHover, setMinusHover] = useState(false);
+
+  const parentRef = useRef(null);
+  const router = useRouter();
+  const deleteNotes = async (e: React.SyntheticEvent, titleUsed: string) => {
     e.preventDefault();
-    const res = await fetch("/api/delete/" + title, {
+
+    const res = await fetch("/api/delete/" + titleUsed, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
     const data = await res.json();
-    setTitle("");
-    setContent("");
-    console.log(data);
-    await Router.push("/notes");
+    if (title == titleUsed) {
+      setTitle("");
+      setContent("");
+    }
+    router.replace(router.asPath);
+    //await Router.push("/notes");
   };
 
   // for minus icon
   const handleMinusClick = (e: React.SyntheticEvent) => {
     let removedNote = props.notes[(e.target as HTMLElement).id];
     if (removedNote) {
-      console.log(removedNote.title);
       deleteNotes(e, removedNote.title);
     }
   };
@@ -60,6 +75,11 @@ export default function Sidebar({
     if (e.currentTarget.innerHTML) {
       updateNote(e, e.currentTarget.innerHTML, "");
     }
+  };
+
+  const handlePencilClick = (e: React.SyntheticEvent) => {
+    console.log(e.currentTarget);
+    //parentRef.current.focus();
   };
 
   // takes current text (in first note) then
@@ -118,10 +138,10 @@ export default function Sidebar({
 
   // sizes of elements are hardcoded, figure out better way?
   return (
-    <ScrollArea className="rounded-md border p-0 h-[800px] outline-none">
-      <Command className="h-[1000px] rounded-lg border shadow-md overflow-y-auto pr-[5px] outline-none">
+    <ScrollArea className="rounded-md border p-0 h-[790px] outline-none">
+      <Command className="h-[790px] rounded-lg border shadow-md overflow-y-auto pr-[5px] outline-none">
         <CommandInput placeholder="Search Title:" />
-        <CommandList className="overflow-hidden h-[900px]">
+        <CommandList className="overflow-hidden h-[790px]">
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup>
             <CommandItem className="">
@@ -130,27 +150,48 @@ export default function Sidebar({
               </span>
               <PlusCircledIcon
                 onClick={handlePlusClick}
-                className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
+                className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110"
               ></PlusCircledIcon>
             </CommandItem>
-            {props.notes.map((note, index) => (
-              <CommandItem>
-                <span
-                  className="outline-none"
-                  onFocus={maintainTitle}
-                  onBlur={handleUpdateTitle}
-                  contentEditable={true}
-                  onClick={(e) => loadNotes(e, props.notes[index].title)}
+            <div ref={parentRef}>
+              {props.notes.map((note, index) => (
+                <CommandItem
+                  onSelect={
+                    minusHover == pencilHover
+                      ? (e) => loadNotes(e, props.notes[index].title)
+                      : (e) => e
+                  }
                 >
-                  {note.title}
-                </span>
-                <MinusCircledIcon
-                  id={index + ""}
-                  onClick={handleMinusClick}
-                  className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
-                />
-              </CommandItem>
-            ))}
+                  <span
+                    className="outline-none"
+                    onFocus={maintainTitle}
+                    onBlur={handleUpdateTitle}
+                    contentEditable={true}
+                  >
+                    {note.title}
+                  </span>
+
+                  <span>
+                    <Pencil1Icon
+                      id={index + ""}
+                      onClick={handlePencilClick}
+                      className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 translate-x-[-1.5rem] scale-110"
+                      onMouseEnter={(e) => setPencilHover(true)}
+                      onMouseLeave={(e) => setPencilHover(false)}
+                    />
+                  </span>
+                  <span>
+                    <MinusCircledIcon
+                      id={index + ""}
+                      onClick={handleMinusClick}
+                      className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110"
+                      onMouseEnter={(e) => setMinusHover(true)}
+                      onMouseLeave={(e) => setMinusHover(false)}
+                    />
+                  </span>
+                </CommandItem>
+              ))}
+            </div>
           </CommandGroup>
           <Promptbar />
         </CommandList>

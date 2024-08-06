@@ -4,7 +4,7 @@ import { useSession, getSession } from "next-auth/react";
 import Layout from "../components/Layout";
 import { PostProps } from "../components/Post";
 import prisma from "../lib/prisma";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 
 // shadcn and icon imports
 import { Separator } from "../components/ui/separator";
@@ -44,7 +44,7 @@ const Notes: React.FC<Props> = (props) => {
   const { data: session } = useSession();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>();
-
+  const router = useRouter();
   // saves notes to db
   const saveNotes = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -55,7 +55,7 @@ const Notes: React.FC<Props> = (props) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      await Router.push("/notes");
+      router.replace(router.asPath);
     } catch (error) {
       console.error(error);
     }
@@ -127,7 +127,7 @@ const Notes: React.FC<Props> = (props) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      await Router.push("/notes");
+      router.replace(router.asPath);
     } catch (error) {
       console.error(error);
     }
@@ -135,7 +135,7 @@ const Notes: React.FC<Props> = (props) => {
 
   // currently we use search for db which we dont wanna stick with (use more logic)
   const loadNotes = async (e: React.SyntheticEvent, title: string) => {
-    e.preventDefault();
+    console.log("loading");
     const res = await fetch("/api/load_notes/" + title, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -145,7 +145,8 @@ const Notes: React.FC<Props> = (props) => {
     setTitle(data.title);
     setContent(data.content);
 
-    await Router.push("/notes");
+    router.replace(router.asPath);
+    return false;
   };
 
   const deleteNotes = async (e: React.SyntheticEvent, title: string) => {
@@ -157,7 +158,7 @@ const Notes: React.FC<Props> = (props) => {
     const data = await res.json();
     setTitle("");
     setContent("");
-    await Router.push("/notes");
+    router.replace(router.asPath);
   };
 
   if (!session) {
@@ -198,9 +199,10 @@ const Notes: React.FC<Props> = (props) => {
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
             defaultSize={20}
-            className="min-h-[700px] min-w-[250px] max-w-[500px] rounded-lg border"
+            className="min-h-[600px] min-w-[250px] max-w-[500px] rounded-lg border"
           >
             <Sidebar
+              title={title}
               setTitle={setTitle}
               setContent={setContent}
               createNewNote={createNewNote}
@@ -286,3 +288,12 @@ export default Notes;
                     </Tooltip>
                   </TooltipProvider> */
 }
+
+// "@tiptap/extension-bullet-list": "^2.5.8",
+// "@tiptap/extension-highlight": "^2.5.7",
+// "@tiptap/extension-list-item": "^2.5.8",
+// "@tiptap/extension-placeholder": "^2.5.7",
+// "@tiptap/extension-text-align": "^2.5.7",
+// "@tiptap/pm": "^2.5.6",
+// "@tiptap/react": "^2.5.6",
+// "@tiptap/starter-kit": "^2.5.6",

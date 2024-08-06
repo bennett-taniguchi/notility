@@ -1,5 +1,6 @@
 import React from "react";
 import { GetServerSideProps } from "next";
+import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
 import Router from "next/router";
 import Layout from "../../components/Layout";
@@ -19,7 +20,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     },
   });
   return {
-    props: post,
+    props: { ...post },
   };
 };
 
@@ -48,11 +49,12 @@ const Post: React.FC<PostProps> = (props) => {
   if (!props.published) {
     title = `${title} (Draft)`;
   }
-
+  console.log(props);
   return (
     <Layout>
       <div>
         <h2>{title}</h2>
+
         <p>By {props?.author?.name || "Unknown author"}</p>
         <ReactMarkdown children={props.content} />
 

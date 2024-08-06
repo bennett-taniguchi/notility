@@ -6,6 +6,8 @@
  */
 async function addDocuments(req: Request, res: Response) {
   // This is effectively the ID of the workspace / tenant
-  let namespaceId = req.body?.namespaceId;
+  // let namespaceId = req.body?.namespaceId;
 }
 //...
+
+// function given by pinecone namespace docs walkthru, used for new docs & namespace
