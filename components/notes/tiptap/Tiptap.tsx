@@ -11,8 +11,8 @@ import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 // import { Indent } from "./tiptap/indent";
 import React from "react";
-import { Button as NextButton } from "../ui/button";
-import { Separator } from "../ui/separator";
+import { Button as NextButton } from "../../ui/button";
+import { Separator } from "../../ui/separator";
 import {
   FontBoldIcon,
   FontItalicIcon,
@@ -31,9 +31,9 @@ import { LuHeading1, LuHeading2, LuHeading3 } from "react-icons/lu";
 import { FaHighlighter, FaListOl, FaListUl } from "react-icons/fa6";
 import { useState, useEffect } from "react";
 
-import { Textarea } from "../ui/textarea";
-import { ScrollArea } from "../ui/scroll-area";
-import { ResizablePanel } from "../ui/resizable";
+import { Textarea } from "../../ui/textarea";
+import { ScrollArea } from "../../ui/scroll-area";
+import { ResizablePanel } from "../../ui/resizable";
 
 const MenuBar = ({ editor }) => {
   if (!editor) {

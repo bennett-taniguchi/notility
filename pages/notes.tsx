@@ -1,13 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { GetServerSideProps } from "next";
 import { useSession, getSession } from "next-auth/react";
 import Layout from "../components/Layout";
 import { PostProps } from "../components/Post";
 import prisma from "../lib/prisma";
-import Router, { useRouter } from "next/router";
-
-// shadcn and icon imports
-import { Separator } from "../components/ui/separator";
+import Router from "next/router";
 
 import {
   ResizableHandle,
@@ -17,35 +14,53 @@ import {
 
 // refactored components:
 import Sidebar from "../components/notes/Sidebar";
-import Hoverbar from "../components/notes/Hoverbar";
-import Tiptap from "../components/notes/Tiptap";
+import Tiptap from "../components/notes/tiptap/Tiptap";
+import Chat from "../components/notes/chat/Chat";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
+
   if (!session) {
     res.statusCode = 403;
     return { props: { notes: [] } };
   }
-
+  // lol
+  if (session.user.email != "bennettt356@gmail.com") {
+    return;
+  }
   const notes = await prisma.notes.findMany({
     where: {
       author: { email: session?.user?.email },
     },
   });
+
+  const messages = await prisma.message.findMany({
+    where: { authorId: session.id },
+  });
+
   return {
-    props: { notes },
+    props: { notes, messages },
   };
 };
-type Props = {
+// export type Message = {
+//   index: number;
+//   authorId: string;
+//   role: string;
+//   content: string;
+// };
+export type Props = {
   notes: PostProps[];
+  messages: any;
 };
 
 const Notes: React.FC<Props> = (props) => {
   const { data: session } = useSession();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const router = useRouter();
+  const [chatSelected, setChatSelected] = useState(true);
+
   // saves notes to db
+
   const saveNotes = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     try {
@@ -170,130 +185,74 @@ const Notes: React.FC<Props> = (props) => {
     );
   }
 
-  // perfectly does highlight and show tooltip
-  // **need to position tooltip relative to client cursor
-  // const handleHighlight = (e: React.SyntheticEvent) => {
-  //   if (!window) return;
-
-  //   setMouseX(e.clientX);
-  //   setMouseY(e.clientY);
-
-  //   let selectedString = window?.getSelection()?.toString();
-  //   setSelected(selectedString);
-
-  //   if (selectedString == selected) {
-  //     // last selection is current, was clicked again
-  //     setShowTooltip(false);
-  //   } else if (selectedString != "") {
-  //     // first not null selection, open tooltip
-  //     setShowTooltip(true);
-  //   } else {
-  //     // clearly empty selection, close tooltip
-  //     setShowTooltip(false);
-  //   }
-  // };
-
-  return (
-    <Layout>
-      <div className="page">
-        <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel
-            defaultSize={20}
-            className="min-h-[600px] min-w-[250px] max-w-[500px] rounded-lg border"
-          >
-            <Sidebar
-              title={title}
-              setTitle={setTitle}
-              setContent={setContent}
-              createNewNote={createNewNote}
-              updateNote={updateNote}
-              maintainTitle={maintainTitle}
-              loadNotes={loadNotes}
-              props={props}
-            />
-          </ResizablePanel>
-          <ResizableHandle />
-          <ResizablePanel>
-            <ResizablePanelGroup direction="vertical">
-              {/* <ResizablePanel defaultSize={10} className=" min-h-[900px] z-0 "> */}
-
-              <Tiptap
-                setTitle={setTitle}
+  if (chatSelected) {
+    return (
+      <Layout>
+        <div className="page">
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel
+              defaultSize={20}
+              className="min-h-[600px] min-w-[250px] max-w-[500px] rounded-lg border"
+            >
+              <Sidebar
                 title={title}
+                setTitle={setTitle}
                 setContent={setContent}
-                content={content}
-                saveNotes={saveNotes}
-                deleteNotes={deleteNotes}
+                createNewNote={createNewNote}
+                updateNote={updateNote}
+                maintainTitle={maintainTitle}
+                loadNotes={loadNotes}
+                props={props}
               />
-              {/* </ResizablePanel> */}
-            </ResizablePanelGroup>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </div>
-    </Layout>
-  );
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel>
+              <ResizablePanelGroup direction="vertical">
+                <Chat messagesLoaded={props.messages} />
+              </ResizablePanelGroup>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+      </Layout>
+    );
+  } else {
+    return (
+      <Layout>
+        <div className="page">
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel
+              defaultSize={20}
+              className="min-h-[600px] min-w-[250px] max-w-[500px] rounded-lg border"
+            >
+              <Sidebar
+                title={title}
+                setTitle={setTitle}
+                setContent={setContent}
+                createNewNote={createNewNote}
+                updateNote={updateNote}
+                maintainTitle={maintainTitle}
+                loadNotes={loadNotes}
+                props={props}
+              />
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel>
+              <ResizablePanelGroup direction="vertical">
+                <Tiptap
+                  setTitle={setTitle}
+                  title={title}
+                  setContent={setContent}
+                  content={content}
+                  saveNotes={saveNotes}
+                  deleteNotes={deleteNotes}
+                />
+              </ResizablePanelGroup>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+      </Layout>
+    );
+  }
 };
 
 export default Notes;
-{
-  /* 
-  Add into text editing area, some type of approach to have hover buttons on text highlight
-  <div
-                    className={
-                      "group position: absolute  display: inline-block  z-10 " +
-                      "left-[" +
-                      mouseX +
-                      "px] top-[" +
-                      mouseY +
-                      "px] "
-                    }
-                  >
-                    Here
-                    <span
-                      className={
-                        "invisible group-hover:visible position: absolute  display: inline-block  w-[120px] bg-zinc-900 text-white text-center padding-[5px] absolute z-20 "
-                      }
-                    >
-                      Interior Text
-                    </span>
-                  </div> */
-}
-{
-  /* <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger
-                        className={
-                          "" + (!showTooltip ? "invisible" : "visible")
-                        }
-                      ></TooltipTrigger>
-                      <TooltipContent
-                        align="start"
-                        forceMount={true}
-                        alignOffset={mouseX}
-                        sideOffset={mouseY - 10}
-                        hideWhenDetached
-                        className={
-                          "" +
-                          (!showTooltip
-                            ? "invisible"
-                            : "absolute visible top: [" +
-                              mouseY +
-                              "px] left: [" +
-                              mouseX +
-                              "px]")
-                        }
-                      >
-                        <p>Add to library</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider> */
-}
-
-// "@tiptap/extension-bullet-list": "^2.5.8",
-// "@tiptap/extension-highlight": "^2.5.7",
-// "@tiptap/extension-list-item": "^2.5.8",
-// "@tiptap/extension-placeholder": "^2.5.7",
-// "@tiptap/extension-text-align": "^2.5.7",
-// "@tiptap/pm": "^2.5.6",
-// "@tiptap/react": "^2.5.6",
-// "@tiptap/starter-kit": "^2.5.6",
