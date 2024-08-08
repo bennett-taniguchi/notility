@@ -24,10 +24,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     res.statusCode = 403;
     return { props: { notes: [] } };
   }
-  // lol
-  if (session.user.email != "bennettt356@gmail.com") {
-    return;
-  }
+
   const notes = await prisma.notes.findMany({
     where: {
       author: { email: session?.user?.email },
@@ -189,10 +186,12 @@ const Notes: React.FC<Props> = (props) => {
     return (
       <Layout>
         <div className="page">
-          <ResizablePanelGroup direction="horizontal">
+          <ResizablePanelGroup direction="horizontal" className="fixed ">
             <ResizablePanel
+              minSize={20}
+              maxSize={20}
               defaultSize={20}
-              className="min-h-[600px] min-w-[250px] max-w-[500px] rounded-lg border"
+              className="rounded-lg border"
             >
               <Sidebar
                 title={title}
@@ -206,9 +205,14 @@ const Notes: React.FC<Props> = (props) => {
               />
             </ResizablePanel>
             <ResizableHandle />
+
             <ResizablePanel>
               <ResizablePanelGroup direction="vertical">
+                {/* perfect scrolling method */}
                 <Chat messagesLoaded={props.messages} />
+                {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
+                  Here
+                </div> */}
               </ResizablePanelGroup>
             </ResizablePanel>
           </ResizablePanelGroup>
@@ -220,10 +224,7 @@ const Notes: React.FC<Props> = (props) => {
       <Layout>
         <div className="page">
           <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel
-              defaultSize={20}
-              className="min-h-[600px] min-w-[250px] max-w-[500px] rounded-lg border"
-            >
+            <ResizablePanel>
               <Sidebar
                 title={title}
                 setTitle={setTitle}

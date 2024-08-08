@@ -2,10 +2,23 @@ import { ResizablePanel } from "../../ui/resizable";
 import { Separator } from "../../ui/separator";
 import { ScrollArea } from "../../ui/scroll-area";
 import { useEffect, useState } from "react";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { options as authOptions } from "../../../pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import { useRouter } from "next/navigation";
+
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../ui/card";
+import { Panel, PanelGroup } from "react-resizable-panels";
+import { TrashIcon, CircleIcon, Pencil2Icon } from "@radix-ui/react-icons";
 // export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 //   console.log("here");
 //   const session = await getSession({ req });
@@ -33,6 +46,15 @@ export default function Chat({ messagesLoaded }) {
     role: string;
     content: string;
   };
+  //lol
+  const { data: session, status } = useSession();
+  if (
+    session?.user.email != "bennettt356@gmail.com" &&
+    session?.user.email != "tanigb@uw.edu" &&
+    session
+  ) {
+    return null;
+  }
   const [data, setData] = useState();
   const [messages, setMessages] = useState<Message[]>(messagesLoaded);
   const [input, setInput] = useState("");
@@ -40,14 +62,17 @@ export default function Chat({ messagesLoaded }) {
   async function handleSubmit(e: React.SyntheticEvent) {
     const prompt = input;
 
-    const body = { prompt, messagesLoaded };
+    const messages = messagesLoaded;
+    const body = { prompt, messages };
 
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+
     router.refresh();
+
     //setMessages(messages + data);
     //
     // call api
@@ -84,39 +109,94 @@ export default function Chat({ messagesLoaded }) {
   //   // setMessages(props.messages);
   // }, [messages]);
 
-  console.log(messages);
+  async function handleDeleteChat(e: React.SyntheticEvent) {
+    const res = await fetch("/api/delete_chat", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    console.log(res);
+    await router.refresh();
+  }
 
   return (
     <>
       <ScrollArea>
-        <ResizablePanel className="min-h-[50px] max-h-[50px] " defaultSize={1}>
+        <ResizablePanel className="" defaultSize={1}>
           {/* (AI?) Buttons go here */}
         </ResizablePanel>
 
-        <ResizablePanel className="bg-white ">
+        <ResizablePanel className="bg-zinc-100 ">
           <Separator />
-
-          <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+          <div className="flex flex-col w-3/4 max-w-1/2 py-24 mx-auto stretch gap-y-2 bg-zinc-100 pb-[200px]">
             {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
-            {messagesLoaded ? (
+            {messagesLoaded.length != 0 ? (
               messagesLoaded.map((m: any) => (
-                <div key={m.id} className="whitespace-pre-wrap">
-                  {m.role === "user" ? "User: " : "AI: "}
-                  {m.content}
+                <div
+                  className={
+                    m.role === "user"
+                      ? "flex justify-end"
+                      : "flex justify-start"
+                  }
+                >
+                  <Card
+                    className={
+                      m.role === "user"
+                        ? "bg-cyan-200 drop-shadow-md border-cyan-400 shadow-inner"
+                        : "bg-white drop-shadow-lg shadow-inner border-zinc-200"
+                    }
+                  >
+                    <div key={m.id} className="whitespace-pre-wrap">
+                      <CardHeader>
+                        {m.role === "user" ? (
+                          <Pencil2Icon className=" hover:bg-cyan-400 fixed right-5 scale-[1.3] hover:drop-shadow-2xl rounded" />
+                        ) : (
+                          <div />
+                        )}
+                        <CardTitle className="font-bold font-mono">
+                          {m.role === "user" ? "User: " : "AI: "}
+                        </CardTitle>
+                      </CardHeader>
+
+                      <CardContent>
+                        <Markdown
+                          className="text-gray-600"
+                          remarkPlugins={[remarkGfm]}
+                        >
+                          {m.content}
+                        </Markdown>
+                      </CardContent>
+                    </div>
+                  </Card>
                 </div>
               ))
             ) : (
-              <p></p>
+              <Card>
+                <CardContent className="text-sm text-mono  h-[100px] text-center py-10">
+                  Try typing a message to talk to the AI
+                </CardContent>
+              </Card>
             )}
 
-            <form onSubmit={handleSubmit}>
-              <input
-                className="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
-                value={input}
-                placeholder="Say something..."
-                onChange={handleInputChange}
+            <CardTitle>
+              <div className="flex justify-center">
+                <div className="fixed bottom-0 bg-white h-[100px] w-[80vw] flex justify-center border border-gray-300" />
+              </div>
+            </CardTitle>
+            <CardContent>
+              <TrashIcon
+                className=" fixed bottom-10 right-10 translate-x-[-5rem] scale-150 hover:stroke-zinc-400 hover:bg-zinc-200 hover:stroke-[.5] rounded-full"
+                onClick={handleDeleteChat}
               />
-            </form>
+
+              <form onSubmit={handleSubmit} className="flex justify-center ">
+                <input
+                  className="fixed bottom-0 w-[60vw] p-2 mb-8 border border-gray-300 rounded shadow-xl"
+                  value={input}
+                  placeholder="Say something..."
+                  onChange={handleInputChange}
+                />
+              </form>
+            </CardContent>
           </div>
         </ResizablePanel>
       </ScrollArea>

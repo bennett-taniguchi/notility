@@ -139,10 +139,10 @@ export default function Sidebar({
 
   // sizes of elements are hardcoded, figure out better way?
   return (
-    <ScrollArea className="rounded-md border p-0 h-[790px] outline-none">
-      <Command className="h-[790px] rounded-lg border shadow-md overflow-y-auto pr-[5px] outline-none">
+    <ScrollArea className="rounded-md p-0   ">
+      <Command className="  size-full rounded-lg    ">
         <CommandInput placeholder="Search Title:" />
-        <CommandList className="overflow-hidden h-[790px]">
+        <CommandList className="overflow-hidden h-screen">
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup>
             <CommandItem className="">

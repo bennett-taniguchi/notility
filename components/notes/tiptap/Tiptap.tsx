@@ -185,6 +185,7 @@ const Tiptap = ({
   saveNotes,
 }) => {
   const [initial, setInitial] = useState(true);
+
   const editor = useEditor({
     extensions: [
       BulletList.configure({

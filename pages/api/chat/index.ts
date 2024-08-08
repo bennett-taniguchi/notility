@@ -3,7 +3,10 @@ import OpenAI from "openai";
 import { getServerSession } from "next-auth/next";
 import { options as authOptions } from "../auth/[...nextauth]";
 import prisma from "../../../lib/prisma";
-const openai = new OpenAI();
+
+const openai = new OpenAI({
+  apiKey: process.env["OPENAI_API_KEY"], // This is the default and can be omitted
+});
 
 // {"role": "system", "content": "You are a helpful assistant."},
 // {"role": "user", "content": "message 1 content."},
