@@ -109,8 +109,10 @@ export default function Sidebar({
       </CommandGroup>
     );
   }
-
+  if (!props) return <div></div>;
+  console.log(props);
   // sizes of elements are hardcoded, figure out better way?
+
   return (
     <ScrollArea className="rounded-md p-0   ">
       <Command className="  size-full rounded-lg    ">
