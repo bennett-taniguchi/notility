@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next";
-import { options as authOptions } from "../auth/[...nextauth]";
-import prisma from "../../../lib/prisma";
+import { options as authOptions } from "../../auth/[...nextauth]";
+import prisma from "../../../../lib/prisma";
 
 // POST /api/post
 // Required fields in body: title

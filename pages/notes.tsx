@@ -13,13 +13,13 @@ import {
 } from "../components/ui/resizable";
 
 // refactored components:
-import Sidebar from "../components/notes/Sidebar";
+import Sidebar from "../components/Sidebar";
 import Tiptap from "../components/notes/tiptap/Tiptap";
 import Chat from "../components/notes/chat/Chat";
 
+// retrieve notes and messages with chatbot, don't need to fetch both if only one is needed...
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
-
   if (!session) {
     res.statusCode = 403;
     return { props: { notes: [] } };
@@ -32,19 +32,14 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   });
 
   const messages = await prisma.message.findMany({
-    where: { authorId: session.id },
+    where: { authorId: (session as any).id },
   });
 
   return {
     props: { notes, messages },
   };
 };
-// export type Message = {
-//   index: number;
-//   authorId: string;
-//   role: string;
-//   content: string;
-// };
+
 export type Props = {
   notes: PostProps[];
   messages: any;
@@ -54,15 +49,14 @@ const Notes: React.FC<Props> = (props) => {
   const { data: session } = useSession();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [chatSelected, setChatSelected] = useState(true);
+  const [chatSelected, setChatSelected] = useState(false);
 
   // saves notes to db
-
   const saveNotes = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     try {
       const body = { title, content };
-      await fetch("/api/save", {
+      await fetch("/api/notes/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -81,6 +75,7 @@ const Notes: React.FC<Props> = (props) => {
     }
   };
 
+  // tracks currently editted title to ensure update in db
   const [initialEdit, setInitialEdit] = useState(true);
   const [maintainedTitle, setMaintainedTitle] = useState("");
 
@@ -95,7 +90,7 @@ const Notes: React.FC<Props> = (props) => {
       const oldTitle = maintainedTitle;
       const body = { title, content, oldTitle };
 
-      await fetch("/api/update", {
+      await fetch("/api/notes/update", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -109,11 +104,11 @@ const Notes: React.FC<Props> = (props) => {
   };
 
   // look at currently displayed props.note and make new note accordingly
-  // works as we refresh on every update, however this is api-call intensive
+  //      works as we refresh on every update, however this is api-call intensive
   //      look into caching or more performant way of updating (on save or something)
+  //          basically iterates through "New Note"(s) in current props and appends 1st after gap
   const createNewNote = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    let titles: string[] = [];
     let numberMap = new Map<number, number>();
     numberMap.set(0, 1);
     let index = 1;
@@ -125,7 +120,7 @@ const Notes: React.FC<Props> = (props) => {
           numberMap.set(parseInt(currTitle), 1);
           while (numberMap.has(index)) {
             index++;
-            if (index == 10) break; // limit notes, remove this **
+            if (index == 10) break; // limit notes to 10, remove this **
           }
         }
       }
@@ -134,7 +129,7 @@ const Notes: React.FC<Props> = (props) => {
       const title = "New Note " + index;
       const content = "New Note";
       const body = { title, content };
-      await fetch("/api/save", {
+      await fetch("/api/notes/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -148,7 +143,7 @@ const Notes: React.FC<Props> = (props) => {
   // currently we use search for db which we dont wanna stick with (use more logic)
   const loadNotes = async (e: React.SyntheticEvent, title: string) => {
     console.log("loading");
-    const res = await fetch("/api/load_notes/" + title, {
+    const res = await fetch("/api/notes/load/" + title, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
@@ -163,7 +158,7 @@ const Notes: React.FC<Props> = (props) => {
 
   const deleteNotes = async (e: React.SyntheticEvent, title: string) => {
     e.preventDefault();
-    const res = await fetch("/api/delete/" + title, {
+    const res = await fetch("/api/notes/delete/" + title, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
@@ -176,7 +171,7 @@ const Notes: React.FC<Props> = (props) => {
   if (!session) {
     return (
       <Layout>
-        <h1>My Drafts</h1>
+        <h1>My Notes</h1>
         <div>You need to be authenticated to view this page.</div>
       </Layout>
     );
@@ -224,16 +219,16 @@ const Notes: React.FC<Props> = (props) => {
       <Layout>
         <div className="page">
           <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel>
+            <ResizablePanel minSize={20} maxSize={20} defaultSize={20}>
               <Sidebar
-                title={title}
-                setTitle={setTitle}
-                setContent={setContent}
-                createNewNote={createNewNote}
-                updateNote={updateNote}
-                maintainTitle={maintainTitle}
-                loadNotes={loadNotes}
-                props={props}
+                title={title} // state of currently loaded title in notes
+                setTitle={setTitle} // usestate for currently loaded title
+                setContent={setContent} //  set body of current text
+                createNewNote={createNewNote} // create new note
+                updateNote={updateNote} // think its just for title update
+                maintainTitle={maintainTitle} // necessary
+                loadNotes={loadNotes} // onclick
+                props={props} //...
               />
             </ResizablePanel>
             <ResizableHandle />

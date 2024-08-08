@@ -161,7 +161,7 @@ export async function upsertVectors(embeddings: embedding[], chunks: string[]) {
     const batch = vectors.slice(i, i + batchSize) as VectorRecord[]; // {id: "vec1", values: [1536]}
     const body = { batch };
 
-    const res = await fetch("/api/pinecone_upsert/", {
+    const res = await fetch("/api/pinecone/upsert/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

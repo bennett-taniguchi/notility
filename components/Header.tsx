@@ -82,6 +82,7 @@ const Header: React.FC = () => {
     );
   }
 
+  // everything below related to sign in and showing nav
   if (!session) {
     right = (
       <div className="right">

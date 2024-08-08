@@ -3,8 +3,9 @@ import { GetStaticProps } from "next";
 import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
 import prisma from "../lib/prisma";
-
+import Router from "next/router";
 export const getStaticProps: GetStaticProps = async () => {
+  await Router.push("/notes");
   const feed = await prisma.post.findMany({
     where: { published: true },
     include: {

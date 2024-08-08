@@ -1,4 +1,3 @@
-import { ResizablePanel } from "../ui/resizable";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import {
   Command,
@@ -7,7 +6,7 @@ import {
   CommandGroup,
   CommandList,
   CommandEmpty,
-} from "../ui/command";
+} from "./ui/command";
 
 import {
   PlusCircledIcon,
@@ -16,17 +15,17 @@ import {
 } from "@radix-ui/react-icons";
 import { FaBoltLightning } from "react-icons/fa6";
 
-import Router, { useRouter } from "next/router";
+import Router from "next/router";
 
 import {
   HTMLtoText,
   chunkTextByMultiParagraphs,
   embedChunks,
   upsertVectors,
-} from "../../utils/parse_text";
-import { Button } from "../ui/button";
-import { Separator } from "@radix-ui/react-separator";
-import { useRef, useState } from "react";
+} from "../utils/parse_text";
+
+import { useState } from "react";
+
 export default function Sidebar({
   title,
   setTitle,
@@ -40,12 +39,9 @@ export default function Sidebar({
   const [pencilHover, setPencilHover] = useState(false);
   const [minusHover, setMinusHover] = useState(false);
 
-  const parentRef = useRef(null);
-  const router = useRouter();
   const deleteNotes = async (e: React.SyntheticEvent, titleUsed: string) => {
     e.preventDefault();
-
-    const res = await fetch("/api/delete/" + titleUsed, {
+    const res = await fetch("/api/notes/delete/" + titleUsed, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
@@ -55,7 +51,6 @@ export default function Sidebar({
       setContent("");
     }
     await Router.push("/notes");
-    //await Router.push("/notes");
   };
 
   // for minus icon
@@ -110,29 +105,7 @@ export default function Sidebar({
             onClick={parseText}
             className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 hover:fill-yellow-400"
           />
-          {/* <PlusCircledIcon
-            onClick={handlePlusClick}
-            className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
-          ></PlusCircledIcon> */}
         </CommandItem>
-        {/* {props.notes.map((note, index) => (
-          <CommandItem>
-            <span
-              className="outline-none"
-              onFocus={maintainTitle}
-              onBlur={handleUpdateTitle}
-              contentEditable={true}
-              onClick={(e) => loadNotes(e, props.notes[index].title)}
-            >
-              {note.title}
-            </span>
-            <MinusCircledIcon
-              id={index + ""}
-              onClick={handleMinusClick}
-              className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200"
-            />
-          </CommandItem>
-        ))} */}
       </CommandGroup>
     );
   }
@@ -154,7 +127,7 @@ export default function Sidebar({
                 className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110"
               ></PlusCircledIcon>
             </CommandItem>
-            <div ref={parentRef}>
+            <div>
               {props.notes.map((note, index) => (
                 <CommandItem
                   onSelect={

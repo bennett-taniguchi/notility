@@ -9,44 +9,11 @@ import { useRouter } from "next/navigation";
 
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../../ui/card";
-import { Panel, PanelGroup } from "react-resizable-panels";
-import { TrashIcon, CircleIcon, Pencil2Icon } from "@radix-ui/react-icons";
-// export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-//   console.log("here");
-//   const session = await getSession({ req });
-//   if (!session) {
-//     res.statusCode = 403;
-//     return { props: { messages: [] } };
-//   }
-//   console.log(session.id);
-//   console.log(session);
-//   const messages = await prisma.message.findMany({
-//     where: { authorId: session.user.authorId },
-//   });
-
-//   console.log(messages);
-//   return {
-//     props: { messages },
-//   };
-// };
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { TrashIcon, Pencil2Icon } from "@radix-ui/react-icons";
 
 export default function Chat({ messagesLoaded }) {
-  // const { messages, input, handleInputChange, handleSubmit, data } = useChat();
-  type Message = {
-    index: number;
-    authorId: string;
-    role: string;
-    content: string;
-  };
-  //lol
+  //lol for not wasting openai credits
   const { data: session, status } = useSession();
   if (
     session?.user.email != "bennettt356@gmail.com" &&
@@ -55,66 +22,39 @@ export default function Chat({ messagesLoaded }) {
   ) {
     return null;
   }
-  const [data, setData] = useState();
-  const [messages, setMessages] = useState<Message[]>(messagesLoaded);
+
+  // const [messages, setMessages] = useState<Message[]>(messagesLoaded); // potential future use for editing singular message
   const [input, setInput] = useState("");
   const router = useRouter();
+
+  // for submitting current chat message and updating state reflecting back and forth
   async function handleSubmit(e: React.SyntheticEvent) {
     const prompt = input;
 
     const messages = messagesLoaded;
     const body = { prompt, messages };
 
-    const res = await fetch("/api/chat", {
+    const res = await fetch("/api/chat/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
     router.refresh();
-
-    //setMessages(messages + data);
-    //
-    // call api
-    // use returned data to render into messages
   }
 
+  // tracks text input for chat
   const handleInputChange = (e: React.SyntheticEvent) => {
-    //
-    // set input
     e.preventDefault();
-    setInput(e.target.value);
+    setInput((e.target as HTMLInputElement).value);
   };
 
-  // useEffect(() => {
-  //   const fetchApi = async () => {
-  //     const msgs = await fetch("/api/load_chat/", {
-  //       method: "GET",
-  //       headers: { "Content-Type": "application/json" },
-  //     });
-
-  //     const data = await msgs.json();
-
-  //     setMessages(data);
-  //   };
-  //   fetchApi();
-  // }, []);
-
-  // useEffect(() => {
-  //   const res = await fetch("/api/load_chat/" + session.id, {
-  //     method: "GET",
-  //     headers: { "Content-Type": "application/json" },
-  //   });
-
-  //   // setMessages(props.messages);
-  // }, [messages]);
-
+  // delete all chat logs
   async function handleDeleteChat(e: React.SyntheticEvent) {
-    const res = await fetch("/api/delete_chat", {
+    const res = await fetch("/api/chat/delete", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
-    console.log(res);
     await router.refresh();
   }
 
@@ -128,7 +68,7 @@ export default function Chat({ messagesLoaded }) {
         <ResizablePanel className="bg-zinc-100 ">
           <Separator />
           <div className="flex flex-col w-3/4 max-w-1/2 py-24 mx-auto stretch gap-y-2 bg-zinc-100 pb-[200px]">
-            {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+            {/* {data && <pre>{JSON.stringify(data, null, 2)}</pre>} */}
             {messagesLoaded.length != 0 ? (
               messagesLoaded.map((m: any) => (
                 <div
