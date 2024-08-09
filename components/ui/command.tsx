@@ -117,7 +117,7 @@ const CommandItem = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
 >(({ className, ...props }, ref) => (
-  <div className="hover:bg-zinc-200">
+  <div className="hover:shadow-[0px_2px_4px_2px_rgba(168,225,213,.5)] rounded-lg">
     <CommandPrimitive.Item
       ref={ref}
       //value="-999" // finnicky way to remove 1st highlight

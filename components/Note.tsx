@@ -24,7 +24,7 @@ export default function Note(props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      await Router.push("/notes");
+      await Router.push("/notes/" + title);
     } catch (error) {
       console.error(error);
     }
@@ -41,7 +41,7 @@ export default function Note(props) {
     const data = await res.json();
     setTitle("");
     setContent("");
-    await Router.push("/notes");
+    await Router.push("/notes/landing", undefined, { shallow: true });
   };
 
   return (

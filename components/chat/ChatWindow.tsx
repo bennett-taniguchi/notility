@@ -23,14 +23,13 @@ export default function ChatWindow({ messagesLoaded }) {
     return null;
   }
 
-  console.log(messagesLoaded);
-
   // const [messages, setMessages] = useState<Message[]>(messagesLoaded); // potential future use for editing singular message
   const [input, setInput] = useState("");
-  const router = useRouter();
+  const Router = useRouter();
 
   // for submitting current chat message and updating state reflecting back and forth
   async function handleSubmit(e: React.SyntheticEvent) {
+    e.preventDefault();
     const prompt = input;
 
     const messages = messagesLoaded;
@@ -41,8 +40,8 @@ export default function ChatWindow({ messagesLoaded }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-
-    router.refresh();
+    setInput("");
+    Router.push("/chat");
   }
 
   // tracks text input for chat
@@ -57,7 +56,7 @@ export default function ChatWindow({ messagesLoaded }) {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
-    await router.refresh();
+    await Router.push("/chat");
   }
 
   return (

@@ -26,6 +26,21 @@ import {
 } from "../utils/parse_text";
 
 import { useState } from "react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Separator } from "@radix-ui/react-separator";
+import { Checkbox } from "./ui/checkbox";
 
 export default function Sidebar({
   title,
@@ -37,7 +52,7 @@ export default function Sidebar({
   const [initial, setInitial] = useState(false);
   const [pencilHover, setPencilHover] = useState(false);
   const [minusHover, setMinusHover] = useState(false);
-
+  const [checkboxSelected, setCheckboxSelected] = useState<number[]>([]); // modal
   // for updating title in sidebar
   const maintainTitle = (e: React.SyntheticEvent) => {
     if (initialEdit) {
@@ -104,7 +119,7 @@ export default function Sidebar({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      await Router.push("/notes");
+      await Router.push("/notes/landing");
     } catch (error) {
       console.error(error);
     }
@@ -150,7 +165,7 @@ export default function Sidebar({
       setTitle("");
       setContent("");
     }
-    await Router.push("/notes");
+    await Router.push("/notes/landing");
   };
 
   // for minus icon
@@ -183,14 +198,32 @@ export default function Sidebar({
   //  and then embeds it
   //  then upserts it
   async function handleLightningClick(content: any) {
-    const parsed = HTMLtoText(props.notes[0].content);
-    const chunks = chunkTextByMultiParagraphs(parsed);
-
-    const res = await embedChunks(chunks);
-    const upserted = await upsertVectors(res, chunks);
-
+    // const parsed = HTMLtoText(props.notes[0].content);
+    // const chunks = chunkTextByMultiParagraphs(parsed);
+    // const res = await embedChunks(chunks);
+    // const upserted = await upsertVectors(res, chunks);
     // format:
     // 0: {embedding (1536) [.1232,...], index:0, object:"embedding"},
+
+    setCheckboxSelected([]);
+  }
+  async function handleCheckboxClicked(e: React.SyntheticEvent) {
+    const checked = e.target.getAttribute("data-state");
+
+    if (checked == "checked") {
+      let found = checkboxSelected.filter((n) => n !== parseInt(e.target.id));
+      setCheckboxSelected(found);
+    } else {
+      setCheckboxSelected([...checkboxSelected, +e.target.id]);
+    }
+  }
+
+  async function handleAnalyzeSubmit(e: React.SyntheticEvent) {
+    // call 2 in one: forall checkbox indices: do api calls on indices:
+    // for(let i = 0; i< checkboxSelected.length; i++) {
+    // }
+
+    setCheckboxSelected([]);
   }
 
   async function handleNavNotes() {
@@ -221,11 +254,15 @@ export default function Sidebar({
         <CommandInput placeholder="Search Title:" />
         <CommandList className="overflow-hidden h-screen">
           <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup>
+          <CommandGroup className="pb-[50px]">
             {/* Notesbar Component */}
             <CommandItem
               onSelect={handleNavNotes}
-              className={location === "notes" ? "bg-cyan-200" : "bg-zinc-200"}
+              className={
+                location === "notes"
+                  ? "bg-cyan-200  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)]"
+                  : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
+              }
             >
               <span className="text-xs text-zinc-600 font-medium ">
                 Recent Notes
@@ -240,8 +277,8 @@ export default function Sidebar({
                 <CommandItem
                   className={
                     note.title == title
-                      ? "bg-cyan-100  "
-                      : "aria-selected:bg-accent"
+                      ? "bg-cyan-100 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] my-[5px]"
+                      : "hover:box-shadow-[5px_5px_5px_rgba(103,232,249,.5)] my-[5px]"
                   }
                   id={note.title}
                   onSelect={
@@ -251,7 +288,7 @@ export default function Sidebar({
                   }
                 >
                   <span
-                    className="outline-none"
+                    className="outline-none text-slate-600"
                     onFocus={maintainTitle}
                     onBlur={handleUpdateTitle}
                     contentEditable={true}
@@ -281,27 +318,95 @@ export default function Sidebar({
               ))}
             </div>
           </CommandGroup>
-          <CommandGroup>
+          <CommandGroup className="pb-[50px]">
             {/* Prompt Bar Component  (Chat) */}
             <CommandItem
               onSelect={handleNavChat}
-              className={location === "chat" ? "bg-cyan-200" : "bg-zinc-200"}
+              className={
+                location === "chat"
+                  ? "bg-cyan-200  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)]"
+                  : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
+              }
             >
               <span className="text-xs text-zinc-600 font-medium ">
                 Notes Analyzed
               </span>
-              <FaBoltLightning
-                onClick={handleLightningClick}
-                className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 hover:fill-yellow-400"
-              />
+              <Dialog modal={true}>
+                <DialogTrigger asChild>
+                  <FaBoltLightning
+                    onClick={handleLightningClick}
+                    className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 hover:fill-yellow-400"
+                  />
+                </DialogTrigger>
+                <DialogContent className="xl:max-w-[600px] xl:max-h-[500px] h-[500px] ">
+                  <DialogHeader>
+                    <DialogTitle>Analyze Notes</DialogTitle>
+                    <DialogDescription className="relative top-[10px]">
+                      Here you can choose which notes to use to create a chat
+                      channel where the AI deeply understands the uploaded
+                      content. You can also upload PDFs to be analyze here as
+                      well
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="grid grid-rows-2 grid-flow-col gap-1 justify-items-center pt-[10px]">
+                    <div className=" ">
+                      <Label className="text-lg">Choose Notes to Analyze</Label>
+                    </div>
+                    <div className="relative top-[-120px] ">
+                      <ScrollArea className="rounded-md  fixed h-[200px] w-[200px] overflow-y-auto  ">
+                        <div>
+                          {props.notes.map((note, idx) => (
+                            <>
+                              <div>
+                                <Checkbox
+                                  id={idx}
+                                  onClick={handleCheckboxClicked}
+                                />
+                                <Label className="pl-[5px] font-light text-md">
+                                  {note.title}
+                                </Label>
+                              </div>
+                            </>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+
+                    <div className=" ">
+                      <Label className="text-lg ">Upload a PDF</Label>
+                    </div>
+                    <div className="font-light text-md relative top-[-120px] ">
+                      coming soon
+                    </div>
+                  </div>
+                  <DialogFooter className="fixed bottom-10 right-10">
+                    {checkboxSelected.length != 0 ? (
+                      <DialogClose>
+                        <Button type="submit" onClick={handleAnalyzeSubmit}>
+                          Analyze
+                        </Button>
+                      </DialogClose>
+                    ) : (
+                      <Button disabled type="submit">
+                        Analyze
+                      </Button>
+                    )}
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CommandItem>
           </CommandGroup>
 
-          <CommandGroup>
+          <CommandGroup className="pb-[50px]">
             {/* Learn, Flashcards, Tests, etc */}
             <CommandItem
               onSelect={handleNavLearn}
-              className={location === "chat" ? "bg-cyan-200" : "bg-zinc-200"}
+              className={
+                location === "learn"
+                  ? "bg-cyan-200  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)]"
+                  : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
+              }
             >
               <span className="text-xs text-zinc-600 font-medium ">Learn</span>
               <PiCardsFill

@@ -153,6 +153,9 @@ export async function upsertVectors(embeddings: embedding[], chunks: string[]) {
   const vectors: any[] = chunks.map((chunk, idx) => ({
     id: "vec" + idx,
     values: embeddings[idx].embedding,
+    metadata: {
+      text: chunk,
+    },
   }));
 
   //Batch the upsert operation
