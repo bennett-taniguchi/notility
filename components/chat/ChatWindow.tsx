@@ -1,18 +1,18 @@
-import { ResizablePanel } from "../../ui/resizable";
-import { Separator } from "../../ui/separator";
-import { ScrollArea } from "../../ui/scroll-area";
+import { ResizablePanel } from "../ui/resizable";
+import { Separator } from "../ui/separator";
+import { ScrollArea } from "../ui/scroll-area";
 import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
-import { options as authOptions } from "../../../pages/api/auth/[...nextauth]";
+import { options as authOptions } from "../../pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import { useRouter } from "next/navigation";
 
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { TrashIcon, Pencil2Icon } from "@radix-ui/react-icons";
 
-export default function Chat({ messagesLoaded }) {
+export default function ChatWindow({ messagesLoaded }) {
   //lol for not wasting openai credits
   const { data: session, status } = useSession();
   if (
@@ -22,6 +22,8 @@ export default function Chat({ messagesLoaded }) {
   ) {
     return null;
   }
+
+  console.log(messagesLoaded);
 
   // const [messages, setMessages] = useState<Message[]>(messagesLoaded); // potential future use for editing singular message
   const [input, setInput] = useState("");

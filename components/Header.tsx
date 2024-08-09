@@ -126,7 +126,7 @@ const Header: React.FC = () => {
           <a data-active={isActive("/drafts")}>My drafts</a>
         </Link>
         <Link href="/notes" legacyBehavior>
-          <a data-active={isActive("/notes")}>My Notes</a>
+          <a data-active={isActive("/notes/landing")}>My Notes</a>
         </Link>
 
         <style jsx>{`
