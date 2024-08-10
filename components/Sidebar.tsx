@@ -41,6 +41,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Separator } from "@radix-ui/react-separator";
 import { Checkbox } from "./ui/checkbox";
+import { headers } from "next/headers";
 
 export default function Sidebar({
   title,
@@ -207,6 +208,7 @@ export default function Sidebar({
 
     setCheckboxSelected([]);
   }
+
   async function handleCheckboxClicked(e: React.SyntheticEvent) {
     const checked = e.target.getAttribute("data-state");
 
@@ -218,14 +220,45 @@ export default function Sidebar({
     }
   }
 
-  async function handleAnalyzeSubmit(e: React.SyntheticEvent) {
+  // for chosen notes
+  const handleAnalyzeSubmit = async (e: React.SyntheticEvent) => {
     // call 2 in one: forall checkbox indices: do api calls on indices:
     // for(let i = 0; i< checkboxSelected.length; i++) {
     // }
 
-    setCheckboxSelected([]);
-  }
+    let chosen_contents = "";
+    let chosen_titles = "";
 
+    const textEncoder = new TextEncoder();
+
+    for (let i = 0; i < checkboxSelected.length; i++) {
+      chosen_contents =
+        chosen_contents + "_" + props.notes[checkboxSelected[i]].content;
+      if (textEncoder.encode(chosen_contents).length >= 200000000) {
+        // err msg
+        // end upload
+        console.log("the file size is too large");
+        return;
+      }
+
+      chosen_titles =
+        chosen_titles + "_" + props.notes[checkboxSelected[i]].title;
+    }
+    const notes_contents = chosen_contents;
+    const notes_titles = chosen_titles;
+
+    await analyzeSubmission(notes_contents, notes_titles);
+  };
+
+  const analyzeSubmission = async (notes_contents, notes_titles) => {
+    const body = { notes_contents, notes_titles };
+
+    await fetch("/api/chat/analyze", {
+      headers: { "Content-Type": "application/json" },
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  };
   async function handleNavNotes() {
     if (location === "notes") return;
     await Router.push("/notes/landing");
@@ -236,10 +269,26 @@ export default function Sidebar({
     await Router.push("/chat");
   }
 
+  async function handleNavAnalyzed(title: string) {
+    // { pathname: `/notes/[slug]`, query: { slug: data.title } },
+    //     undefined,
+    //     { shallow: true }
+    console.log("what");
+    await Router.push(
+      {
+        pathname: `/chat/` + title,
+
+        query: { slug: title },
+      },
+      undefined
+    );
+  }
+
   async function handleNavLearn() {
     if (location === "learn") return;
     await Router.push("/learn");
   }
+
   if (!props) return <div></div>;
   console.log(props);
 
@@ -396,6 +445,15 @@ export default function Sidebar({
                 </DialogContent>
               </Dialog>
             </CommandItem>
+            <div>
+              {props.analyzed.map((item) => (
+                <div>
+                  <CommandItem onSelect={(e) => handleNavAnalyzed(item.title)}>
+                    {item.title}
+                  </CommandItem>
+                </div>
+              ))}
+            </div>
           </CommandGroup>
 
           <CommandGroup className="pb-[50px]">

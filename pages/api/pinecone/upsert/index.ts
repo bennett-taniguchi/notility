@@ -12,7 +12,7 @@ export default async function handle(req, res) {
   const session = await getServerSession(req, res, authOptions);
 
   const pc = new Pinecone({
-    apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY as string,
+    apiKey: process.env.PINECONE_API_KEY as string,
   });
 
   let index = pc.index("notility");

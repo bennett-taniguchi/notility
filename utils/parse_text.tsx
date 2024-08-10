@@ -8,7 +8,6 @@ import {
 import { Record } from "@prisma/client/runtime/library";
 
 export function HTMLtoText(text: string): string {
-  console.log(text);
   text = text.replace(/<[^>]+>/g, "");
 
   return text;
@@ -147,7 +146,11 @@ type VectorRecord = {
 };
 
 // batches appropriate vectors and upserts using api path into the namespace matching users email
-export async function upsertVectors(embeddings: embedding[], chunks: string[]) {
+export async function upsertVectors(
+  embeddings: embedding[],
+  chunks: string[],
+  server?: boolean
+) {
   // Get the Pinecone index
   //   let index = pc.index("notility");
   const vectors: any[] = chunks.map((chunk, idx) => ({
@@ -159,15 +162,24 @@ export async function upsertVectors(embeddings: embedding[], chunks: string[]) {
   }));
 
   //Batch the upsert operation
+  let batches = [] as VectorRecord[][];
   const batchSize = 200;
   for (let i = 0; i < vectors.length; i += batchSize) {
     const batch = vectors.slice(i, i + batchSize) as VectorRecord[]; // {id: "vec1", values: [1536]}
     const body = { batch };
+    if (server) {
+      batches = [...batches, batch];
+    } else {
+      const res = await fetch("/api/pinecone/upsert/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    }
+  }
 
-    const res = await fetch("/api/pinecone/upsert/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+  if (server) {
+    console.log(batches);
+    return batches;
   }
 }

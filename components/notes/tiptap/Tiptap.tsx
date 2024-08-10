@@ -35,6 +35,15 @@ import { Textarea } from "../../ui/textarea";
 import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
 
+// const CustomBulletList = BulletList.extend({
+//   addKeyboardShortcuts() {
+//     return {
+//       // ↓ your new keyboard shortcut
+//       'Space': () => this.editor.commands,setContent({ }),
+//     }
+//   },
+// })
+
 const MenuBar = ({ editor }) => {
   if (!editor) {
     return null;
@@ -207,6 +216,18 @@ const Tiptap = ({
     editorProps: {
       attributes: {
         className: "shadow-inner",
+      },
+      handleDOMEvents: {
+        keydown: (view, event) => {
+          if (editor)
+            if (event.key === " ") {
+              editor.commands.insertContentAt(
+                editor.state.selection.anchor,
+                "\u00A0"
+              );
+            }
+          return false;
+        },
       },
     },
     content: ``,

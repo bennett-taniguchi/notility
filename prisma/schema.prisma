@@ -84,6 +84,14 @@ model Message {
   authorId String 
   role String
   content String
-  @@unique([index,authorId])
+  title String
+  @@unique([index,authorId,title])
+}
 
+model Upload {
+  index Int @id @default(autoincrement())
+  authorId String
+  title String
+  content String
+  @@unique([title,authorId])
 }

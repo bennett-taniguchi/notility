@@ -42,12 +42,14 @@ export default async function handle(req, res) {
         content: content_user,
         authorId: session.id,
         role: "user",
+        title: "",
       },
       {
         index: messages.length + 2,
         content: content_system,
         authorId: session.id,
         role: "system",
+        title: "",
       },
     ],
   });

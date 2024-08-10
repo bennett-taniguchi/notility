@@ -3,16 +3,17 @@
 
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
-import prisma from "../lib/prisma";
-import Layout from "../components/Layout";
+import prisma from "../../lib/prisma";
+import Layout from "../../components/Layout";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "../components/ui/resizable";
-import Sidebar from "../components/Sidebar";
-import ChatWindow from "../components/chat/ChatWindow";
+} from "../../components/ui/resizable";
+import Sidebar from "../../components/Sidebar";
+import ChatWindow from "../../components/chat/ChatWindow";
 import { useState } from "react";
+import { useRouter } from "next/router";
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
 // then initiate chat
@@ -46,34 +47,28 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   });
 
   const analyzed = await prisma.upload.findMany({
-    where: { authorId: (session as any).id },
+    where: {
+      authorId: (session as any).id,
+    },
   });
-
   return {
     props: { messages, notes, analyzed },
   };
 };
 // define messages
 type Message = {
+  title: string | string[] | undefined;
   index?: number;
   authorId: string;
   role: string;
   content: string;
-  title: any;
-};
-
-type Analyzed = {
-  index: number;
-  title: string;
-  content: string;
-  authorId: string;
 };
 export type Props = {
   messages: Message[];
-  analyzed: Analyzed[];
 };
 
 const Chat: React.FC<Props> = (props) => {
+  const Router = useRouter();
   const { data: session } = useSession();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
@@ -112,8 +107,10 @@ const Chat: React.FC<Props> = (props) => {
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
                 <ChatWindow
-                  messagesLoaded={props.messages.filter((m) => m.title === "")}
-                  title=""
+                  messagesLoaded={props.messages.filter(
+                    (f) => f.title === Router.query.slug
+                  )}
+                  title={Router.query.slug}
                 />
                 {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
                 Here

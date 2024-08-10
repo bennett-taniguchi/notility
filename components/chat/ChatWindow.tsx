@@ -12,7 +12,7 @@ import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { TrashIcon, Pencil2Icon } from "@radix-ui/react-icons";
 
-export default function ChatWindow({ messagesLoaded }) {
+export default function ChatWindow({ messagesLoaded, title }) {
   //lol for not wasting openai credits
   const { data: session, status } = useSession();
   if (
@@ -33,15 +33,28 @@ export default function ChatWindow({ messagesLoaded }) {
     const prompt = input;
 
     const messages = messagesLoaded;
-    const body = { prompt, messages };
 
-    const res = await fetch("/api/chat/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    setInput("");
-    Router.push("/chat");
+    if (title === "") {
+      const body = { prompt, messages };
+      const res = await fetch("/api/chat/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      setInput("");
+      Router.push("/chat");
+    } else {
+      const body = { prompt, messages, title };
+      const res = await fetch("/api/chat/update/rag/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      setInput("");
+      Router.push("/chat/" + title);
+    }
   }
 
   // tracks text input for chat
@@ -70,7 +83,7 @@ export default function ChatWindow({ messagesLoaded }) {
           <Separator />
           <div className="flex flex-col w-3/4 max-w-1/2 py-24 mx-auto stretch gap-y-2 bg-zinc-100 pb-[200px]">
             {/* {data && <pre>{JSON.stringify(data, null, 2)}</pre>} */}
-            {messagesLoaded.length != 0 ? (
+            {messagesLoaded && messagesLoaded.length != 0 ? (
               messagesLoaded.map((m: any) => (
                 <div
                   className={

@@ -30,13 +30,24 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     },
   });
 
+  const analyzed = await prisma.upload.findMany({
+    where: { authorId: (session as any).id },
+  });
+
   return {
-    props: { notes },
+    props: { notes, analyzed },
   };
 };
 
+type Analyzed = {
+  index: number;
+  title: string;
+  content: string;
+  authorId: string;
+};
 export type Props = {
   notes: PostProps[];
+  analyzed: Analyzed[];
 };
 
 const Notes: React.FC<Props> = (props) => {
