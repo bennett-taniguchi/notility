@@ -8,7 +8,13 @@ module.exports = {
     "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
+
   theme: {
+    fontFamily: {
+      greyQo: ["Grey-Qo", "sans-serif"],
+      roboto: ["Roboto", "sans-serif"],
+    },
+
     container: {
       center: true,
       padding: "2rem",

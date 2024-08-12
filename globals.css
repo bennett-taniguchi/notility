@@ -4,7 +4,17 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import url("https://fonts.googleapis.com/css2?family=Grey+Qo&family=Roboto,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
 @layer base {
+  @font-face {
+    font-family: "Grey-Qo";
+    src: url("public/fonts/Grey_Qo/GreyQo-Regular.ttf") format("truetype");
+  }
+  @font-face {
+    font-family: "Roboto";
+    src: url("public/fonts/Roboto/Roboto-Medium.ttf") format("truetype");
+  }
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;

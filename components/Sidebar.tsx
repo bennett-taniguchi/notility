@@ -305,6 +305,7 @@ export default function Sidebar({
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup className="pb-[50px]">
             {/* Notesbar Component */}
+
             <CommandItem
               onSelect={handleNavNotes}
               className={
@@ -313,8 +314,8 @@ export default function Sidebar({
                   : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
               }
             >
-              <span className="text-xs text-zinc-600 font-medium ">
-                Recent Notes
+              <span className="text-md text-zinc-600 font-medium ">
+                Notes 📓
               </span>
               <PlusCircledIcon
                 onClick={handlePlusClick}
@@ -377,8 +378,8 @@ export default function Sidebar({
                   : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
               }
             >
-              <span className="text-xs text-zinc-600 font-medium ">
-                Notes Analyzed
+              <span className="text-md text-zinc-600 font-medium ">
+                Chat with Notes 📖
               </span>
               <Dialog modal={true}>
                 <DialogTrigger asChild>
@@ -463,10 +464,12 @@ export default function Sidebar({
               className={
                 location === "learn"
                   ? "bg-cyan-200  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)]"
-                  : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
+                  : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)]"
               }
             >
-              <span className="text-xs text-zinc-600 font-medium ">Learn</span>
+              <span className="text-md text-zinc-600 font-medium ">
+                Learn 🏫
+              </span>
               <PiCardsFill
                 // onClick={handleLightningClick}
                 className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 hover:fill-yellow-400"

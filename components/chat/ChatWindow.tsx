@@ -63,12 +63,16 @@ export default function ChatWindow({ messagesLoaded, title }) {
     setInput((e.target as HTMLInputElement).value);
   };
 
+  console.log("title", title);
   // delete all chat logs
   async function handleDeleteChat(e: React.SyntheticEvent) {
+    const body = { title };
     const res = await fetch("/api/chat/delete", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
+
     await Router.push("/chat");
   }
 
@@ -81,7 +85,7 @@ export default function ChatWindow({ messagesLoaded, title }) {
 
         <ResizablePanel className="bg-zinc-100 ">
           <Separator />
-          <div className="flex flex-col w-3/4 max-w-1/2 py-24 mx-auto stretch gap-y-2 bg-zinc-100 pb-[200px]">
+          <div className="flex flex-col w-3/4 max-w-1/2 py-10 mx-auto stretch gap-y-2 bg-zinc-100 pb-[200px]">
             {/* {data && <pre>{JSON.stringify(data, null, 2)}</pre>} */}
             {messagesLoaded && messagesLoaded.length != 0 ? (
               messagesLoaded.map((m: any) => (

@@ -4,10 +4,12 @@ import prisma from "../../../../lib/prisma";
 
 // change to delete single when titles are unique
 export default async function handle(req, res) {
+  const { title } = req.body;
   const session = await getServerSession(req, res, authOptions);
   const result = await prisma.message.deleteMany({
     where: {
       authorId: session!.id,
+      title: title,
     },
   });
   res.json(result);
