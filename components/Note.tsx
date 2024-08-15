@@ -8,7 +8,7 @@ import {
   ResizablePanelGroup,
 } from "./ui/resizable";
 import Tiptap from "./notes/tiptap/Tiptap";
-import Sidebar from "./Sidebar";
+import Sidebar from "./sidebar/Sidebar";
 
 export default function Note(props) {
   const [title, setTitle] = useState<string>("");
