@@ -1,7 +1,7 @@
 import { ResizablePanel } from "../ui/resizable";
 import { Separator } from "../ui/separator";
 import { ScrollArea } from "../ui/scroll-area";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { options as authOptions } from "../../pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
@@ -11,8 +11,11 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { TrashIcon, Pencil2Icon } from "@radix-ui/react-icons";
+import { Skeleton } from "../ui/skeleton";
 
 export default function ChatWindow({ messagesLoaded, title }) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+
   //lol for not wasting openai credits
   const { data: session, status } = useSession();
   if (
@@ -26,10 +29,12 @@ export default function ChatWindow({ messagesLoaded, title }) {
   // const [messages, setMessages] = useState<Message[]>(messagesLoaded); // potential future use for editing singular message
   const [input, setInput] = useState("");
   const Router = useRouter();
-
+  const [loading, setLoading] = useState(false);
   // for submitting current chat message and updating state reflecting back and forth
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
+    setLoading(true);
+    scrollMsg();
     const prompt = input;
 
     const messages = messagesLoaded;
@@ -53,6 +58,7 @@ export default function ChatWindow({ messagesLoaded, title }) {
       });
 
       setInput("");
+      setLoading(false);
       Router.push("/chat/" + title);
     }
   }
@@ -76,9 +82,35 @@ export default function ChatWindow({ messagesLoaded, title }) {
     await Router.push("/chat");
   }
 
+  useEffect(() => {
+    // top and bot of start
+    // const msgs = document.getElementsByClassName("flex justify-start");
+    // let len = msgs.length;
+    // let distY = msgs[len - 1].getBoundingClientRect().bottom;
+    // scrollMsg(
+    //   msgs[len - 1].getBoundingClientRect().bottom -
+    //     msgs[len - 1].getBoundingClientRect().height
+    // );
+    scrollMsg();
+  }, [messagesLoaded]);
+
+  const scrollMsg = (amt = 99999999) => {
+    console.log("scroll");
+    if (viewportRef !== null && viewportRef.current !== null) {
+      // here scroll, Ex: to the right
+      console.log("view");
+      console.log(viewportRef.current);
+      viewportRef.current.scrollTo({
+        top: amt,
+        left: 0,
+        behavior: "smooth",
+      });
+    }
+  };
+  console.log(messagesLoaded);
   return (
     <>
-      <ScrollArea>
+      <ScrollArea viewportRef={viewportRef}>
         <ResizablePanel className="" defaultSize={1}>
           {/* (AI?) Buttons go here */}
         </ResizablePanel>
@@ -133,6 +165,15 @@ export default function ChatWindow({ messagesLoaded, title }) {
                   Try typing a message to talk to the AI
                 </CardContent>
               </Card>
+            )}
+            {loading === true ? (
+              <div className="flex justify-center gap-2 mt-5">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-4 rounded-full" />
+              </div>
+            ) : (
+              <div />
             )}
 
             <CardTitle>

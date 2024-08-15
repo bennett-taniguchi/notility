@@ -107,9 +107,9 @@ const Chat: React.FC<Props> = (props) => {
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
                 <ChatWindow
-                  messagesLoaded={props.messages.filter(
-                    (f) => f.title === Router.query.slug
-                  )}
+                  messagesLoaded={props.messages
+                    .filter((f) => f.title === Router.query.slug)
+                    .sort((a, b) => (a.index > b.index ? 1 : -1))}
                   title={Router.query.slug}
                 />
                 {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">

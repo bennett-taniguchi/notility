@@ -28,26 +28,26 @@ type Props = {
 const Blog: React.FC<Props> = (props) => {
   return (
     <Layout>
-      <div className="page w-page h-screen">
-        <h1 className="text-left font-roboto text-[90px] text-[rgb(103,232,200,.8)] text-center pb-[20px]">
+      <div className="page w-page h-screen spectrum-background">
+        <h1 className="text-left font-roboto text-[90px]  text-center pb-[20px]">
           Notility
         </h1>
 
-        <div className="grid grid-cols-3 gap-4 justify-items-center pb-[40px]">
-          <Card className="h-[700px] w-[500px] flex justify-center">
-            <div className="text-left font-roboto text-[45px] text-[rgb(103,232,200,.8)] text-center">
+        <div className="grid grid-cols-3 justify-items-center pb-[40px]">
+          <Card className="h-[700px] w-[500px] flex justify-center landingCard">
+            <div className="text-left font-roboto text-[45px]   text-center">
               Create Notes
             </div>
           </Card>
-          <Card className="h-[700px] w-[500px]">
+          <Card className="h-[700px] w-[500px] landingCard">
             {" "}
-            <div className="text-left font-roboto text-[45px] text-[rgb(103,232,200,.8)] text-center">
+            <div className="text-left font-roboto text-[45px]  text-center">
               Analyze Notes
             </div>
           </Card>
-          <Card className="h-[700px] w-[500px] flex justify-center">
+          <Card className="h-[700px] w-[500px] flex justify-center landingCard">
             {" "}
-            <div className="text-left font-roboto text-[45px] text-[rgb(103,232,200,.8)] text-center">
+            <div className="text-left font-roboto text-[45px]   text-center">
               Study Notes
             </div>
           </Card>
