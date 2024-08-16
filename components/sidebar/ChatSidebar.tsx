@@ -32,7 +32,7 @@ export default function ChatSidebar({ Router, location, props }) {
 
   // main chat page
   async function handleNavChat() {
-    if (location === "chat") return;
+    if (location === "chat" && !Router.query) return;
     await Router.push("/chat");
   }
 
@@ -41,7 +41,6 @@ export default function ChatSidebar({ Router, location, props }) {
     // { pathname: `/notes/[slug]`, query: { slug: data.title } },
     //     undefined,
     //     { shallow: true }
-    console.log("what");
     await Router.push(
       {
         pathname: `/chat/` + title,
@@ -113,8 +112,8 @@ export default function ChatSidebar({ Router, location, props }) {
         onSelect={handleNavChat}
         className={
           location === "chat"
-            ? "bg-cyan-200  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)]"
-            : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
+            ? "bg-emerald-200 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] landingCard"
+            : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] landingCard"
         }
       >
         <span className="text-md text-zinc-600 font-medium ">
@@ -151,7 +150,7 @@ export default function ChatSidebar({ Router, location, props }) {
                       <>
                         <div>
                           <Checkbox id={idx} onClick={handleCheckboxClicked} />
-                          <Label className="pl-[5px] font-light text-md">
+                          <Label className="pl-[5px] font-light text-md ">
                             {note.title}
                           </Label>
                         </div>
@@ -187,7 +186,10 @@ export default function ChatSidebar({ Router, location, props }) {
       <div>
         {props.analyzed.map((item) => (
           <div>
-            <CommandItem onSelect={(e) => handleNavAnalyzed(item.title)}>
+            <CommandItem
+              onSelect={(e) => handleNavAnalyzed(item.title)}
+              className="landingCard"
+            >
               {item.title}
             </CommandItem>
           </div>

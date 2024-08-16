@@ -10,6 +10,7 @@ import Router from "next/router";
 import LearnSidebar from "./LearnSidebar";
 import ChatSidebar from "./ChatSidebar";
 import NoteSidebar from "./NoteSidebar";
+import StatusSidebar from "./StatusSidebar";
 
 export default function Sidebar({
   title,
@@ -21,8 +22,8 @@ export default function Sidebar({
   if (!props) return <div></div>;
 
   return (
-    <ScrollArea className="rounded-md p-0   ">
-      <Command className="  size-full rounded-lg    ">
+    <ScrollArea className="rounded-md">
+      <Command className="  size-full rounded-lg bg-teal-50">
         <CommandInput placeholder="Search Title:" />
         <CommandList className="overflow-hidden h-screen">
           <CommandEmpty>No results found.</CommandEmpty>
@@ -36,6 +37,7 @@ export default function Sidebar({
           />
           <ChatSidebar Router={Router} location={location} props={props} />
           <LearnSidebar Router={Router} location={location} />
+          <StatusSidebar />
         </CommandList>
       </Command>
     </ScrollArea>

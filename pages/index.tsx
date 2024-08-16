@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 import Post, { PostProps } from "../components/Post";
 import prisma from "../lib/prisma";
 import { Card } from "../components/ui/card";
+import Link from "next/link";
 
 export const getStaticProps: GetStaticProps = async () => {
   const feed = await prisma.post.findMany({
@@ -36,19 +37,19 @@ const Blog: React.FC<Props> = (props) => {
         <div className="grid grid-cols-3 justify-items-center pb-[40px]">
           <Card className="h-[700px] w-[500px] flex justify-center landingCard">
             <div className="text-left font-roboto text-[45px]   text-center">
-              Create Notes
+              <Link href="/notes/landing">Create Notes</Link>
             </div>
           </Card>
           <Card className="h-[700px] w-[500px] landingCard">
             {" "}
             <div className="text-left font-roboto text-[45px]  text-center">
-              Analyze Notes
+              <Link href="/chat">Analyze Notes</Link>
             </div>
           </Card>
           <Card className="h-[700px] w-[500px] flex justify-center landingCard">
             {" "}
             <div className="text-left font-roboto text-[45px]   text-center">
-              Study Notes
+              <Link href="/learn">Study Notes</Link>
             </div>
           </Card>
         </div>

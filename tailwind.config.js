@@ -13,6 +13,7 @@ module.exports = {
     fontFamily: {
       greyQo: ["Grey-Qo", "sans-serif"],
       roboto: ["Roboto", "sans-serif"],
+      quicksand: ["Quicksand", "sans-serif"],
     },
 
     container: {

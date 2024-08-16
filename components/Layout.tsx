@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import Header from "./Header";
-import Sidebar from "./sidebar/Sidebar";
+import TopLoader from "./toploader/Toploader";
 
 type Props = {
   children: ReactNode;
@@ -8,6 +8,7 @@ type Props = {
 
 const Layout: React.FC<Props> = (props) => (
   <div>
+    <TopLoader />
     <Header />
     <div className="layout">{props.children}</div>
   </div>

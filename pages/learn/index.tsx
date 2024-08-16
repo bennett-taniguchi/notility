@@ -3,16 +3,22 @@
 
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
-import prisma from "../lib/prisma";
-import Layout from "../components/Layout";
+import prisma from "../../lib/prisma";
+import Layout from "../../components/Layout";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "../components/ui/resizable";
-import Sidebar from "../components/sidebar/Sidebar";
-import ChatWindow from "../components/chat/ChatWindow";
+} from "../../components/ui/resizable";
+import Sidebar from "../../components/sidebar/Sidebar";
+
 import { useState } from "react";
+import { Card, CardTitle } from "../../components/ui/card";
+import DemoPage from "../../components/learn/table/page";
+import { Separator } from "../../components/ui/separator";
+import Link from "next/link";
+import { Button } from "../../components/ui/button";
+
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
 // then initiate chat
@@ -103,7 +109,7 @@ const Chat: React.FC<Props> = (props) => {
                 setTitle={setTitle} // usestate for currently loaded title
                 setContent={setContent} //  set body of current text
                 props={props}
-                location="chat"
+                location="learn"
               />
             </ResizablePanel>
             <ResizableHandle />
@@ -111,10 +117,47 @@ const Chat: React.FC<Props> = (props) => {
             <ResizablePanel className="bg-zinc-100">
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
-                <ChatWindow
-                  messagesLoaded={props.messages.filter((m) => m.title === "")}
-                  title=""
-                />
+
+                <div className=" ">
+                  <h1 className="underline underline-offset-4 text-left pl-7 text-2xl text-zinc-800 translate-y-[15px] font-quicksand pb-[50px]">
+                    Learn
+                  </h1>
+                  <h1 className="text-left pl-7 text-xl text-zinc-500 translate-y-[15px] font-quicksand">
+                    Flashcards
+                  </h1>
+                  <Separator orientation="horizontal" className="mt-5" />
+                  <div className="pl-9  pt-5">
+                    <Link href="/learn/flashcard/create">
+                      <Button variant={"outline"}>Create New</Button>
+                    </Link>
+                  </div>
+                  <div className="translate-y-[-20px]">
+                    <DemoPage />
+                    <div className="pl-9 translate-y-[-15px] ">
+                      <Link href="/learn/flashcard/study">
+                        <Button>Study</Button>
+                      </Link>
+                    </div>
+                  </div>
+                  <h1 className="text-left pl-7 text-xl text-zinc-500 translate-y-[15px] font-quicksand">
+                    Tests
+                  </h1>
+                  <Separator orientation="horizontal" className="mt-5" />
+                  <div className="pl-9  pt-5">
+                    <Link href="/learn/test/create">
+                      <Button variant={"outline"}>Create New</Button>
+                    </Link>
+                  </div>
+                  <div className="translate-y-[-20px]">
+                    <DemoPage />
+                    <div className="pl-9 translate-y-[-15px] ">
+                      <Link href="/learn/test/study">
+                        <Button>Study</Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
                 {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
                 Here
                </div> */}

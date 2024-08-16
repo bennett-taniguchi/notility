@@ -3,16 +3,22 @@
 
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
-import prisma from "../lib/prisma";
-import Layout from "../components/Layout";
+import prisma from "../../../../lib/prisma";
+import Layout from "../../../../components/Layout";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "../components/ui/resizable";
-import Sidebar from "../components/sidebar/Sidebar";
-import ChatWindow from "../components/chat/ChatWindow";
+} from "../../../../components/ui/resizable";
+import Sidebar from "../../../../components/sidebar/Sidebar";
+
 import { useState } from "react";
+import { Card, CardTitle } from "../../../../components/ui/card";
+import DemoPage from "../../../../components/learn/table/page";
+import { Separator } from "../../../../components/ui/separator";
+import Link from "next/link";
+import { Button } from "../../../../components/ui/button";
+
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
 // then initiate chat
@@ -87,6 +93,29 @@ const Chat: React.FC<Props> = (props) => {
     );
   }
 
+  let practiceTerms = [
+    {
+      front: "California Capital",
+      back: "Sacramento",
+    },
+    {
+      front: "Alabama Capital",
+      back: "Montgomery",
+    },
+    {
+      front: "Virginia",
+      back: "Richmond",
+    },
+    {
+      front: "Minnesota",
+      back: "Jackson",
+    },
+    {
+      front: "Idaho",
+      back: "Boise",
+    },
+  ];
+
   if (props)
     return (
       <Layout>
@@ -103,7 +132,7 @@ const Chat: React.FC<Props> = (props) => {
                 setTitle={setTitle} // usestate for currently loaded title
                 setContent={setContent} //  set body of current text
                 props={props}
-                location="chat"
+                location="learn"
               />
             </ResizablePanel>
             <ResizableHandle />
@@ -111,10 +140,34 @@ const Chat: React.FC<Props> = (props) => {
             <ResizablePanel className="bg-zinc-100">
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
-                <ChatWindow
-                  messagesLoaded={props.messages.filter((m) => m.title === "")}
-                  title=""
-                />
+
+                <div className="grid grid-cols-1  justify-items-center">
+                  <h1 className="underline underline-offset-4 text-left pl-7 text-2xl text-zinc-800 translate-y-[15px] font-quicksand pb-[20px] text-center">
+                    Study (Set Name) Flashcards
+                  </h1>
+                  <div className="flex flex-3 justify-center gap-2  ">
+                    <Button>Shuffle</Button>
+                    <Button>Hint</Button>
+                    <Button>Restart</Button>
+                  </div>
+                  <div>Score:</div>
+
+                  <div className="flip-card">
+                    <div className="flip-card-inner">
+                      <Card className="w-[70vw] h-[50vh] shadow-inner drop-shadow-xl text-center flip-card-front">
+                        <p className="top-1/3 relative text-2xl font-quicksand font-extrabold">
+                          front
+                        </p>
+                      </Card>
+                      <Card className="w-[70vw] h-[50vh] shadow-inner drop-shadow-xl text-center flip-card-back">
+                        <p className="top-1/3 relative text-2xl font-quicksand font-extrabold">
+                          back
+                        </p>
+                      </Card>
+                    </div>
+                  </div>
+                </div>
+
                 {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
                 Here
                </div> */}

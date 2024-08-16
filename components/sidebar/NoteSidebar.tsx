@@ -180,8 +180,8 @@ export default function NoteSidebar({
         onSelect={handleNavNotes}
         className={
           location === "notes"
-            ? "bg-cyan-200  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)]"
-            : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
+            ? "bg-emerald-200  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] landingCard"
+            : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] landingCard"
         }
       >
         <span className="text-md text-zinc-600 font-medium ">Notes 📓</span>
@@ -195,8 +195,8 @@ export default function NoteSidebar({
           <CommandItem
             className={
               note.title == title
-                ? "bg-cyan-100 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] my-[5px]"
-                : "hover:box-shadow-[5px_5px_5px_rgba(103,232,249,.5)] my-[5px]"
+                ? "bg-cyan-100 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] my-[5px] landingCard"
+                : "hover:box-shadow-[5px_5px_5px_rgba(103,232,249,.5)] my-[5px] landingCard"
             }
             id={note.title}
             onSelect={

@@ -9,6 +9,7 @@ import {
 } from "./ui/resizable";
 import Tiptap from "./notes/tiptap/Tiptap";
 import Sidebar from "./sidebar/Sidebar";
+import Layout from "./Layout";
 
 export default function Note(props) {
   const [title, setTitle] = useState<string>("");
@@ -46,8 +47,13 @@ export default function Note(props) {
 
   return (
     <div className="page">
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel minSize={20} maxSize={20} defaultSize={20}>
+      <ResizablePanelGroup direction="horizontal" className="fixed">
+        <ResizablePanel
+          minSize={20}
+          maxSize={20}
+          defaultSize={20}
+          className="rounded-lg border"
+        >
           <Sidebar
             title={title}
             setTitle={setTitle}

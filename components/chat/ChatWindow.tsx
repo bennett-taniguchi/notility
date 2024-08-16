@@ -110,12 +110,12 @@ export default function ChatWindow({ messagesLoaded, title }) {
   console.log(messagesLoaded);
   return (
     <>
-      <ScrollArea viewportRef={viewportRef}>
-        <ResizablePanel className="" defaultSize={1}>
+      <ScrollArea className="bg-zinc-100" viewportRef={viewportRef}>
+        <ResizablePanel defaultSize={1}>
           {/* (AI?) Buttons go here */}
         </ResizablePanel>
 
-        <ResizablePanel className="bg-zinc-100 ">
+        <ResizablePanel>
           <Separator />
           <div className="flex flex-col w-3/4 max-w-1/2 py-10 mx-auto stretch gap-y-2 bg-zinc-100 pb-[200px]">
             {/* {data && <pre>{JSON.stringify(data, null, 2)}</pre>} */}
