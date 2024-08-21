@@ -112,8 +112,8 @@ export default function ChatSidebar({ Router, location, props }) {
         onSelect={handleNavChat}
         className={
           location === "chat"
-            ? "bg-emerald-200 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] landingCard"
-            : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] landingCard"
+            ? "bg-emerald-300 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(31,78,47,.5)] landingCard"
+            : "bg-[rgba(168,225,213,.5)]  landingCard"
         }
       >
         <span className="text-md text-zinc-600 font-medium ">

@@ -10,6 +10,7 @@ import {
 import Tiptap from "./notes/tiptap/Tiptap";
 import Sidebar from "./sidebar/Sidebar";
 import Layout from "./Layout";
+import Tiptap2 from "./notes/tiptap/Tiptap2";
 
 export default function Note(props) {
   const [title, setTitle] = useState<string>("");
@@ -73,9 +74,15 @@ export default function Note(props) {
               saveNotes={saveNotes}
               deleteNotes={deleteNotes}
             />
+            {/* <Tiptap2 /> */}
           </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
   );
 }
+
+// div class = bubble-menu
+// button >Bold<
+// button >Italic<
+// button >Strike<

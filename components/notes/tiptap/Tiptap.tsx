@@ -4,7 +4,7 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 
-import { EditorContent, useEditor } from "@tiptap/react";
+import { Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
 import BulletList from "@tiptap/extension-bullet-list";
@@ -34,15 +34,6 @@ import { useState, useEffect } from "react";
 import { Textarea } from "../../ui/textarea";
 import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
-
-// const CustomBulletList = BulletList.extend({
-//   addKeyboardShortcuts() {
-//     return {
-//       // ↓ your new keyboard shortcut
-//       'Space': () => this.editor.commands,setContent({ }),
-//     }
-//   },
-// })
 
 const MenuBar = ({ editor }) => {
   if (!editor) {
@@ -203,7 +194,6 @@ const Tiptap = ({
         },
       }),
       ListItem,
-      // Indent,
       StarterKit,
       Placeholder.configure({
         placeholder: "Write a Note                                ",
@@ -213,29 +203,32 @@ const Tiptap = ({
       }),
       Highlight,
     ],
-    editorProps: {
-      attributes: {
-        className: "shadow-inner",
-      },
-      handleDOMEvents: {
-        keydown: (view, event) => {
-          if (editor)
-            if (event.key === " ") {
-              editor.commands.insertContentAt(
-                editor.state.selection.anchor,
-                "\u00A0"
-              );
-            }
-          return false;
-        },
-      },
-    },
+
     content: ``,
   });
 
   useEffect(() => {
     setInitial(false);
-  }, []);
+    editor?.setOptions({
+      editorProps: {
+        handleDOMEvents: {
+          keydown: (view, event) => {
+            if (editor) {
+              console.log(event.key);
+              if (event.key === " ") {
+                console.log("space pressed");
+                editor.commands.insertContentAt(
+                  editor.state.selection.anchor,
+                  "\u00A0"
+                );
+              }
+            }
+            return false;
+          },
+        },
+      },
+    });
+  }, [editor]);
 
   // updates on changed prop, 1st and third to maintain previous cursor positionining
   useEffect(() => {
@@ -276,7 +269,7 @@ const Tiptap = ({
       <ResizablePanel className="bg-white ">
         <Separator />
 
-        <ScrollArea>
+        <ScrollArea viewportRef={null}>
           <Textarea
             placeholder="Write a Title"
             onChange={(e) => setTitle(e.target.value)}
@@ -288,6 +281,7 @@ const Tiptap = ({
 
           <EditorContent
             editor={editor}
+            content={content}
             onChange={setContent(editor?.getHTML())}
             value={content}
             className="focus-visible:ring-0 border-0 bg-white h-[600px] "

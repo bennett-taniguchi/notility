@@ -12,12 +12,13 @@ import {
 } from "../../../../components/ui/resizable";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardTitle } from "../../../../components/ui/card";
 import DemoPage from "../../../../components/learn/table/page";
 import { Separator } from "../../../../components/ui/separator";
 import Link from "next/link";
 import { Button } from "../../../../components/ui/button";
+import { Textarea } from "../../../../components/ui/textarea";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -80,20 +81,20 @@ export type Props = {
 };
 
 const Chat: React.FC<Props> = (props) => {
+  const [cardClicked, setCardClicked] = useState(false);
+
   const { data: session } = useSession();
+  type Card = {
+    front: string;
+    back: string;
+  };
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-
-  if (!session) {
-    return (
-      <Layout>
-        <h1>My Notes</h1>
-        <div>You need to be authenticated to view this page.</div>
-      </Layout>
-    );
-  }
-
-  let practiceTerms = [
+  const [text, setText] = useState();
+  const [currentCard, setCurrentCard] = useState(0);
+  const [currentScore, setCurrentScore] = useState(0);
+  // will be provided as comp param
+  const [practiceTerms, setPracticeTerms] = useState<Card[]>([
     {
       front: "California Capital",
       back: "Sacramento",
@@ -103,19 +104,93 @@ const Chat: React.FC<Props> = (props) => {
       back: "Montgomery",
     },
     {
-      front: "Virginia",
+      front: "Virginia Capital",
       back: "Richmond",
     },
     {
-      front: "Minnesota",
+      front: "Minnesota Capital",
       back: "Jackson",
     },
     {
-      front: "Idaho",
+      front: "Idaho Capital",
       back: "Boise",
     },
-  ];
+  ]);
 
+  if (!session || !practiceTerms) {
+    return (
+      <Layout>
+        <h1>My Notes</h1>
+        <div>You need to be authenticated to view this page.</div>
+      </Layout>
+    );
+  }
+
+  function handleCardClick(e: React.SyntheticEvent) {
+    if (!cardClicked) {
+      setCardClicked(!cardClicked);
+    } else {
+      if (currentCard != practiceTerms.length - 1) {
+        setCurrentCard(currentCard + 1);
+        setCardClicked(false);
+      }
+    }
+  }
+
+  function handleFormSubmit(e?: React.SyntheticEvent) {
+    e?.preventDefault();
+    setCardClicked(true);
+    if (text === practiceTerms[currentCard].back && cardClicked != true) {
+      if (currentCard != practiceTerms.length - 1) {
+        setCardClicked(false);
+        setCurrentCard(currentCard + 1);
+        setCurrentScore(currentScore + 1);
+
+        console.log(currentCard + 1);
+      } else {
+        setCurrentCard(0);
+      }
+    }
+
+    // check correctness of card
+    // increment counter if true (index and score)
+    // flip and green effect
+    // flip and red effect
+
+    // need click to continue on already flipped card
+  }
+  function handleEnterPress(e: React.KeyboardEvent) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleFormSubmit();
+    }
+  }
+
+  function handleRestart() {
+    setCurrentCard(0);
+    setCardClicked(false);
+    setCurrentScore(0);
+  }
+
+  function handleShuffle() {
+    let i = practiceTerms.length;
+    let arr = new Array(0);
+    for (let j = 0; j < practiceTerms.length; j++) {
+      arr[j] = practiceTerms[j];
+    }
+    // While there remain elements to shuffle...
+    while (i != 0) {
+      // Pick a remaining element...
+      let randomIndex = Math.floor(Math.random() * i);
+      i--;
+
+      // And swap it with the current element.
+      [arr[i], arr[randomIndex]] = [arr[randomIndex], arr[i]];
+    }
+    setPracticeTerms(arr);
+
+    handleRestart();
+  }
   if (props)
     return (
       <Layout>
@@ -146,28 +221,50 @@ const Chat: React.FC<Props> = (props) => {
                     Study (Set Name) Flashcards
                   </h1>
                   <div className="flex flex-3 justify-center gap-2  ">
-                    <Button>Shuffle</Button>
+                    <Button onClick={handleShuffle}>Shuffle</Button>
                     <Button>Hint</Button>
-                    <Button>Restart</Button>
+                    <Button onClick={handleRestart}>Restart</Button>
                   </div>
-                  <div>Score:</div>
+                  <div>Score: {currentScore}</div>
 
-                  <div className="flip-card">
-                    <div className="flip-card-inner">
-                      <Card className="w-[70vw] h-[50vh] shadow-inner drop-shadow-xl text-center flip-card-front">
+                  {/* Card start */}
+
+                  <div className={"flip-card "} onClick={handleCardClick}>
+                    <div
+                      className={
+                        "flip-card-inner " +
+                        (cardClicked
+                          ? "flashCardPrimary transition-transform delay-5000"
+                          : "")
+                      }
+                    >
+                      <Card className="w-[70vw] h-[50vh] shadow-inner drop-shadow-xl text-center flip-card-front transform: translateY(180deg)">
                         <p className="top-1/3 relative text-2xl font-quicksand font-extrabold">
-                          front
+                          {practiceTerms[currentCard].front}
                         </p>
                       </Card>
-                      <Card className="w-[70vw] h-[50vh] shadow-inner drop-shadow-xl text-center flip-card-back">
+                      <Card
+                        className={
+                          "w-[70vw] h-[50vh] shadow-inner drop-shadow-xl text-center flip-card-back "
+                        }
+                      >
                         <p className="top-1/3 relative text-2xl font-quicksand font-extrabold">
-                          back
+                          {practiceTerms[currentCard].back}
                         </p>
                       </Card>
                     </div>
                   </div>
                 </div>
 
+                {/* Card End */}
+                <div className="grid gap-2 mx-[90px] mt-[50px] bg-zinc-50">
+                  <Textarea
+                    onChange={(e) => setText(e.target.value as any)}
+                    className="non-resize"
+                    onKeyPress={handleEnterPress}
+                  ></Textarea>
+                  <Button onClick={handleFormSubmit}>Submit</Button>
+                </div>
                 {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
                 Here
                </div> */}

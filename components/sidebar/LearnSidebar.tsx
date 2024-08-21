@@ -17,27 +17,11 @@ export default function LearnSidebar({ location, Router }) {
         onSelect={handleNavLearn}
         className={
           location === "learn"
-            ? "bg-emerald-200 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] "
-            : "bg-[rgba(168,225,213,.5)] hover:drop-shadow-[5px_5px_5px_rgb(103,232,249)] landingCard"
+            ? "bg-emerald-300 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(31,78,47,.5)] landingCard"
+            : "bg-[rgba(168,225,213,.5)] landingCard"
         }
       >
-        <HoverCard openDelay={0}>
-          <HoverCardTrigger>
-            {/* <PiCardsFill
-              // onClick={handleLightningClick}
-              className="stroke-zinc-600 stroke-[.5px] top-2.5 right-5 position: absolute hover:stroke-zinc-200 hover:fill-yellow-400"
-            /> */}
-            <span className="text-md text-zinc-600 font-medium ">Learn 🏫</span>
-          </HoverCardTrigger>
-          <HoverCardContent
-            avoidCollisions={true}
-            sideOffset={-20}
-            className="w-[200px] h-[150px] text-sm"
-          >
-            Here you can convert your notes to flashcards, or make your own, as
-            well as study tests based on flashcards
-          </HoverCardContent>
-        </HoverCard>
+        <span className="text-md text-zinc-600 font-medium ">Learn 🏫</span>
       </CommandItem>
     </CommandGroup>
   );
