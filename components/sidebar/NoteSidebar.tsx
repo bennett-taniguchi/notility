@@ -5,6 +5,7 @@ import {
 } from "@radix-ui/react-icons";
 import { CommandGroup, CommandItem } from "../ui/command";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function NoteSidebar({
   Router,
@@ -184,7 +185,9 @@ export default function NoteSidebar({
             : "bg-[rgba(168,225,213,.5)]   landingCard"
         }
       >
-        <span className="text-md text-zinc-600 font-medium ">Notes 📓</span>
+        <span className="text-md text-zinc-600 font-medium ">
+          <Link href="/notes/landing">Notes 📓</Link>
+        </span>
         <PlusCircledIcon
           onClick={handlePlusClick}
           className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110"

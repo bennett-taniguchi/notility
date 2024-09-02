@@ -3,6 +3,7 @@ import { CommandGroup, CommandItem } from "../ui/command";
 import Router from "next/router";
 import { HoverCardTrigger } from "@radix-ui/react-hover-card";
 import { HoverCard, HoverCardContent } from "../ui/hover-card";
+import Link from "next/link";
 
 export default function LearnSidebar({ location, Router }) {
   async function handleNavLearn() {
@@ -21,7 +22,9 @@ export default function LearnSidebar({ location, Router }) {
             : "bg-[rgba(168,225,213,.5)] landingCard"
         }
       >
-        <span className="text-md text-zinc-600 font-medium ">Learn 🏫</span>
+        <span className="text-md text-zinc-600 font-medium ">
+          <Link href="/learn">Learn 🏫</Link>
+        </span>
       </CommandItem>
     </CommandGroup>
   );

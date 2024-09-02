@@ -15,6 +15,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function ChatSidebar({ Router, location, props }) {
   const [checkboxSelected, setCheckboxSelected] = useState<number[]>([]); // modal
@@ -117,7 +118,7 @@ export default function ChatSidebar({ Router, location, props }) {
         }
       >
         <span className="text-md text-zinc-600 font-medium ">
-          Chat with Notes 📖
+          <Link href="/chat"> Chat with Notes 📖</Link>
         </span>
         <Dialog modal={true}>
           <DialogTrigger asChild>
