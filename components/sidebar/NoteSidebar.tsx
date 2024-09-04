@@ -195,47 +195,50 @@ export default function NoteSidebar({
       </CommandItem>
       <div>
         {props.notes.map((note, index) => (
-          <CommandItem
-            className={
-              note.title == title
-                ? "bg-cyan-100 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] my-[5px] landingCard"
-                : "hover:box-shadow-[5px_5px_5px_rgba(103,232,249,.5)] my-[5px] landingCard"
-            }
-            id={note.title}
-            onSelect={
-              minusHover == pencilHover
-                ? (e) => loadNotes(props.notes[index].title)
-                : (e) => e
-            }
-          >
-            <span
-              className="outline-none text-slate-600"
-              onFocus={maintainTitle}
-              onBlur={handleUpdateTitle}
-              contentEditable={true}
+          <Link href={"/notes/" + note.title}>
+            <CommandItem
+              className={
+                note.title == title
+                  ? "bg-cyan-100 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] my-[5px] landingCard"
+                  : "hover:box-shadow-[5px_5px_5px_rgba(103,232,249,.5)] my-[5px] landingCard"
+              }
+              id={note.title}
+              onSelect={
+                minusHover == pencilHover
+                  ? (e) => loadNotes(props.notes[index].title)
+                  : (e) => e
+              }
             >
-              {note.title}
-            </span>
+              <span
+                className="outline-none text-slate-600"
+                onFocus={maintainTitle}
+                onBlur={handleUpdateTitle}
+                contentEditable={true}
+              >
+                {/* <Link href={"/notes/" + note.title}>{note.title}</Link> */}
+                {note.title}
+              </span>
 
-            <span>
-              <Pencil1Icon
-                id={index + ""}
-                onClick={handlePencilClick}
-                className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 translate-x-[-1.5rem] scale-110 translate-y-[-.5rem]"
-                onMouseEnter={(e) => setPencilHover(true)}
-                onMouseLeave={(e) => setPencilHover(false)}
-              />
-            </span>
-            <span>
-              <MinusCircledIcon
-                id={index + ""}
-                onClick={handleMinusClick}
-                className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110 translate-y-[-.5rem]"
-                onMouseEnter={(e) => setMinusHover(true)}
-                onMouseLeave={(e) => setMinusHover(false)}
-              />
-            </span>
-          </CommandItem>
+              <span>
+                <Pencil1Icon
+                  id={index + ""}
+                  onClick={handlePencilClick}
+                  className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 translate-x-[-1.5rem] scale-110 translate-y-[-.5rem]"
+                  onMouseEnter={(e) => setPencilHover(true)}
+                  onMouseLeave={(e) => setPencilHover(false)}
+                />
+              </span>
+              <span>
+                <MinusCircledIcon
+                  id={index + ""}
+                  onClick={handleMinusClick}
+                  className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110 translate-y-[-.5rem]"
+                  onMouseEnter={(e) => setMinusHover(true)}
+                  onMouseLeave={(e) => setMinusHover(false)}
+                />
+              </span>
+            </CommandItem>
+          </Link>
         ))}
       </div>
     </CommandGroup>

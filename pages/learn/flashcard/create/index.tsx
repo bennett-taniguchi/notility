@@ -100,10 +100,13 @@ const Chat: React.FC<Props> = (props) => {
   const [content, setContent] = useState<string>("");
   const [text, setText] = useState();
 
+  const [size, setSize] = useState(1);
   const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
 
-  const itemsRef = forwardRef([]);
+  const titleRef = useRef<string[]>([]);
+  const defRef = useRef<string[]>([]);
+
   // will be provided as comp param
   const [practiceTerms, setPracticeTerms] = useState<Card[]>([
     {
@@ -122,6 +125,7 @@ const Chat: React.FC<Props> = (props) => {
   }
   function handlePlusClicked(e: React.SyntheticEvent) {
     setPracticeTerms([...practiceTerms, { front: "", back: "" } as Card]);
+    setSize(size + 1);
   }
 
   function handleMinusClicked(e: React.SyntheticEvent) {
@@ -133,21 +137,22 @@ const Chat: React.FC<Props> = (props) => {
         copied.push(practiceTerms[i]);
       }
       setPracticeTerms(copied);
+      setSize(size - 1);
     }
   }
 
   function cardsEmpty() {
     for (let i = 0; i < practiceTerms.length; i++) {
-      console.log(practiceTerms[i]);
-      if (!practiceTerms[i].back) {
+      let back = defRef[i].value;
+      let front = titleRef[i].value;
+      if (!back) {
         return true;
-      } else if (practiceTerms[i].back.replace(/\s+/g, "") == "") {
+      } else if (back.replace(/\s+/g, "") == "") {
         return true;
       }
-
-      if (!practiceTerms[i].front) {
+      if (!front) {
         return true;
-      } else if (practiceTerms[i].front.replace(/\s+/g, "") == "") {
+      } else if (front.replace(/\s+/g, "") == "") {
         return true;
       }
     }
@@ -163,17 +168,24 @@ const Chat: React.FC<Props> = (props) => {
       msg += "Please fill out all your cards or delete unused ones";
     }
 
-    if (titleEmpty()) {
+    let noTitle = titleEmpty();
+    if (noTitle) {
       msg += ". Please fill out your flashcard set name";
-    } else if (msg == "") {
+    } else if (msg == "" && noTitle) {
       msg = "Please fill out your flashcard set name";
     }
-
-    toast({
-      variant: "destructive",
-      title: "Please fix these errors before saving",
-      description: msg,
-    });
+    if (msg != "") {
+      toast({
+        variant: "destructive",
+        title: "Please fix these errors before saving",
+        description: msg,
+      });
+    } else {
+      toast({
+        title: "Flashcards Saved",
+        description: msg,
+      });
+    }
   }
 
   function handleNameChange(e: React.SyntheticEvent) {
@@ -209,20 +221,20 @@ const Chat: React.FC<Props> = (props) => {
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
                 <ScrollArea className="overflow-auto h-full">
-                  <h1 className="underline underline-offset-4 text-left pl-7 text-2xl text-zinc-800 translate-y-[15px] font-quicksand pb-[20px] text-center pb-10">
+                  <h1 className=" text-left pl-7 text-2xl text-zinc-800 translate-y-[15px] font-quicksand pb-[20px] text-center pb-20">
                     Make New Flashcards
                   </h1>
                   <div className="mx-[50px] mb-[10px]">
                     <Textarea
                       id="set"
                       className="self-center resize-none text-2xl  bg-white mb-1"
-                      onChange={(e) => handleNameChange}
+                      onChange={handleNameChange}
                       placeholder="Title for Flashcards"
                     ></Textarea>
                     <Textarea
                       id="set"
                       className="self-center resize-none text-md  bg-white"
-                      onChange={(e) => handleDescriptionChange(e)}
+                      onChange={handleDescriptionChange}
                       placeholder="Description for Flashcards"
                     ></Textarea>
                   </div>
@@ -238,7 +250,7 @@ const Chat: React.FC<Props> = (props) => {
                             id="term"
                             placeholder="Write a title"
                             onChange={() => term.front}
-                            ref={itemsRef[idx][0]}
+                            ref={(r) => (titleRef[idx] = r)}
                           ></Textarea>
                         </div>
 
@@ -248,7 +260,7 @@ const Chat: React.FC<Props> = (props) => {
                             className="resize-none"
                             id="definition"
                             placeholder="Write a definition"
-                            ref={itemsRef[idx][1]}
+                            ref={(r) => (defRef[idx] = r)}
                           ></Textarea>
                         </div>
                       </Card>

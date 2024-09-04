@@ -16,16 +16,6 @@ import { Skeleton } from "../ui/skeleton";
 export default function ChatWindow({ messagesLoaded, title }) {
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  //lol for not wasting openai credits
-  const { data: session, status } = useSession();
-  if (
-    session?.user.email != "bennettt356@gmail.com" &&
-    session?.user.email != "tanigb@uw.edu" &&
-    session
-  ) {
-    return null;
-  }
-
   // const [messages, setMessages] = useState<Message[]>(messagesLoaded); // potential future use for editing singular message
   const [input, setInput] = useState("");
   const Router = useRouter();
