@@ -75,15 +75,46 @@ CREATE TABLE "Message" (
     "index" INTEGER NOT NULL,
     "authorId" TEXT NOT NULL,
     "role" TEXT NOT NULL,
-    "content" TEXT NOT NULL
+    "content" TEXT NOT NULL,
+    "title" TEXT NOT NULL
 );
 
 -- CreateTable
-CREATE TABLE "Chat" (
-    "id" SERIAL NOT NULL,
+CREATE TABLE "Upload" (
+    "index" SERIAL NOT NULL,
     "authorId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
 
-    CONSTRAINT "Chat_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Upload_pkey" PRIMARY KEY ("index")
+);
+
+-- CreateTable
+CREATE TABLE "Card" (
+    "index" SERIAL NOT NULL,
+    "authorId" TEXT NOT NULL,
+    "term" TEXT NOT NULL,
+    "answer" TEXT NOT NULL,
+
+    CONSTRAINT "Card_pkey" PRIMARY KEY ("index")
+);
+
+-- CreateTable
+CREATE TABLE "Flashcard" (
+    "index" SERIAL NOT NULL,
+    "authorId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "rating" INTEGER NOT NULL,
+    "practiceCount" INTEGER,
+
+    CONSTRAINT "Flashcard_pkey" PRIMARY KEY ("index")
+);
+
+-- CreateTable
+CREATE TABLE "_CardToFlashcard" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
 );
 
 -- CreateIndex
@@ -105,10 +136,16 @@ CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationTok
 CREATE UNIQUE INDEX "Notes_title_authorId_key" ON "Notes"("title", "authorId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Message_index_authorId_key" ON "Message"("index", "authorId");
+CREATE UNIQUE INDEX "Message_index_authorId_title_key" ON "Message"("index", "authorId", "title");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Chat_authorId_key" ON "Chat"("authorId");
+CREATE UNIQUE INDEX "Upload_title_authorId_key" ON "Upload"("title", "authorId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_CardToFlashcard_AB_unique" ON "_CardToFlashcard"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_CardToFlashcard_B_index" ON "_CardToFlashcard"("B");
 
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -123,4 +160,7 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_user_id_fkey" FOREIGN KEY ("user_i
 ALTER TABLE "Notes" ADD CONSTRAINT "Notes_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Chat"("authorId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "_CardToFlashcard" ADD CONSTRAINT "_CardToFlashcard_A_fkey" FOREIGN KEY ("A") REFERENCES "Card"("index") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_CardToFlashcard" ADD CONSTRAINT "_CardToFlashcard_B_fkey" FOREIGN KEY ("B") REFERENCES "Flashcard"("index") ON DELETE CASCADE ON UPDATE CASCADE;

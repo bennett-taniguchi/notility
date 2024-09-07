@@ -27,6 +27,7 @@ import { Textarea } from "../../../../components/ui/textarea";
 import { Label } from "../../../../components/ui/label";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useToast } from "../../../../hooks/use-toast";
+import { useRouter } from "next/router";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -90,6 +91,7 @@ export type Props = {
 
 const Chat: React.FC<Props> = (props) => {
   const [cardClicked, setCardClicked] = useState(false);
+  const Router = useRouter();
   const { data: session } = useSession();
   type Card = {
     front: string;
@@ -141,6 +143,16 @@ const Chat: React.FC<Props> = (props) => {
     }
   }
 
+  function getCards() {
+    let cards = [] as Card[];
+    for (let i = 0; i < practiceTerms.length; i++) {
+      let back = defRef[i].value as string;
+      let front = titleRef[i].value as string;
+      cards.push({ front: front, back: back });
+    }
+    return cards;
+  }
+
   function cardsEmpty() {
     for (let i = 0; i < practiceTerms.length; i++) {
       let back = defRef[i].value;
@@ -162,7 +174,8 @@ const Chat: React.FC<Props> = (props) => {
     return name == "" || !name || name.replace(/\s+/g, "") == "";
   }
 
-  function handleSubmitClicked(e: React.SyntheticEvent) {
+  async function handleSubmitClicked(e: React.SyntheticEvent) {
+    let submitted = false;
     let msg = "";
     if (cardsEmpty()) {
       msg += "Please fill out all your cards or delete unused ones";
@@ -185,10 +198,24 @@ const Chat: React.FC<Props> = (props) => {
         title: "Flashcards Saved",
         description: msg,
       });
+
+      let cards = getCards();
+      let title = name;
+
+      let body = { title, description, cards };
+
+      const result = await fetch("/api/flashcard/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      submitted = true;
     }
+    if (submitted) Router.push("/learn");
   }
 
   function handleNameChange(e: React.SyntheticEvent) {
+    console.log(practiceTerms);
     setName((e.target as HTMLTextAreaElement).value);
   }
 

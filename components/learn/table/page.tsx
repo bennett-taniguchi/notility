@@ -14,8 +14,36 @@ import { DataTable } from "./data-table";
 //   ];
 // }
 
-export default function DemoPage() {
+export default function DemoPage({ cards }) {
   //const data = await getData();
+
+  //cards : [ {index Int @id @default(autoincrement())
+  // authorId String
+  // title String
+  // description String
+  // rating Int
+  // practiceCount Int?
+
+  // cards Card[]}]
+  console.log(cards);
+  let cardsUsed = [] as any;
+
+  if (!cards) {
+    return <div></div>;
+  }
+
+  for (let i = 0; i < cards.length; i++) {
+    cardsUsed.push({
+      id: "1",
+      name: cards[i].title,
+      status: "pending",
+      email: "a@gmail.com",
+      difficulty: "🟩",
+      amount: cards[i].length,
+      last_practiced: new Date("2019-09-09").toDateString(),
+    });
+  }
+
   const data = [
     {
       id: "728ed52f",
@@ -48,7 +76,7 @@ export default function DemoPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={columns as any} data={data} />
+      <DataTable columns={columns as any} data={cardsUsed} />
     </div>
   );
 }

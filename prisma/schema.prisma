@@ -95,3 +95,23 @@ model Upload {
   content String
   @@unique([title,authorId])
 }
+
+model Card {
+  index Int @id @default(autoincrement())
+  authorId String
+  term String
+  answer String
+
+  Flashcard Flashcard[]
+}
+
+model Flashcard {
+  index Int @id @default(autoincrement())
+  authorId String
+  title String
+  description String
+  rating Int
+  practiceCount Int?
+  
+  cards Card[]
+}

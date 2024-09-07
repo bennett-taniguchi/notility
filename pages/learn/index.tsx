@@ -55,8 +55,14 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     where: { authorId: (session as any).id },
   });
 
+  const flashcards = await prisma.flashcard.findMany({
+    where: { authorId: (session as any).id },
+  });
+
+  let testcards = "";
+
   return {
-    props: { messages, notes, analyzed },
+    props: { messages, notes, analyzed, flashcards, testcards },
   };
 };
 // define messages
@@ -77,6 +83,8 @@ type Analyzed = {
 export type Props = {
   messages: Message[];
   analyzed: Analyzed[];
+  testcards: any;
+  flashcards: any;
 };
 
 const Chat: React.FC<Props> = (props) => {
@@ -132,10 +140,14 @@ const Chat: React.FC<Props> = (props) => {
                     </Link>
                   </div>
                   <div className="translate-y-[-20px]">
-                    <DemoPage />
+                    <DemoPage cards={props.flashcards} />
                     <div className="pl-9 translate-y-[-15px] ">
                       <Link href="/learn/flashcard/study">
-                        <Button>Study</Button>
+                        {!props.flashcards ? (
+                          <div></div>
+                        ) : (
+                          <Button>Study</Button>
+                        )}
                       </Link>
                     </div>
                   </div>
@@ -149,10 +161,14 @@ const Chat: React.FC<Props> = (props) => {
                     </Link>
                   </div>
                   <div className="translate-y-[-20px]">
-                    <DemoPage />
+                    <DemoPage cards={props.testcards} />
                     <div className="pl-9 translate-y-[-15px] ">
                       <Link href="/learn/test/study">
-                        <Button>Study</Button>
+                        {!props.testcards ? (
+                          <div></div>
+                        ) : (
+                          <Button>Study</Button>
+                        )}
                       </Link>
                     </div>
                   </div>
