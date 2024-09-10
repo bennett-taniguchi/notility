@@ -21,18 +21,13 @@ export default function Header(): ReactElement {
   return (
     <Menubar className="top-0 right-0 fixed w-[150px] ">
       <MenubarMenu>
-        {session ? (
-          <div className="text-xs">{session.user.email}</div>
-        ) : (
-          <div>
-            {" "}
-            <MenubarTrigger>
-              <Link href="/api/auth/signin" legacyBehavior>
-                Log In
-              </Link>
-            </MenubarTrigger>
-          </div>
-        )}
+        <div>
+          <MenubarTrigger>
+            <Link href="/api/auth/signin" legacyBehavior>
+              Log In
+            </Link>
+          </MenubarTrigger>
+        </div>
       </MenubarMenu>
       <MenubarSeparator />
       <MenubarMenu>

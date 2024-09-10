@@ -1,6 +1,6 @@
 import { Payment, columns } from "./columns";
 import { DataTable } from "./data-table";
-
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
 // async function getData(): Promise<Payment[]> {
 //   // Fetch data from your API here.
 //   return [
@@ -34,7 +34,7 @@ export default function DemoPage({ cards }) {
 
   for (let i = 0; i < cards.length; i++) {
     cardsUsed.push({
-      id: "1",
+      id: "" + i,
       name: cards[i].title,
       status: "pending",
       email: "a@gmail.com",

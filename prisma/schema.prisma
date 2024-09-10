@@ -102,6 +102,8 @@ model Card {
   term String
   answer String
 
+ @@unique([term,answer])
+
   Flashcard Flashcard[]
 }
 
@@ -114,4 +116,6 @@ model Flashcard {
   practiceCount Int?
   
   cards Card[]
+
+  @@unique([authorId,title])
 }

@@ -4,7 +4,7 @@ import OpenAI from "openai";
 import { getServerSession } from "next-auth/next";
 import { options as authOptions } from "../../../auth/[...nextauth]";
 import prisma from "../../../../../lib/prisma";
-import { Pinecone } from "@pinecone-database/pinecone";
+import { Pinecone, RecordMetadata } from "@pinecone-database/pinecone";
 
 const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
@@ -42,7 +42,8 @@ export default async function handle(req, res) {
   console.log(matches);
   let metadata;
   for (let i = 0; i < matches.length; i++) {
-    metadata += "From " + matches[0].id + matches[0].metadata.text;
+    metadata +=
+      "From " + matches[0].id + (matches[0].metadata as RecordMetadata).text;
   }
   // Returns:
   // {

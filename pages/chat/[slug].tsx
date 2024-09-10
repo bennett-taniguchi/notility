@@ -109,7 +109,9 @@ const Chat: React.FC<Props> = (props) => {
                 <ChatWindow
                   messagesLoaded={props.messages
                     .filter((f) => f.title === Router.query.slug)
-                    .sort((a, b) => (a.index > b.index ? 1 : -1))}
+                    .sort((a, b) =>
+                      (a.index as any) > (b.index as any) ? 1 : -1
+                    )}
                   title={Router.query.slug}
                 />
                 {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">

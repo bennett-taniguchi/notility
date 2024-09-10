@@ -21,13 +21,18 @@ export default function ChatSidebar({ Router, location, props }) {
   const [checkboxSelected, setCheckboxSelected] = useState<number[]>([]); // modal
 
   async function handleCheckboxClicked(e: React.SyntheticEvent) {
-    const checked = e.target.getAttribute("data-state");
+    const checked = (e.target as HTMLInputElement).getAttribute("data-state");
 
     if (checked == "checked") {
-      let found = checkboxSelected.filter((n) => n !== parseInt(e.target.id));
+      let found = checkboxSelected.filter(
+        (n) => n !== parseInt((e.target as HTMLInputElement).id)
+      );
       setCheckboxSelected(found);
     } else {
-      setCheckboxSelected([...checkboxSelected, +e.target.id]);
+      setCheckboxSelected([
+        ...checkboxSelected,
+        +(e.target as HTMLInputElement).id,
+      ]);
     }
   }
 
