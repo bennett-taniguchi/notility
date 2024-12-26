@@ -54,7 +54,7 @@ const MenuBar = ({ editor }) => {
         >
           <LuHeading1 />
         </NextButton>
-        <Separator orientation="vertical" />
+     
         <NextButton
           variant="outline"
           onClick={() =>
@@ -66,7 +66,7 @@ const MenuBar = ({ editor }) => {
         >
           <LuHeading2 />
         </NextButton>
-        <Separator orientation="vertical" />
+ 
         <NextButton
           variant="outline"
           onClick={() =>
@@ -78,7 +78,7 @@ const MenuBar = ({ editor }) => {
         >
           <LuHeading3 />
         </NextButton>
-        <Separator orientation="vertical" />
+        
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setParagraph().run()}
@@ -86,7 +86,7 @@ const MenuBar = ({ editor }) => {
         >
           <PilcrowIcon />
         </NextButton>
-        <Separator orientation="vertical" />
+   
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -94,7 +94,7 @@ const MenuBar = ({ editor }) => {
         >
           <FontBoldIcon />
         </NextButton>
-        <Separator orientation="vertical" />
+     
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -102,7 +102,7 @@ const MenuBar = ({ editor }) => {
         >
           <FontItalicIcon />
         </NextButton>
-        <Separator orientation="vertical" />
+       
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -110,7 +110,7 @@ const MenuBar = ({ editor }) => {
         >
           <StrikethroughIcon />
         </NextButton>
-        <Separator orientation="vertical" />
+        
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleHighlight().run()}
@@ -118,7 +118,7 @@ const MenuBar = ({ editor }) => {
         >
           <FaHighlighter />
         </NextButton>
-        <Separator orientation="vertical" />
+    
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
@@ -126,7 +126,7 @@ const MenuBar = ({ editor }) => {
         >
           <TextAlignLeftIcon />
         </NextButton>
-        <Separator orientation="vertical" />
+    
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("center").run()}
@@ -136,7 +136,7 @@ const MenuBar = ({ editor }) => {
         >
           <TextAlignCenterIcon />
         </NextButton>
-        <Separator orientation="vertical" />
+     
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("right").run()}
@@ -144,7 +144,7 @@ const MenuBar = ({ editor }) => {
         >
           <TextAlignRightIcon />
         </NextButton>
-        <Separator orientation="vertical" />
+        
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("justify").run()}
@@ -155,7 +155,7 @@ const MenuBar = ({ editor }) => {
           <TextAlignJustifyIcon />
         </NextButton>
 
-        <Separator orientation="vertical" />
+        
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -163,7 +163,7 @@ const MenuBar = ({ editor }) => {
         >
           <FaListOl />
         </NextButton>
-        <Separator orientation="vertical" />
+      
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -216,10 +216,20 @@ const Tiptap = ({
             if (editor) {
               console.log(event.key);
               if (event.key === " ") {
-                console.log("space pressed");
+           
                 editor.commands.insertContentAt(
                   editor.state.selection.anchor,
                   "\u00A0"
+                );
+              }
+            }
+            if (editor) {
+              console.log(event.key);
+              if (event.key === "Tab") {
+                event.preventDefault();
+                editor.commands.insertContentAt(
+                  editor.state.selection.anchor,
+                  "\u00A0\u00A0\u00A0"
                 );
               }
             }

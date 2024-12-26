@@ -10,17 +10,46 @@ import {
 import Tiptap from "./notes/tiptap/Tiptap";
 import Sidebar from "./sidebar/Sidebar";
 import Layout from "./Layout";
-import Tiptap2 from "./notes/tiptap/Tiptap2";
+import { useToast } from "../hooks/use-toast";
+ 
 
 export default function Note(props) {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-
+  const {toast} = useToast();
+  
   // saves notes to db
   const saveNotes = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     try {
       const body = { title, content };
+      console.log(content)
+      if(!title || content == '<p></p>') {
+        toast({
+          variant: "destructive",
+          title: "Please fix these errors before saving",
+          description: 'Please add a title and content to this note',
+        });
+        return;
+      }
+
+      if(title.toLowerCase() == 'landing') {
+        toast({
+          variant: "destructive",
+          title: "Please fix these errors before saving",
+          description: 'Please rename title',
+        });
+        return;
+      }
+      if(title.length >= 200) {
+        toast({
+          variant: "destructive",
+          title: "Please fix these errors before saving",
+          description: 'Please shorten title length',
+        });
+        return;
+      }
+
       await fetch("/api/notes/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

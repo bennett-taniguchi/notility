@@ -38,6 +38,7 @@ export default function ChatWindow({ messagesLoaded, title }) {
       });
 
       setInput("");
+      setLoading(false);
       Router.push("/chat");
     } else {
       const body = { prompt, messages, title };

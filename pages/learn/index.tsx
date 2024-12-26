@@ -14,7 +14,7 @@ import Sidebar from "../../components/sidebar/Sidebar";
 
 import { useState } from "react";
 import { Card, CardTitle } from "../../components/ui/card";
-import DemoPage from "../../components/learn/table/page";
+import TablePage from "../../components/learn/table/page";
 import { Separator } from "../../components/ui/separator";
 import Link from "next/link";
 import { Button } from "../../components/ui/button";
@@ -140,7 +140,7 @@ const Chat: React.FC<Props> = (props) => {
                     </Link>
                   </div>
                   <div className="translate-y-[-20px]">
-                    <DemoPage cards={props.flashcards} />
+                    <TablePage cards={props.flashcards} />
                     <div className="pl-9 translate-y-[-15px] ">
                       <Link href="/learn/flashcard/study">
                         {!props.flashcards ? (
@@ -161,7 +161,7 @@ const Chat: React.FC<Props> = (props) => {
                     </Link>
                   </div>
                   <div className="translate-y-[-20px]">
-                    <DemoPage cards={props.testcards} />
+                    <TablePage cards={props.testcards} />
                     <div className="pl-9 translate-y-[-15px] ">
                       <Link href="/learn/test/study">
                         {!props.testcards ? (

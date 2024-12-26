@@ -92,6 +92,7 @@ CREATE TABLE "Upload" (
 -- CreateTable
 CREATE TABLE "Card" (
     "index" SERIAL NOT NULL,
+    "setTitle" TEXT NOT NULL,
     "authorId" TEXT NOT NULL,
     "term" TEXT NOT NULL,
     "answer" TEXT NOT NULL,
@@ -109,12 +110,6 @@ CREATE TABLE "Flashcard" (
     "practiceCount" INTEGER,
 
     CONSTRAINT "Flashcard_pkey" PRIMARY KEY ("index")
-);
-
--- CreateTable
-CREATE TABLE "_CardToFlashcard" (
-    "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
 );
 
 -- CreateIndex
@@ -142,10 +137,10 @@ CREATE UNIQUE INDEX "Message_index_authorId_title_key" ON "Message"("index", "au
 CREATE UNIQUE INDEX "Upload_title_authorId_key" ON "Upload"("title", "authorId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_CardToFlashcard_AB_unique" ON "_CardToFlashcard"("A", "B");
+CREATE UNIQUE INDEX "Card_term_answer_setTitle_key" ON "Card"("term", "answer", "setTitle");
 
 -- CreateIndex
-CREATE INDEX "_CardToFlashcard_B_index" ON "_CardToFlashcard"("B");
+CREATE UNIQUE INDEX "Flashcard_authorId_title_key" ON "Flashcard"("authorId", "title");
 
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -160,7 +155,4 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_user_id_fkey" FOREIGN KEY ("user_i
 ALTER TABLE "Notes" ADD CONSTRAINT "Notes_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_CardToFlashcard" ADD CONSTRAINT "_CardToFlashcard_A_fkey" FOREIGN KEY ("A") REFERENCES "Card"("index") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_CardToFlashcard" ADD CONSTRAINT "_CardToFlashcard_B_fkey" FOREIGN KEY ("B") REFERENCES "Flashcard"("index") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Card" ADD CONSTRAINT "Card_setTitle_authorId_fkey" FOREIGN KEY ("setTitle", "authorId") REFERENCES "Flashcard"("title", "authorId") ON DELETE RESTRICT ON UPDATE CASCADE;

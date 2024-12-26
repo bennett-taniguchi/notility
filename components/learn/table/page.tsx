@@ -14,7 +14,7 @@ import { DotsVerticalIcon } from "@radix-ui/react-icons";
 //   ];
 // }
 
-export default function DemoPage({ cards }) {
+export default function TablePage({ cards }) {
   //const data = await getData();
 
   //cards : [ {index Int @id @default(autoincrement())

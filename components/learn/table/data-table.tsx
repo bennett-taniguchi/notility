@@ -41,6 +41,7 @@ import {
   AlertDialogTrigger,
 } from "../../ui/alert-dialog";
 import Router from "next/router";
+import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -91,6 +92,15 @@ export function DataTable<TData, TValue>({
 
   async function editCardName() {}
 
+  async function editCards(title: string) {
+    const res = await fetch("/api/card/get/" + title, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    let result = await res.json();
+    await console.log(result.cards);
+  }
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -135,6 +145,11 @@ export function DataTable<TData, TValue>({
                             Delete
                           </DropdownMenuItem>
                           <DropdownMenuItem>Rename</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => editCards(row.getValue("name"))}
+                          >
+                            Edit
+                          </DropdownMenuItem>
                           <DropdownMenuItem>Share</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -163,10 +178,15 @@ export function DataTable<TData, TValue>({
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+
+                      <Link href="/learn">
+                        <u className="hover:text-zinc-400">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </u>
+                      </Link>
                     </TableCell>
                   ) : (
                     <TableCell key={cell.id}>

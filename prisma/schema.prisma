@@ -98,24 +98,31 @@ model Upload {
 
 model Card {
   index Int @id @default(autoincrement())
+
+  title String
   authorId String
   term String
   answer String
 
- @@unique([term,answer])
+ 
+ @@unique([term,answer,title])
 
-  Flashcard Flashcard[]
+  flashcard Flashcard @relation(fields: [title, authorId], references: [title, authorId])
+ 
 }
 
 model Flashcard {
   index Int @id @default(autoincrement())
   authorId String
-  title String
+  title String 
   description String
   rating Int
   practiceCount Int?
   
-  cards Card[]
+  cards Card []
+  
 
   @@unique([authorId,title])
 }
+
+ 

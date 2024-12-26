@@ -264,6 +264,7 @@ const Chat: React.FC<Props> = (props) => {
                       className="self-center resize-none text-2xl  bg-white mb-1"
                       onChange={handleNameChange}
                       placeholder="Title for Flashcards"
+                      disabled
                     ></Textarea>
                     <Textarea
                       id="set"
