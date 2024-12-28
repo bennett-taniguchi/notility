@@ -127,10 +127,12 @@ export default function ChatSidebar({ Router, location, props }) {
         </span>
         <Dialog modal={true}>
           <DialogTrigger asChild>
+            <div  onClick={handleLightningClick} className="item-end">
             <FaBoltLightning
-              onClick={handleLightningClick}
-              className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 hover:fill-yellow-400"
+             
+              className="absolute right-5 stroke-zinc-600 stroke-[.5px] bottom-2 hover:stroke-zinc-200 hover:fill-yellow-400"
             />
+            </div>
           </DialogTrigger>
           <DialogContent className="xl:max-w-[600px] xl:max-h-[500px] h-[500px] ">
             <DialogHeader>
@@ -153,14 +155,14 @@ export default function ChatSidebar({ Router, location, props }) {
                 >
                   <div>
                     {props.notes.map((note, idx) => (
-                      <>
-                        <div>
+                      
+                        <div key={idx}>
                           <Checkbox id={idx} onClick={handleCheckboxClicked} />
                           <Label className="pl-[5px] font-light text-md ">
                             {note.title}
                           </Label>
                         </div>
-                      </>
+                      
                     ))}
                   </div>
                 </ScrollArea>
@@ -190,8 +192,8 @@ export default function ChatSidebar({ Router, location, props }) {
         </Dialog>
       </CommandItem>
       <div>
-        {props.analyzed.map((item) => (
-          <div>
+        {props.analyzed.map((item,idx) => (
+          <div key={idx}>
             <CommandItem
               onSelect={(e) => handleNavAnalyzed(item.title)}
               className="landingCard"

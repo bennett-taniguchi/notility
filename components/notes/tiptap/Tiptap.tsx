@@ -187,6 +187,7 @@ const Tiptap = ({
   const [initial, setInitial] = useState(true);
 
   const editor = useEditor({
+    immediatelyRender:false,
     extensions: [
       BulletList.configure({
         HTMLAttributes: {

@@ -1,6 +1,6 @@
 // where RAG-related chat exists
 // would be cool to have open source database files to prompt chat for basic subjects such as calculus, econ, and what not
-
+import { FaRegQuestionCircle } from "react-icons/fa";
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
 import prisma from "../../lib/prisma";
@@ -12,12 +12,14 @@ import {
 } from "../../components/ui/resizable";
 import Sidebar from "../../components/sidebar/Sidebar";
 
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Card, CardTitle } from "../../components/ui/card";
 import TablePage from "../../components/learn/table/page";
 import { Separator } from "../../components/ui/separator";
 import Link from "next/link";
 import { Button } from "../../components/ui/button";
+import { SelectedRowsContext } from "../../components/context/context";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@radix-ui/react-tooltip";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -91,7 +93,11 @@ const Chat: React.FC<Props> = (props) => {
   const { data: session } = useSession();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
+  const [selectedRowsL, setSelectedRowsL] = useState<number[]>([]);
+  const [selectedTitlesL, setSelectedTitlesL] = useState<string[]>([]);
 
+  const { selectedRows, setSelectedRows, selectedTitles, setSelectedTitles } =
+    useContext(SelectedRowsContext);
   if (!session) {
     return (
       <Layout>
@@ -101,86 +107,122 @@ const Chat: React.FC<Props> = (props) => {
     );
   }
 
+  function rowNumsToTitles() {
+    console.log();
+  }
+  function titlesToString(selectedRowsL: any[]) {
+    console.log(selectedRowsL);
+    for (const row of selectedRows) {
+      console.log(row);
+    }
+    return "";
+  }
   if (props)
     return (
       <Layout>
-        <div className="page">
-          <ResizablePanelGroup direction="horizontal" className="fixed ">
-            <ResizablePanel
-              minSize={20}
-              maxSize={20}
-              defaultSize={20}
-              className="rounded-lg border"
-            >
-              <Sidebar
-                title={title} // state of currently loaded title in notes
-                setTitle={setTitle} // usestate for currently loaded title
-                setContent={setContent} //  set body of current text
-                props={props}
-                location="learn"
-              />
-            </ResizablePanel>
-            <ResizableHandle />
+        <SelectedRowsContext.Provider
+          value={{
+            selectedRows: selectedRowsL,
+            setSelectedRows: setSelectedRowsL,
+            selectedTitles: selectedTitlesL,
+            setSelectedTitles: setSelectedTitlesL,
+          }}
+        >
+          <div className="page">
+            <ResizablePanelGroup direction="horizontal" className="fixed ">
+              <ResizablePanel
+                minSize={20}
+                maxSize={20}
+                defaultSize={20}
+                className="rounded-lg border"
+              >
+                <Sidebar
+                  title={title} // state of currently loaded title in notes
+                  setTitle={setTitle} // usestate for currently loaded title
+                  setContent={setContent} //  set body of current text
+                  props={props}
+                  location="learn"
+                />
+              </ResizablePanel>
+              <ResizableHandle />
 
-            <ResizablePanel className="bg-zinc-100">
-              <ResizablePanelGroup direction="vertical">
-                {/* perfect scrolling method */}
+              <ResizablePanel className="bg-zinc-100">
+                <ResizablePanelGroup direction="vertical">
+                  {/* perfect scrolling method */}
 
-                <div className=" ">
-                  <h1 className="underline underline-offset-4 text-left pl-7 text-2xl text-zinc-800 translate-y-[15px] font-quicksand pb-[50px]">
-                    Learn
-                  </h1>
-                  <h1 className="text-left pl-7 text-xl text-zinc-500 translate-y-[15px] font-quicksand">
-                    Flashcards
-                  </h1>
-                  <Separator orientation="horizontal" className="mt-5" />
-                  <div className="pl-9  pt-5">
-                    <Link href="/learn/flashcard/create">
-                      <Button variant={"outline"}>Create New</Button>
-                    </Link>
-                  </div>
-                  <div className="translate-y-[-20px]">
-                    <TablePage cards={props.flashcards} />
-                    <div className="pl-9 translate-y-[-15px] ">
-                      <Link href="/learn/flashcard/study">
+                  <div className=" ">
+                    <h1 className="underline underline-offset-4 text-left pl-7 text-2xl text-zinc-800 translate-y-[15px] font-quicksand pb-[50px]">
+                      Learn
+                    </h1>
+                    <h1 className="text-left pl-7 text-xl text-zinc-500 translate-y-[15px] font-quicksand">
+                      Flashcards
+                    </h1>
+                    <Separator orientation="horizontal" className="mt-5" />
+                    <div className="pl-9  pt-5">
+                      <Link href="/learn/flashcard/create">
+                        <Button variant={"outline"}>Create New</Button>
+                      </Link>
+                    </div>
+                    <div className="translate-y-[-20px]">
+                      <TablePage cards={props.flashcards} />
+                     
+                      <div className="pl-9 translate-y-[-15px] ">
+                        <div className="flex flex-row">
+                      <p className="m-0 left-0 text-sm pb-5 -ml-4">{(selectedRowsL.length+0) + ' selected rows'}</p>
+                      <TooltipProvider>
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild> 
+          <div  className="w-5 h-5 -mb-2 -ml-2">
+          <FaRegQuestionCircle className="my-auto"/>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent className="bg-black rounded -mb-2">
+          <p className="text-white text-sm">Click on Rows to Select</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+                      </div>
                         {!props.flashcards ? (
                           <div></div>
                         ) : (
-                          <Button>Study</Button>
-                        )}
-                      </Link>
-                    </div>
-                  </div>
-                  <h1 className="text-left pl-7 text-xl text-zinc-500 translate-y-[15px] font-quicksand">
-                    Tests
-                  </h1>
-                  <Separator orientation="horizontal" className="mt-5" />
-                  <div className="pl-9  pt-5">
-                    <Link href="/learn/test/create">
-                      <Button variant={"outline"}>Create New</Button>
-                    </Link>
-                  </div>
-                  <div className="translate-y-[-20px]">
-                    <TablePage cards={props.testcards} />
-                    <div className="pl-9 translate-y-[-15px] ">
-                      <Link href="/learn/test/study">
-                        {!props.testcards ? (
-                          <div></div>
-                        ) : (
-                          <Button>Study</Button>
-                        )}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                          <div className="flex flex-row">
+                          
+                            <div>
+                              <Button disabled={selectedRowsL.length == 0}>
+                                <Link
+                                  href={`
+                        /learn/flashcard/study/${encodeURIComponent(
+                          JSON.stringify(selectedRowsL)
+                        )}`}
+                                >
+                                  { "Study Selected" }
+                                </Link>
+                              </Button>
+                            </div>
 
-                {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
-                Here
-               </div> */}
-              </ResizablePanelGroup>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
+                            <div className="pl-5">
+                              <Button disabled={selectedRowsL.length == 0}>
+                                {" "}
+                                <Link
+                                  href={`
+                        /learn/test/${encodeURIComponent(
+                          JSON.stringify(selectedRowsL)
+                        )}`}
+                                >
+                                   {"Take a Test on Selected"} 
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </ResizablePanelGroup>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
+        </SelectedRowsContext.Provider>
       </Layout>
     );
 

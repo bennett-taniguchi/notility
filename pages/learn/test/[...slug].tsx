@@ -3,22 +3,24 @@
 
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
-import prisma from "../../../../lib/prisma";
-import Layout from "../../../../components/Layout";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "../../../../components/ui/resizable";
-import Sidebar from "../../../../components/sidebar/Sidebar";
 
-import { useEffect, useState } from "react";
-import { Card, CardTitle } from "../../../../components/ui/card";
-import DemoPage from "../../../../components/learn/table/page";
-import { Separator } from "../../../../components/ui/separator";
-import Link from "next/link";
-import { Button } from "../../../../components/ui/button";
-import { Textarea } from "../../../../components/ui/textarea";
+import { Flashcard } from "@prisma/client";
+import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
+import Layout from "../../../components/Layout";
+import Sidebar from "../../../components/sidebar/Sidebar";
+import { Button } from "../../../components/ui/button";
+import { Card } from "../../../components/ui/card";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "../../../components/ui/resizable";
+import { Textarea } from "../../../components/ui/textarea";
+import prisma from "../../../lib/prisma";
+import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
+import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -37,6 +39,7 @@ import { Textarea } from "../../../../components/ui/textarea";
 // test null cases for notes and messages
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
+
   if (!session) {
     res.statusCode = 403;
     return { props: { messages: [] } };
@@ -55,9 +58,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const analyzed = await prisma.upload.findMany({
     where: { authorId: (session as any).id },
   });
+  const card = await prisma.card.findMany({
+    where: { authorId: (session as any).id },
+  });
 
   return {
-    props: { messages, notes, analyzed },
+    props: { messages, notes, analyzed, card },
   };
 };
 // define messages
@@ -78,44 +84,66 @@ type Analyzed = {
 export type Props = {
   messages: Message[];
   analyzed: Analyzed[];
+  card: Flashcard[];
 };
-
+type Card = {
+  front: string;
+  back: string;
+};
 const Chat: React.FC<Props> = (props) => {
+  const [practiceTerms, setPracticeTerms] = useState<Card[]>([]);
   const [cardClicked, setCardClicked] = useState(false);
-
   const { data: session } = useSession();
-  type Card = {
-    front: string;
-    back: string;
-  };
+
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const [text, setText] = useState();
   const [currentCard, setCurrentCard] = useState(0);
   const [currentScore, setCurrentScore] = useState(0);
+  const router = useRouter();
+  const { slug } = router.query;
+
+  useEffect(() => {
+    // if(slug && practiceTerms.length == 0)
+    retrieve();
+  }, []);
+
+  useEffect(() => {}, [practiceTerms]);
+
+  async function retrieve() {
+    let titles = JSON.parse((slug as any)[0]);
+
+    if (Array.isArray(titles)) {
+      const res = await fetch("/api/flashcard/get/" + JSON.stringify(titles), {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+
+      let vals = [] as any;
+      if (res)
+        for (const each of data) {
+          vals.push({ front: each.term, back: each.answer });
+        }
+      setPracticeTerms(vals);
+    } else {
+      const res = await fetch("/api/flashcard/get/" + titles, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+
+      let vals = [] as any;
+      if (res)
+        for (const each of data) {
+          vals.push({ front: each.term, back: each.answer });
+        }
+      setPracticeTerms(vals);
+    }
+    return;
+  }
+  //const [practiceTerms, setPracticeTerms] = useState<Card[]>()
   // will be provided as comp param
-  const [practiceTerms, setPracticeTerms] = useState<Card[]>([
-    {
-      front: "California Capital",
-      back: "Sacramento",
-    },
-    {
-      front: "Alabama Capital",
-      back: "Montgomery",
-    },
-    {
-      front: "Virginia Capital",
-      back: "Richmond",
-    },
-    {
-      front: "Minnesota Capital",
-      back: "Jackson",
-    },
-    {
-      front: "Idaho Capital",
-      back: "Boise",
-    },
-  ]);
 
   if (!session || !practiceTerms) {
     return (
@@ -191,7 +219,47 @@ const Chat: React.FC<Props> = (props) => {
 
     handleRestart();
   }
-  if (props)
+
+  // options [a,b,c,d]
+  // correct is [0] by default
+  //
+  function QuizMultipleChoice({ options, question }: any) {
+    if (options.length < 2 || options.length > 10 || !question || !options)
+      return <></>;
+    return (
+      <div className="w-1/2 justify-items-center  ">
+        <p className="bold ml-5 text-xl">{question}</p>
+        <RadioGroup
+          onValueChange={(value) => console.log(value)}
+          defaultValue="default"
+        
+        >
+          {options.map((ans, idx) => (
+            <div className="flex items-start space-x-2   ">
+              <RadioGroupItem value={idx + ""} id={"r" + idx} />
+              <Label htmlFor={"r" + idx}>{ans}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+    );
+  }
+  // question is string
+  // count is amount of words to randomly block out
+  function QuizShortAnswer({question,answer}:any) {
+
+    return (
+        <div className="w-1/2 justify-items-center    "><p  className="text-xl ">{question}</p>
+
+        <div>
+            <Input   />
+            </div>
+        </div>
+    )
+
+  }
+
+  if (props && practiceTerms.length != 0)
     return (
       <Layout>
         <div className="page">
@@ -216,55 +284,23 @@ const Chat: React.FC<Props> = (props) => {
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
 
-                <div className="grid grid-cols-1  justify-items-center">
-                  <h1 className="underline underline-offset-4 text-left pl-7 text-2xl text-zinc-800 translate-y-[15px] font-quicksand pb-[20px] text-center">
-                    Study (Set Name) Flashcards
-                  </h1>
-                  <div className="flex flex-3 justify-center gap-2  ">
-                    <Button onClick={handleShuffle}>Shuffle</Button>
-                    <Button>Hint</Button>
-                    <Button onClick={handleRestart}>Restart</Button>
-                  </div>
-                  <div>Score: {currentScore}</div>
-
-                  {/* Card start */}
-
-                  <div className={"flip-card "} onClick={handleCardClick}>
-                    <div
-                      className={
-                        "flip-card-inner " +
-                        (cardClicked
-                          ? "flashCardPrimary transition-transform delay-5000"
-                          : "")
-                      }
-                    >
-                      <Card className="w-[70vw] h-[50vh] shadow-inner drop-shadow-xl text-center flip-card-front transform: translateY(180deg)">
-                        <p className="top-1/3 relative text-2xl font-quicksand font-extrabold">
-                          {practiceTerms[currentCard].front}
-                        </p>
-                      </Card>
-                      <Card
-                        className={
-                          "w-[70vw] h-[50vh] shadow-inner drop-shadow-xl text-center flip-card-back "
-                        }
-                      >
-                        <p className="top-1/3 relative text-2xl font-quicksand font-extrabold">
-                          {practiceTerms[currentCard].back}
-                        </p>
-                      </Card>
-                    </div>
-                  </div>
-                </div>
-
+                <QuizMultipleChoice
+                  options={[
+                    "potato",
+                    "brocolli",
+                    "asparagus",
+                    "bok choy",
+                    "brussel sprouts",
+                  ]}
+                  question={"What vegetable am I thinking of"}
+                />
+                <QuizShortAnswer question={'Give the term for ketchup'} answer={''}/>
+                
                 {/* Card End */}
-                <div className="grid gap-2 mx-[90px] mt-[50px] bg-zinc-50">
-                  <Textarea
-                    onChange={(e) => setText(e.target.value as any)}
-                    className="non-resize"
-                    onKeyPress={handleEnterPress}
-                  ></Textarea>
-                  <Button onClick={handleFormSubmit}>Submit</Button>
-                </div>
+                <p className="mx-auto italic">
+                  {currentCard + 1 + " / " + practiceTerms.length}
+                </p>
+             
                 {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
                 Here
                </div> */}

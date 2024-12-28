@@ -5,6 +5,7 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  Row,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -17,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
-import { useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { Button } from "../../ui/button";
@@ -42,6 +43,9 @@ import {
 } from "../../ui/alert-dialog";
 import Router from "next/router";
 import Link from "next/link";
+import { SelectedRowsContext } from "../../context/context";
+import { cn } from "../../lib/utils";
+import { TableRowComponent, TableRowProps } from "react-markdown/lib/ast-to-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -56,6 +60,8 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([
     { id: "last_practiced", desc: true },
   ]);
+  const { selectedRows, setSelectedRows, setSelectedTitles } = useContext(SelectedRowsContext);
+
   const table = useReactTable({
     data,
     columns,
@@ -90,6 +96,7 @@ export function DataTable<TData, TValue>({
     await Router.push("/learn");
   }
 
+ 
   async function editCardName() {}
 
   async function editCards(title: string) {
@@ -101,15 +108,31 @@ export function DataTable<TData, TValue>({
     await console.log(result.cards);
   }
 
+  function onCellClicked(idx:number,row:any) {
+    row.toggleSelected();
+    let name = row.getValue('name')
+    if(selectedRows.includes(name)) {
+      let vals = selectedRows.filter((s) => s != name)
+      setSelectedRows([...vals])
+    } else {
+      setSelectedRows([...selectedRows,name])
+    }
+  }
+
+ 
+
+ 
+  useEffect(() => {}, [selectedRows]);
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
+              {headerGroup.headers.map((header, idx) => {
                 return (
-                  <TableHead key={headerGroup.id}>
+                  <TableHead key={idx}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -124,14 +147,16 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+            table.getRowModel().rows.map((row, num) => (
               <TableRow
+               
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onClick={() => onCellClicked(num,row)}
               >
                 {row.getVisibleCells().map((cell, idx) =>
                   idx == 0 ? (
-                    <TableCell key={cell.id} className="flex flex-grow">
+                    <TableCell key={cell.id} className={"flex flex-grow"}>
                       <DropdownMenu>
                         <DropdownMenuTrigger>
                           {" "}

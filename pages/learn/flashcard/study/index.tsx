@@ -19,6 +19,7 @@ import { Separator } from "../../../../components/ui/separator";
 import Link from "next/link";
 import { Button } from "../../../../components/ui/button";
 import { Textarea } from "../../../../components/ui/textarea";
+import { Flashcard } from "@prisma/client";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -55,9 +56,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const analyzed = await prisma.upload.findMany({
     where: { authorId: (session as any).id },
   });
+  const card = await prisma.card.findMany({
+    where: { authorId: (session as any).id },
+  });
 
   return {
-    props: { messages, notes, analyzed },
+    props: { messages, notes, analyzed,card },
   };
 };
 // define messages
@@ -78,11 +82,13 @@ type Analyzed = {
 export type Props = {
   messages: Message[];
   analyzed: Analyzed[];
+  card: Flashcard[]
 };
 
 const Chat: React.FC<Props> = (props) => {
   const [cardClicked, setCardClicked] = useState(false);
 
+console.log(props.card)
   const { data: session } = useSession();
   type Card = {
     front: string;

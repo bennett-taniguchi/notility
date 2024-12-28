@@ -195,7 +195,7 @@ export default function NoteSidebar({
       </CommandItem>
       <div>
         {props.notes.map((note, index) => (
-          <Link href={"/notes/" + note.title}>
+          <Link href={"/notes/" + note.title} key={index}>
             <CommandItem
               className={
                 note.title == title
@@ -213,7 +213,7 @@ export default function NoteSidebar({
                 className="outline-none text-slate-600"
                 onFocus={maintainTitle}
                 onBlur={handleUpdateTitle}
-                contentEditable={true}
+       
               >
                 {/* <Link href={"/notes/" + note.title}>{note.title}</Link> */}
                 {note.title}
