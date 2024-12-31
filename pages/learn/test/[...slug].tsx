@@ -22,9 +22,17 @@ import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import { Label } from "../../../components/ui/label";
 import { Input } from "../../../components/ui/input";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { shuffleArray } from "../../../utils/fisher_yates";
 import { Separator } from "../../../components/ui/separator";
- 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
+import { Switch } from "../../../components/ui/switch";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -43,7 +51,7 @@ import { Separator } from "../../../components/ui/separator";
 // test null cases for notes and messages
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
- 
+
   if (!session) {
     res.statusCode = 403;
     return { props: { messages: [] } };
@@ -94,8 +102,11 @@ type Card = {
   front: string;
   back: string;
 };
-const Chat: React.FC<Props> =  (props) => {
+const Chat: React.FC<Props> = (props) => {
   const router = useRouter();
+  const[multipleChoiceOn,setMultipleChoiceOn] = useState(true)
+  const[shortAnswerOn,setShortAnswerOn] = useState(false)
+  const [numOptions, setNumOptions] = useState(4);
   const [practiceTerms, setPracticeTerms] = useState<Card[]>([]);
   const [cardClicked, setCardClicked] = useState(false);
   const { data: session } = useSession();
@@ -105,16 +116,16 @@ const Chat: React.FC<Props> =  (props) => {
   const [text, setText] = useState();
   const [currentCard, setCurrentCard] = useState(0);
   const [currentScore, setCurrentScore] = useState(0);
-   
+
   const { slug } = router.query;
 
   useEffect(() => {
-    if(  practiceTerms.length == 0)
-    retrieve();
+    if (practiceTerms.length == 0) retrieve();
   }, []);
 
- 
+  useEffect(() => {
 
+  },[multipleChoiceOn,shortAnswerOn])
   async function retrieve() {
     let titles = JSON.parse((slug as any)[0]);
 
@@ -224,89 +235,141 @@ const Chat: React.FC<Props> =  (props) => {
     handleRestart();
   }
 
+  function QuestionHeader({question,q_num,children}:any){
+
+    return (
+      <div className="w-1/2 justify-items-center  ">
+        <p className="-ml-[8svw]   pt-5 font-light">
+          {"Question " + (q_num + 1)}
+        </p>
+        <Separator className="w-[60svw] ml-[45svw]" />
+        <p className="-ml-[8svw] bold text-xl bg-zinc-200 rounded-xl">
+          {question}
+        </p>
+        {children}
+</div>
+    )
+  }
   // options [a,b,c,d]
   // correct is [0] by default
   //
-  function QuizMultipleChoice({ options, question,num }: any) {
-    let q_num = num
-    if(!num) q_num=0
+  function QuizMultipleChoice({ answer, question, num }: any) {
+    let options = [answer];
+    for (let i = 0; i < numOptions; i++) {
+      options.push(getOther(num, 1 + i, practiceTerms));
+    }
+
+    let q_num = num;
+    if (!num) q_num = 0;
 
     if (options.length < 2 || options.length > 10 || !question || !options)
       return <></>;
 
-    
-  options.sort((a,b) => Number(a.front) - Number(b.front))
+    options = options.sort(
+      (a, b) => Number(a.charCodeAt(0)) - Number(b.charCodeAt(0))
+    ); // deterministic random ordering
 
-   shuffleArray(options)
-   console.log(options)
     return (
-      <div className="w-1/2 justify-items-center  ">
-     
-        <p className="-ml-[8svw]   pt-5 font-light">{'Question ' +(q_num+1)}</p>
-        <Separator className="w-[60svw] ml-[40svw]"/>
-        <p className="-ml-[8svw] bold text-xl bg-zinc-200 rounded-xl">{question}</p>
-        <RadioGroup
-          onValueChange={(value) => {}}
-          defaultValue="default"
-        >
+      <QuestionHeader question={question}   q_num={q_num}>
+
+        <RadioGroup  onValueChange={(value) => {}} defaultValue="default">
           {options.map((ans, idx) => (
             <div className="-ml-[5svw] flex items-start space-x-2" key={idx}>
-              <RadioGroupItem value={(idx+1) + ""} id={"r" + idx} />
+              <RadioGroupItem value={idx + 1 + ""} id={"r" + idx} />
               <Label htmlFor={"r" + idx}>{ans}</Label>
             </div>
           ))}
         </RadioGroup>
-      </div>
+
+
+        </QuestionHeader>
     );
   }
   // question is string
   // count is amount of words to randomly block out
-  function QuizShortAnswer({ question, answer }: any) {
+  function QuizShortAnswer({ question, answer, num }: any) {
     return (
-      <div className="w-1/2 justify-items-center    ">
-        <p className="text-xl ">{question}</p>
-
-        <div>
-          <Input />
-        </div>
-      </div>
+      <QuestionHeader question={question} answer={answer} q_num={num}>
+          <Input className="-ml-[3svw] w-[10svw]"/>
+          </QuestionHeader>
     );
   }
-
-
-  function ConvertAllToTest() {
-    function getOther(idx:number,offset:number,practiceTerms: Card[]) {
-      let length = practiceTerms.length
-      let used = (idx+offset) % length
-      return practiceTerms[used].back + ""
-    }
-
-    return (
-      <ScrollArea className="overflow-auto">
-        
-        {
-          practiceTerms.map((term,idx) => (
-            <div >
-             
-            <QuizMultipleChoice
-            options={[
-              term.back,
-              getOther(idx,1,practiceTerms),
-              getOther(idx,2,practiceTerms),
-              getOther(idx,3,practiceTerms),
-              getOther(idx,4,practiceTerms),
-            ]}
-            question={term.front}
-            num={idx+0}
-            />
-            </div>
-          ))
-        }
-     
-      </ScrollArea>
-    )
+  function getOther(idx: number, offset: number, practiceTerms: Card[]) {
+    let length = practiceTerms.length;
+    let used = (idx + offset) % length;
+    return practiceTerms[used].back + "";
   }
 
+  const handleStringToInt = (value: string) => {
+    setNumOptions(parseInt(value));
+  };
+
+  function ConvertAllToTest({multipleChoice,shortAnswer}:any) {
+    if(multipleChoice && !shortAnswer)
+    return (
+      <ScrollArea className="overflow-auto">
+        {practiceTerms.map((term, idx) => (
+          <div>
+            <QuizMultipleChoice
+              question={term.front}
+              answer={term.back}
+              num={idx}
+            />
+          </div>
+        ))}
+      </ScrollArea>
+    );
+    if(multipleChoice && shortAnswer)
+      return (
+        <ScrollArea className="overflow-auto">
+          {practiceTerms.map((term, idx) => (
+
+<div>
+            {
+              idx % 2 == 0 ? 
+              <QuizMultipleChoice
+                question={term.front}
+                answer={term.back}
+                num={idx}
+              />
+              :
+              <QuizShortAnswer
+              question={term.front}
+              answer={term.back}
+              num={idx}
+            />
+
+            }
+           
+              
+            </div>
+          ))}
+        </ScrollArea>
+      );
+
+      if(shortAnswer ) {
+        return (
+          <ScrollArea className="overflow-auto">
+            {practiceTerms.map((term, idx) => (
+              <div>
+                <QuizShortAnswer
+                  question={term.front}
+                  answer={term.back}
+                  num={idx}
+                />
+              </div>
+            ))}
+          </ScrollArea>
+        );
+      }
+
+      return(
+        <div></div>
+      )
+  }
+
+
+  
   if (props && practiceTerms.length != 0)
     return (
       <Layout>
@@ -332,19 +395,59 @@ const Chat: React.FC<Props> =  (props) => {
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
 
+                <ConvertAllToTest multipleChoice={multipleChoiceOn} shortAnswer={shortAnswerOn} />
 
-  
-<ConvertAllToTest/>
-    
+                <div className="justify-items-end pt-5">
+                  <Button className=" w-[15svw] right-[5svw] mr-[8svw]">
+                    Submit
+                  </Button>
+                  <p className="mx-auto italic text-center"></p>
+                </div>
 
-                {/* Card End */}  <Button className=" w-[15svw] m-auto">Submit</Button>
-                <p className="mx-auto italic">
-                  {currentCard + 1 + " / " + practiceTerms.length}
-                </p>
+                <div className="left-[20svw] top-[10svh] absolute">
+                  <label className="text-sm ml-5">
+                    Select amount of options
+                  </label>
+                  <div className="ml-5">
+                    <Select
+                      onValueChange={handleStringToInt}
+                      defaultValue={numOptions + ""}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue
+                          className="text-xs"
+                          placeholder="Pick # of options"
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="2">3</SelectItem>
+                          <SelectItem value="3">4</SelectItem>
+                          <SelectItem value="4">5</SelectItem>
+                          <SelectItem value="5">6</SelectItem>
+                          <SelectItem value="6">7</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="ml-5 mt-5 py-2 bg-gray-200 rounded-lg">
+                    <Label className="text-sm ml-2">Multiple Choice? </Label>
+                    <Switch 
+                    value={Number(multipleChoiceOn)}
+                    className="ml-4"
+                      onClick={()=>setMultipleChoiceOn(!multipleChoiceOn)}
+                      defaultChecked={true}
+                    />
+                  </div>
 
-                {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
-                Here
-               </div> */}
+                  <div className="ml-5 mt-5 py-2 bg-gray-200 rounded-lg ">
+                    <Label className="text-sm ml-2">Short Answer? </Label>
+                    <Switch 
+                    value={Number(shortAnswerOn)}
+                    onClick={()=>setShortAnswerOn(!shortAnswerOn)}
+                    className="ml-7"/>
+                  </div>
+                </div>
               </ResizablePanelGroup>
             </ResizablePanel>
           </ResizablePanelGroup>
