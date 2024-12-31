@@ -45,7 +45,10 @@ import Router from "next/router";
 import Link from "next/link";
 import { SelectedRowsContext } from "../../context/context";
 import { cn } from "../../lib/utils";
-import { TableRowComponent, TableRowProps } from "react-markdown/lib/ast-to-react";
+import {
+  TableRowComponent,
+  TableRowProps,
+} from "react-markdown/lib/ast-to-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -60,7 +63,8 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([
     { id: "last_practiced", desc: true },
   ]);
-  const { selectedRows, setSelectedRows, setSelectedTitles } = useContext(SelectedRowsContext);
+  const { selectedRows, setSelectedRows, setSelectedTitles } =
+    useContext(SelectedRowsContext);
 
   const table = useReactTable({
     data,
@@ -84,19 +88,16 @@ export function DataTable<TData, TValue>({
   async function deleteCard(cardName: string) {
     // delete
     // toggle alert
-    setAlertState();
 
-    const body = { cardName };
+    await setAlertState();
 
-    await fetch("/api/flashcard/delete", {
+    await fetch("/api/flashcard/delete/" + cardName, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
     });
     await Router.push("/learn");
   }
 
- 
   async function editCardName() {}
 
   async function editCards(title: string) {
@@ -108,21 +109,19 @@ export function DataTable<TData, TValue>({
     await console.log(result.cards);
   }
 
-  function onCellClicked(idx:number,row:any) {
+  function onCellClicked(idx: number, row: any) {
+    if (toggleAlert) return;
     row.toggleSelected();
-    let name = row.getValue('name')
-    if(selectedRows.includes(name)) {
-      let vals = selectedRows.filter((s) => s != name)
-      setSelectedRows([...vals])
+    let name = row.getValue("name");
+    if (selectedRows.includes(name)) {
+      let vals = selectedRows.filter((s) => s != name);
+      setSelectedRows([...vals]);
     } else {
-      setSelectedRows([...selectedRows,name])
+      setSelectedRows([...selectedRows, name]);
     }
   }
 
- 
-
- 
-  useEffect(() => {}, [selectedRows]);
+  useEffect(() => {}, [selectedRows, toggleAlert]);
 
   return (
     <div className="rounded-md border">
@@ -149,10 +148,9 @@ export function DataTable<TData, TValue>({
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row, num) => (
               <TableRow
-               
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => onCellClicked(num,row)}
+                onClick={() => onCellClicked(num, row)}
               >
                 {row.getVisibleCells().map((cell, idx) =>
                   idx == 0 ? (
@@ -179,7 +177,10 @@ export function DataTable<TData, TValue>({
                         </DropdownMenuContent>
                       </DropdownMenu>
 
-                      <AlertDialog open={toggleAlert}>
+                      <AlertDialog
+                        open={toggleAlert}
+                        onOpenChange={setToggleAlert as any}
+                      >
                         <AlertDialogTrigger asChild></AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>

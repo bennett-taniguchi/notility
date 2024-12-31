@@ -294,3 +294,7 @@ li > p {
   background-color: #d3d3d3;
   border-radius: 25px;
 }
+
+.heading {
+  font-size:large
+}

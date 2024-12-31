@@ -59,11 +59,12 @@
         "react-markdown": "^8.0.0",
         "react-resizable-panels": "^2.0.21",
         "remark-gfm": "^4.0.0",
+        "seedrandom": "^3.0.5",
         "tailwind-merge": "^2.4.0",
         "tailwindcss-animate": "^1.0.7"
     },
     "devDependencies": {
-        "@tailwindcss/typography": "^0.5.13",
+        "@tailwindcss/typography": "^0.5.15",
         "@types/node": "17.0.14",
         "@types/react": "17.0.38",
         "autoprefixer": "^10.4.19",

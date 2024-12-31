@@ -163,8 +163,7 @@ const Chat: React.FC<Props> = (props) => {
   if (!session || !practiceTerms) {
     return (
       <Layout>
-        <h1>My Notes</h1>
-        <div>You need to be authenticated to view this page.</div>
+         <div/>
       </Layout>
     );
   }
@@ -194,13 +193,6 @@ const Chat: React.FC<Props> = (props) => {
         setCurrentCard(0);
       }
     }
-
-    // check correctness of card
-    // increment counter if true (index and score)
-    // flip and green effect
-    // flip and red effect
-
-    // need click to continue on already flipped card
   }
   function handleEnterPress(e: React.KeyboardEvent) {
     if (e.key === "Enter") {

@@ -34,6 +34,7 @@ import { useState, useEffect } from "react";
 import { Textarea } from "../../ui/textarea";
 import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
+import { cn } from "../../lib/utils";
 
 const MenuBar = ({ editor }) => {
   if (!editor) {
@@ -212,6 +213,11 @@ const Tiptap = ({
     setInitial(false);
     editor?.setOptions({
       editorProps: {
+        attributes: {
+          class: cn(
+            'prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc',
+          ),
+        },
         handleDOMEvents: {
           keydown: (view, event) => {
             if (editor) {

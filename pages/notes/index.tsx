@@ -57,10 +57,12 @@ const Notes: React.FC<Props> = (props) => {
 
   if (!session) {
     return (
+       
       <Layout>
-        <h1>My Notes</h1>
-        <div>You need to be authenticated to view this page.</div>
+       
+       <div/>
       </Layout>
+     
     );
   }
 

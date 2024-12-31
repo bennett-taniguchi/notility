@@ -9,6 +9,7 @@ import {
   MenubarTrigger,
 } from "./ui/menubar";
 import { ReactElement } from "react-markdown/lib/react-markdown";
+import { Button, buttonVariants } from "./ui/button";
 
 export default function Header(): ReactElement {
   const router = useRouter();
@@ -19,16 +20,16 @@ export default function Header(): ReactElement {
   }
 
   return (
-    <Menubar className="top-0 right-0 fixed w-[150px] ">
+    <Menubar className="top-1/2 right-[47.7svw] fixed w-[85px] h-[45px] bg-white">
       <MenubarMenu>
-        <div>
-          <MenubarTrigger>
-            <Link href="/api/auth/signin" legacyBehavior>
-              Log In
-            </Link>
-          </MenubarTrigger>
-        </div>
+        <MenubarTrigger>
+        <Link href='/api/auth/signin' className={buttonVariants({ variant: "link",size:'sm' })}>Log In</Link>
+
+         
+       
+        </MenubarTrigger>
       </MenubarMenu>
+
       <MenubarSeparator />
       <MenubarMenu>
         {session ? (

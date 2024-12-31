@@ -1,20 +1,31 @@
 import { getServerSession } from "next-auth/next";
 import { options as authOptions } from "../../auth/[...nextauth]";
 import prisma from "../../../../lib/prisma";
+import { Flashcard } from "@prisma/client";
 
 // bad practice of conditional calls, probably move this to clientside
 export default async function handle(req, res) {
-  const { cardName } = req.body;
+  const  {cardName}  = req.body;
+   
   const session = await getServerSession(req, res, authOptions);
-
-  const result = await prisma.flashcard.delete({
-    where: { authorId_title: { authorId: session.id, title: cardName } },
+ console.log(cardName,session.id)
+  
+ 
+  const result = await prisma.card.deleteMany({
+    where: {
+      
+        authorId: session.user.id, // Assuming session.user.id contains the authorId
+        title: cardName,
+      
+    },
   });
 
-  res.json(result);
-  res.json(result);
+ 
+ 
+res.json(result);
 }
 
+ 
 // title and description are correct
 
 // cards only contains front and back

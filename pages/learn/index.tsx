@@ -90,6 +90,7 @@ export type Props = {
 };
 
 const Chat: React.FC<Props> = (props) => {
+  
   const { data: session } = useSession();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
@@ -101,8 +102,7 @@ const Chat: React.FC<Props> = (props) => {
   if (!session) {
     return (
       <Layout>
-        <h1>My Notes</h1>
-        <div>You need to be authenticated to view this page.</div>
+        <div/>
       </Layout>
     );
   }
@@ -204,6 +204,7 @@ const Chat: React.FC<Props> = (props) => {
                               <Button disabled={selectedRowsL.length == 0}>
                                 {" "}
                                 <Link
+                                shallow={true}
                                   href={`
                         /learn/test/${encodeURIComponent(
                           JSON.stringify(selectedRowsL)

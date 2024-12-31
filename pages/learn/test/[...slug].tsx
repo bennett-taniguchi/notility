@@ -6,7 +6,7 @@ import { getSession, useSession } from "next-auth/react";
 
 import { Flashcard } from "@prisma/client";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import Layout from "../../../components/Layout";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import { Button } from "../../../components/ui/button";
@@ -21,6 +21,10 @@ import prisma from "../../../lib/prisma";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import { Label } from "../../../components/ui/label";
 import { Input } from "../../../components/ui/input";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { shuffleArray } from "../../../utils/fisher_yates";
+import { Separator } from "../../../components/ui/separator";
+ 
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -39,7 +43,7 @@ import { Input } from "../../../components/ui/input";
 // test null cases for notes and messages
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession({ req });
-
+ 
   if (!session) {
     res.statusCode = 403;
     return { props: { messages: [] } };
@@ -90,7 +94,8 @@ type Card = {
   front: string;
   back: string;
 };
-const Chat: React.FC<Props> = (props) => {
+const Chat: React.FC<Props> =  (props) => {
+  const router = useRouter();
   const [practiceTerms, setPracticeTerms] = useState<Card[]>([]);
   const [cardClicked, setCardClicked] = useState(false);
   const { data: session } = useSession();
@@ -100,15 +105,15 @@ const Chat: React.FC<Props> = (props) => {
   const [text, setText] = useState();
   const [currentCard, setCurrentCard] = useState(0);
   const [currentScore, setCurrentScore] = useState(0);
-  const router = useRouter();
+   
   const { slug } = router.query;
 
   useEffect(() => {
-    // if(slug && practiceTerms.length == 0)
+    if(  practiceTerms.length == 0)
     retrieve();
   }, []);
 
-  useEffect(() => {}, [practiceTerms]);
+ 
 
   async function retrieve() {
     let titles = JSON.parse((slug as any)[0]);
@@ -148,8 +153,7 @@ const Chat: React.FC<Props> = (props) => {
   if (!session || !practiceTerms) {
     return (
       <Layout>
-        <h1>My Notes</h1>
-        <div>You need to be authenticated to view this page.</div>
+        <div />
       </Layout>
     );
   }
@@ -223,20 +227,31 @@ const Chat: React.FC<Props> = (props) => {
   // options [a,b,c,d]
   // correct is [0] by default
   //
-  function QuizMultipleChoice({ options, question }: any) {
+  function QuizMultipleChoice({ options, question,num }: any) {
+    let q_num = num
+    if(!num) q_num=0
+
     if (options.length < 2 || options.length > 10 || !question || !options)
       return <></>;
+
+    
+  options.sort((a,b) => Number(a.front) - Number(b.front))
+
+   shuffleArray(options)
+   console.log(options)
     return (
       <div className="w-1/2 justify-items-center  ">
-        <p className="bold ml-5 text-xl">{question}</p>
+     
+        <p className="-ml-[8svw]   pt-5 font-light">{'Question ' +(q_num+1)}</p>
+        <Separator className="w-[60svw] ml-[40svw]"/>
+        <p className="-ml-[8svw] bold text-xl bg-zinc-200 rounded-xl">{question}</p>
         <RadioGroup
-          onValueChange={(value) => console.log(value)}
+          onValueChange={(value) => {}}
           defaultValue="default"
-        
         >
           {options.map((ans, idx) => (
-            <div className="flex items-start space-x-2   ">
-              <RadioGroupItem value={idx + ""} id={"r" + idx} />
+            <div className="-ml-[5svw] flex items-start space-x-2" key={idx}>
+              <RadioGroupItem value={(idx+1) + ""} id={"r" + idx} />
               <Label htmlFor={"r" + idx}>{ans}</Label>
             </div>
           ))}
@@ -246,17 +261,50 @@ const Chat: React.FC<Props> = (props) => {
   }
   // question is string
   // count is amount of words to randomly block out
-  function QuizShortAnswer({question,answer}:any) {
-
+  function QuizShortAnswer({ question, answer }: any) {
     return (
-        <div className="w-1/2 justify-items-center    "><p  className="text-xl ">{question}</p>
+      <div className="w-1/2 justify-items-center    ">
+        <p className="text-xl ">{question}</p>
 
         <div>
-            <Input   />
-            </div>
+          <Input />
         </div>
-    )
+      </div>
+    );
+  }
 
+
+  function ConvertAllToTest() {
+    function getOther(idx:number,offset:number,practiceTerms: Card[]) {
+      let length = practiceTerms.length
+      let used = (idx+offset) % length
+      return practiceTerms[used].back + ""
+    }
+
+    return (
+      <ScrollArea className="overflow-auto">
+        
+        {
+          practiceTerms.map((term,idx) => (
+            <div >
+             
+            <QuizMultipleChoice
+            options={[
+              term.back,
+              getOther(idx,1,practiceTerms),
+              getOther(idx,2,practiceTerms),
+              getOther(idx,3,practiceTerms),
+              getOther(idx,4,practiceTerms),
+            ]}
+            question={term.front}
+            num={idx+0}
+            />
+            </div>
+          ))
+        }
+     
+      </ScrollArea>
+    )
   }
 
   if (props && practiceTerms.length != 0)
@@ -284,23 +332,16 @@ const Chat: React.FC<Props> = (props) => {
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
 
-                <QuizMultipleChoice
-                  options={[
-                    "potato",
-                    "brocolli",
-                    "asparagus",
-                    "bok choy",
-                    "brussel sprouts",
-                  ]}
-                  question={"What vegetable am I thinking of"}
-                />
-                <QuizShortAnswer question={'Give the term for ketchup'} answer={''}/>
-                
-                {/* Card End */}
+
+  
+<ConvertAllToTest/>
+    
+
+                {/* Card End */}  <Button className=" w-[15svw] m-auto">Submit</Button>
                 <p className="mx-auto italic">
                   {currentCard + 1 + " / " + practiceTerms.length}
                 </p>
-             
+
                 {/* <div className="bottom-0 fixed h-10 w-screen bg-white border">
                 Here
                </div> */}
