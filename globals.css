@@ -101,60 +101,7 @@ body {
   overflow: auto;
 }
 
-@layer base {
-  ul,
-  ol {
-    list-style: revert;
-  }
-}
-p {
-  margin: 1em 0;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
-ul {
-  list-style-type: disc;
-  list-style-position: outisde;
-  padding: 0 1rem;
-}
-
-ol {
-  list-style-type: decimal;
-  list-style-position: outside;
-  padding: 0 1rem;
-}
-ul li p {
-  margin-top: 0.25em;
-  margin-bottom: 0.25em;
-}
-ol li p {
-  margin-top: 0.25em;
-  margin-bottom: 0.25em;
-}
-
-ul ul,
-ol ul {
-  list-style-type: circle;
-  list-style-position: inside;
-  margin-left: 15px;
-}
-ol ol,
-ul ol {
-  list-style-type: lower-latin;
-  list-style-position: inside;
-  margin-left: 15px;
-}
-
-ol > li {
-  list-style-position: outside;
-}
-
-li > p {
-  position: relative;
-  top: -27.5px;
-}
-
+ 
 .spectrum-background {
   /* background: linear-gradient(150deg, #ecedee, transparent 30%),
     linear-gradient(330deg, rgb(210, 206, 242), transparent 30%),
@@ -182,11 +129,17 @@ li > p {
   box-shadow: 8px 14px 38px rgba(0, 128, 255, 0.06),
     1px 3px 8px rgba(39, 44, 49, 0.03);
   transition: all 0.4s ease; /* back to normal */
+  cursor: pointer;
 }
 .landingCard:hover {
   transform: translate3d(0, -1px, 0) scale(1.02);
   box-shadow: rgba(79, 192, 124, 0.2) 0px 7px 29px 0px;
   transition: 0.1s ease-in;
+}
+.landingCard:active {
+  transform: translate3d(0, -1px, 0) scale(1.05);
+  box-shadow: rgba(79, 192, 124, 0.2) 0px 7px 29px 0px;
+  transition: 0.05s ease-in;
 }
 
 .except:hover {

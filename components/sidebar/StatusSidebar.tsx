@@ -13,7 +13,7 @@ export default function StatusSidebar() {
   return (
     <Menubar className="bottom-0 fixed flex justify-center bg-emerald-200 shadow-inner w-[20vw] overflow-hidden">
       <MenubarMenu>
-        <div className="font-bold pr-2 hover:bg-emerald-300 rounded pl-2 w-max">
+        <div className="font-bold pr-2 hover:bg-emerald-300 rounded pl-2 w-max bg-emerald-300 landingCard">
           <Link href="/">Notility</Link>
         </div>
       </MenubarMenu>
@@ -27,7 +27,7 @@ export default function StatusSidebar() {
       <MenubarMenu>
         {session ? (
           <div className="w-[175px] pl-2">
-            <span className="text-xs  truncate ...  block">
+            <span className="text-xs  truncate ...  block text-decoration-line: underline">
               {session.user.email}
             </span>
           </div>
@@ -47,7 +47,7 @@ export default function StatusSidebar() {
         {session ? (
           <MenubarTrigger
             onClick={() => signOut()}
-            className="text-sm inline-block whitespace-nowrap hover:bg-emerald-300 "
+            className="text-sm inline-block whitespace-nowrap hover:bg-emerald-300 justify-self-end pr-2 landingCard  data-[state=open]:bg-emerald-600 data-[state=closed]:bg-emerald-300 p-1"
           >
             Log Out
           </MenubarTrigger>

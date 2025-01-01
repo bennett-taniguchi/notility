@@ -35,6 +35,11 @@ import { Textarea } from "../../ui/textarea";
 import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
 import { cn } from "../../lib/utils";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "../../ui/hover-card";
 
 const MenuBar = ({ editor }) => {
   if (!editor) {
@@ -42,8 +47,8 @@ const MenuBar = ({ editor }) => {
   }
 
   return (
-    <div className="control-group">
-      <div className="button-group  flex h-10 text-center text-sm justify-center">
+    <div className="control-group ">
+      <div className="button-group  flex h-10 text-center text-sm justify-center justify-items-center pt-2">
         <NextButton
           variant="outline"
           onClick={() =>
@@ -55,7 +60,7 @@ const MenuBar = ({ editor }) => {
         >
           <LuHeading1 />
         </NextButton>
-     
+
         <NextButton
           variant="outline"
           onClick={() =>
@@ -67,7 +72,7 @@ const MenuBar = ({ editor }) => {
         >
           <LuHeading2 />
         </NextButton>
- 
+
         <NextButton
           variant="outline"
           onClick={() =>
@@ -79,7 +84,7 @@ const MenuBar = ({ editor }) => {
         >
           <LuHeading3 />
         </NextButton>
-        
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setParagraph().run()}
@@ -87,7 +92,7 @@ const MenuBar = ({ editor }) => {
         >
           <PilcrowIcon />
         </NextButton>
-   
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -95,7 +100,7 @@ const MenuBar = ({ editor }) => {
         >
           <FontBoldIcon />
         </NextButton>
-     
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -103,7 +108,7 @@ const MenuBar = ({ editor }) => {
         >
           <FontItalicIcon />
         </NextButton>
-       
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -111,7 +116,7 @@ const MenuBar = ({ editor }) => {
         >
           <StrikethroughIcon />
         </NextButton>
-        
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleHighlight().run()}
@@ -119,7 +124,7 @@ const MenuBar = ({ editor }) => {
         >
           <FaHighlighter />
         </NextButton>
-    
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
@@ -127,7 +132,7 @@ const MenuBar = ({ editor }) => {
         >
           <TextAlignLeftIcon />
         </NextButton>
-    
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("center").run()}
@@ -137,7 +142,7 @@ const MenuBar = ({ editor }) => {
         >
           <TextAlignCenterIcon />
         </NextButton>
-     
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("right").run()}
@@ -145,7 +150,7 @@ const MenuBar = ({ editor }) => {
         >
           <TextAlignRightIcon />
         </NextButton>
-        
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("justify").run()}
@@ -156,7 +161,6 @@ const MenuBar = ({ editor }) => {
           <TextAlignJustifyIcon />
         </NextButton>
 
-        
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -164,7 +168,7 @@ const MenuBar = ({ editor }) => {
         >
           <FaListOl />
         </NextButton>
-      
+
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -188,7 +192,7 @@ const Tiptap = ({
   const [initial, setInitial] = useState(true);
 
   const editor = useEditor({
-    immediatelyRender:false,
+    immediatelyRender: false,
     extensions: [
       BulletList.configure({
         HTMLAttributes: {
@@ -214,16 +218,13 @@ const Tiptap = ({
     editor?.setOptions({
       editorProps: {
         attributes: {
-          class: cn(
-            'prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc',
-          ),
+          class: cn("prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc"),
         },
         handleDOMEvents: {
           keydown: (view, event) => {
             if (editor) {
               console.log(event.key);
               if (event.key === " ") {
-           
                 editor.commands.insertContentAt(
                   editor.state.selection.anchor,
                   "\u00A0"
@@ -261,25 +262,39 @@ const Tiptap = ({
         <div className="position: static flex justify-center top-0px">
           <MenuBar editor={editor} />
 
-          <NextButton
-            variant="outline"
-            value="paperplane"
-            aria-label="Toggle paperplane"
-            onClick={saveNotes}
-            className=""
-          >
-            <PaperPlaneIcon className="h-4 w-4" />
-          </NextButton>
+          <HoverCard openDelay={0}>
+            <HoverCardTrigger>
+              <NextButton
+                variant="outline"
+                value="paperplane"
+                aria-label="Toggle paperplane"
+                onClick={saveNotes}
+                className="absolute top-[6.5svh] right-[2svw] z-10 bg-emerald-200"
+              >
+                <PaperPlaneIcon className="h-4 w-4" />
+              </NextButton>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-[8] h-[5]">Save Page</HoverCardContent>
+          </HoverCard>
 
-          <NextButton
+
+          <HoverCard  openDelay={0}>
+            <HoverCardTrigger>
+            <NextButton
             variant="outline"
             value="cross"
             aria-label="toggle cross"
             onClick={(e) => deleteNotes(e, title)}
-            className="active:bg-zinc-400"
+            className="absolute top-[6.5svh] right-[6svw] z-10 bg-rose-200"
           >
             <Cross1Icon className="h-4 w-4" />
           </NextButton>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-[8] h-[5]">Delete Page</HoverCardContent>
+          </HoverCard>
+
+
+       
         </div>
       </ResizablePanel>
 
@@ -301,7 +316,7 @@ const Tiptap = ({
             content={content}
             onChange={setContent(editor?.getHTML())}
             value={content}
-            className="focus-visible:ring-0 border-0 bg-white h-[600px] "
+            className="focus-visible:ring-0 border-0 bg-white h-[85svh] mx-3"
           />
         </ScrollArea>
       </ResizablePanel>

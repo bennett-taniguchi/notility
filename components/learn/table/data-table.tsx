@@ -205,14 +205,14 @@ export function DataTable<TData, TValue>({
                         </AlertDialogContent>
                       </AlertDialog>
 
-                      <Link href="/learn">
+                     
                         <u className="hover:text-zinc-400">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
                           )}
                         </u>
-                      </Link>
+                     
                     </TableCell>
                   ) : (
                     <TableCell key={cell.id}>
