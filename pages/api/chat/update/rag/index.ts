@@ -40,7 +40,7 @@ export default async function handle(req, res) {
 
   const matches = queryResponse.matches; // we want metadata
   console.log(matches);
-  let metadata;
+  let metadata = '';
   for (let i = 0; i < matches.length; i++) {
     metadata +=
       "From " + matches[0].id + (matches[0].metadata as RecordMetadata).text;

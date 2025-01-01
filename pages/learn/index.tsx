@@ -172,7 +172,7 @@ const Chat: React.FC<Props> = (props) => {
                       <TooltipProvider>
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild> 
-          <div  className="w-5 h-5 -mb-2 -ml-2">
+          <div  className="w-5 h-5 -mb-2 ml-2">
           <FaRegQuestionCircle className="my-auto"/>
           </div>
         </TooltipTrigger>
