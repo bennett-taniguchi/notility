@@ -42,15 +42,16 @@ export default function ChatWindow({ messagesLoaded, title }) {
       Router.push("/chat");
     } else {
       const body = { prompt, messages, title };
-      const res = await fetch("/api/chat/update/rag/", {
+     await fetch("/api/chat/update/rag/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-      });
-
-      setInput("");
-      setLoading(false);
-      Router.push("/chat/" + title);
+      }).then(() => {
+        setInput("");
+        setLoading(false);
+        Router.push("/chat/" + title);
+      })
+     
     }
   }
 
@@ -60,33 +61,28 @@ export default function ChatWindow({ messagesLoaded, title }) {
     setInput((e.target as HTMLInputElement).value);
   };
 
-  console.log("title", title);
+ 
   // delete all chat logs
   async function handleDeleteChat(e: React.SyntheticEvent) {
     const body = { title };
-    const res = await fetch("/api/chat/delete", {
+    await fetch("/api/chat/delete", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-    });
+    }).then(() => {
+      Router.push("/chat");
+    })
 
-    await Router.push("/chat");
+  
   }
 
   useEffect(() => {
-    // top and bot of start
-    // const msgs = document.getElementsByClassName("flex justify-start");
-    // let len = msgs.length;
-    // let distY = msgs[len - 1].getBoundingClientRect().bottom;
-    // scrollMsg(
-    //   msgs[len - 1].getBoundingClientRect().bottom -
-    //     msgs[len - 1].getBoundingClientRect().height
-    // );
+ 
     scrollMsg();
   }, [messagesLoaded]);
 
   const scrollMsg = (amt = 99999999) => {
-    console.log("scroll");
+   
     if (viewportRef !== null && viewportRef.current !== null) {
       // here scroll, Ex: to the right
       console.log("view");
@@ -98,10 +94,10 @@ export default function ChatWindow({ messagesLoaded, title }) {
       });
     }
   };
-  console.log(messagesLoaded);
+ 
   return (
-    <>
-      <ScrollArea className="bg-zinc-100" viewportRef={viewportRef}>
+    
+      <ScrollArea className="bg-zinc-100 " viewportRef={viewportRef}>
         <ResizablePanel defaultSize={1}>
           {/* (AI?) Buttons go here */}
         </ResizablePanel>
@@ -109,7 +105,7 @@ export default function ChatWindow({ messagesLoaded, title }) {
         <ResizablePanel>
           <Separator />
           <div className="flex flex-col w-3/4 max-w-1/2 py-10 mx-auto stretch gap-y-2 bg-zinc-100 pb-[200px]">
-            {/* {data && <pre>{JSON.stringify(data, null, 2)}</pre>} */}
+          
             {messagesLoaded && messagesLoaded.length != 0 ? (
               messagesLoaded.map((m: any) => (
                 <div
@@ -190,6 +186,6 @@ export default function ChatWindow({ messagesLoaded, title }) {
           </div>
         </ResizablePanel>
       </ScrollArea>
-    </>
+    
   );
 }

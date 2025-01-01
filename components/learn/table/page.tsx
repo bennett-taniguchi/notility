@@ -1,4 +1,4 @@
-import { Payment, columns } from "./columns";
+import { TableRow, columns } from "./columns";
 import { DataTable } from "./data-table";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 // async function getData(): Promise<Payment[]> {

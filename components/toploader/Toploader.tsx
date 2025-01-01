@@ -1,8 +1,8 @@
 import NextTopLoader from "nextjs-toploader";
-
+ 
 export default function TopLoader() {
   return (
-    <div  >
+    <div   >
       <NextTopLoader 
       
         color="#50C878"
@@ -14,6 +14,7 @@ export default function TopLoader() {
         easing="ease"
         speed={400}
         shadow="0 0 10px #2299DD,0 0 5px #2299DD"
+        
       />
     </div>
   );

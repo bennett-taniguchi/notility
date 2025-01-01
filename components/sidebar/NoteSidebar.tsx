@@ -176,7 +176,7 @@ export default function NoteSidebar({
   return (
     <CommandGroup className="pb-[50px]">
       {/* Notesbar Component */}
-
+      <Link href="/notes/landing">
       <CommandItem
         onSelect={handleNavNotes}
         className={
@@ -186,13 +186,14 @@ export default function NoteSidebar({
         }
       >
         <span className="text-md text-zinc-600 font-medium ">
-          <Link href="/notes/landing">Notes 📓</Link>
+          Notes 📓
         </span>
         <PlusCircledIcon
           onClick={handlePlusClick}
           className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110"
         ></PlusCircledIcon>
       </CommandItem>
+      </Link>
       <div>
         {props.notes.map((note, index) => (
           <Link href={"/notes/" + note.title} key={index}>

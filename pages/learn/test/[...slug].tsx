@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { Switch } from "../../../components/ui/switch";
+import { Progress } from "../../../components/ui/progress";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -104,8 +105,8 @@ type Card = {
 };
 const Chat: React.FC<Props> = (props) => {
   const router = useRouter();
-  const[multipleChoiceOn,setMultipleChoiceOn] = useState(true)
-  const[shortAnswerOn,setShortAnswerOn] = useState(false)
+  const [multipleChoiceOn, setMultipleChoiceOn] = useState(true);
+  const [shortAnswerOn, setShortAnswerOn] = useState(false);
   const [numOptions, setNumOptions] = useState(4);
   const [practiceTerms, setPracticeTerms] = useState<Card[]>([]);
   const [cardClicked, setCardClicked] = useState(false);
@@ -119,13 +120,18 @@ const Chat: React.FC<Props> = (props) => {
 
   const { slug } = router.query;
 
+  const [progress, setProgress] = useState(13);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setProgress(66), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     if (practiceTerms.length == 0) retrieve();
   }, []);
 
-  useEffect(() => {
-
-  },[multipleChoiceOn,shortAnswerOn])
+  useEffect(() => {}, [multipleChoiceOn, shortAnswerOn]);
   async function retrieve() {
     let titles = JSON.parse((slug as any)[0]);
 
@@ -235,20 +241,22 @@ const Chat: React.FC<Props> = (props) => {
     handleRestart();
   }
 
-  function QuestionHeader({question,q_num,children}:any){
-
+  function QuestionHeader({ question, q_num, children }: any) {
     return (
-      <div className="w-1/2 justify-items-center  ">
-        <p className="-ml-[8svw]   pt-5 font-light">
+      <div className="w-1/2 place-items-center  pt-[2svh]">
+        <p className="-ml-[8svw]   pt-5 font-light ">
           {"Question " + (q_num + 1)}
         </p>
-        <Separator className="w-[60svw] ml-[45svw]" />
-        <p className="-ml-[8svw] bold text-xl bg-zinc-200 rounded-xl">
+        <Separator className="w-[43svw] ml-[29svw]" />
+        <div className="bg-zinc-200 rounded-xl w-[40svw] ml-[30svw] ">
+        <p className="  bold text-xl  my-[2svh] p-[2svh] text-center">
           {question}
         </p>
+        </div>
+     
         {children}
-</div>
-    )
+      </div>
+    );
   }
   // options [a,b,c,d]
   // correct is [0] by default
@@ -270,28 +278,25 @@ const Chat: React.FC<Props> = (props) => {
     ); // deterministic random ordering
 
     return (
-      <QuestionHeader question={question}   q_num={q_num}>
-
-        <RadioGroup  onValueChange={(value) => {}} defaultValue="default">
+      <QuestionHeader question={question} q_num={q_num}>
+        <RadioGroup onValueChange={(value) => {}} defaultValue="default">
           {options.map((ans, idx) => (
-            <div className="-ml-[5svw] flex items-start space-x-2" key={idx}>
+            <div className=" ml-[30svw] flex items-end space-x-2  " key={idx}>
               <RadioGroupItem value={idx + 1 + ""} id={"r" + idx} />
               <Label htmlFor={"r" + idx}>{ans}</Label>
             </div>
           ))}
         </RadioGroup>
-
-
-        </QuestionHeader>
+      </QuestionHeader>
     );
   }
   // question is string
   // count is amount of words to randomly block out
   function QuizShortAnswer({ question, answer, num }: any) {
     return (
-      <QuestionHeader question={question} answer={answer} q_num={num}>
-          <Input className="-ml-[3svw] w-[10svw]"/>
-          </QuestionHeader>
+      <QuestionHeader question={question} answer={answer} q_num={num} >
+        <Input className="  w-[10svw]   ml-[30svw]"/>
+      </QuestionHeader>
     );
   }
   function getOther(idx: number, offset: number, practiceTerms: Card[]) {
@@ -304,72 +309,64 @@ const Chat: React.FC<Props> = (props) => {
     setNumOptions(parseInt(value));
   };
 
-  function ConvertAllToTest({multipleChoice,shortAnswer}:any) {
-    if(multipleChoice && !shortAnswer)
-    return (
-      <ScrollArea className="overflow-auto">
-        {practiceTerms.map((term, idx) => (
-          <div>
-            <QuizMultipleChoice
-              question={term.front}
-              answer={term.back}
-              num={idx}
-            />
-          </div>
-        ))}
-      </ScrollArea>
-    );
-    if(multipleChoice && shortAnswer)
+  function ConvertAllToTest({ multipleChoice, shortAnswer }: any) {
+    if (multipleChoice && !shortAnswer)
       return (
-        <ScrollArea className="overflow-auto">
+        <ScrollArea className="overflow-auto mb-5">
           {practiceTerms.map((term, idx) => (
-
-<div>
-            {
-              idx % 2 == 0 ? 
+            <div>
               <QuizMultipleChoice
                 question={term.front}
                 answer={term.back}
                 num={idx}
               />
-              :
-              <QuizShortAnswer
-              question={term.front}
-              answer={term.back}
-              num={idx}
-            />
-
-            }
-           
-              
             </div>
           ))}
+
         </ScrollArea>
       );
-
-      if(shortAnswer ) {
-        return (
-          <ScrollArea className="overflow-auto">
-            {practiceTerms.map((term, idx) => (
-              <div>
+    if (multipleChoice && shortAnswer)
+      return (
+        <ScrollArea className="overflow-auto mb-5">
+          {practiceTerms.map((term, idx) => (
+            <div>
+              {idx % 2 == 0 ? (
+                <QuizMultipleChoice
+                  question={term.front}
+                  answer={term.back}
+                  num={idx}
+                />
+              ) : (
                 <QuizShortAnswer
                   question={term.front}
                   answer={term.back}
                   num={idx}
                 />
-              </div>
-            ))}
-          </ScrollArea>
-        );
-      }
+              )}
+            </div>
+          ))}
+        </ScrollArea>
+      );
 
-      return(
-        <div></div>
-      )
+    if (shortAnswer) {
+      return (
+        <ScrollArea className="overflow-auto mb-5">
+          {practiceTerms.map((term, idx) => (
+            <div>
+              <QuizShortAnswer
+                question={term.front}
+                answer={term.back}
+                num={idx}
+              />
+            </div>
+          ))}
+        </ScrollArea>
+      );
+    }
+
+    return <div></div>;
   }
 
-
-  
   if (props && practiceTerms.length != 0)
     return (
       <Layout>
@@ -395,14 +392,27 @@ const Chat: React.FC<Props> = (props) => {
               <ResizablePanelGroup direction="vertical">
                 {/* perfect scrolling method */}
 
-                <ConvertAllToTest multipleChoice={multipleChoiceOn} shortAnswer={shortAnswerOn} />
+                <ConvertAllToTest
+                  multipleChoice={multipleChoiceOn}
+                  shortAnswer={shortAnswerOn}
+                />
+               
 
-                <div className="justify-items-end pt-5">
-                  <Button className=" w-[15svw] right-[5svw] mr-[8svw]">
-                    Submit
-                  </Button>
-                  <p className="mx-auto italic text-center"></p>
-                </div>
+                {multipleChoiceOn || shortAnswerOn ?
+
+                <div className="justify-items-end pt-5  bg-zinc-200 ">
+                 
+                  <Button className=" w-[15svw] right-[5svw] mr-[8svw]  mb-[2svh]">
+                  Submit
+                </Button>
+                <p className="mx-auto italic text-center"></p>
+                
+            </div> :   <div></div>
+                }
+                  
+           
+                 
+          
 
                 <div className="left-[20svw] top-[10svh] absolute">
                   <label className="text-sm ml-5">
@@ -432,20 +442,21 @@ const Chat: React.FC<Props> = (props) => {
                   </div>
                   <div className="ml-5 mt-5 py-2 bg-gray-200 rounded-lg">
                     <Label className="text-sm ml-2">Multiple Choice? </Label>
-                    <Switch 
-                    value={Number(multipleChoiceOn)}
-                    className="ml-4"
-                      onClick={()=>setMultipleChoiceOn(!multipleChoiceOn)}
+                    <Switch
+                      value={Number(multipleChoiceOn)}
+                      className="ml-4"
+                      onClick={() => setMultipleChoiceOn(!multipleChoiceOn)}
                       defaultChecked={true}
                     />
                   </div>
 
                   <div className="ml-5 mt-5 py-2 bg-gray-200 rounded-lg ">
                     <Label className="text-sm ml-2">Short Answer? </Label>
-                    <Switch 
-                    value={Number(shortAnswerOn)}
-                    onClick={()=>setShortAnswerOn(!shortAnswerOn)}
-                    className="ml-7"/>
+                    <Switch
+                      value={Number(shortAnswerOn)}
+                      onClick={() => setShortAnswerOn(!shortAnswerOn)}
+                      className="ml-7"
+                    />
                   </div>
                 </div>
               </ResizablePanelGroup>
@@ -455,7 +466,7 @@ const Chat: React.FC<Props> = (props) => {
       </Layout>
     );
 
-  return <div>Data is invalid</div>;
+  return <Progress value={progress} className="w-[60%] m-auto mt-[50svh]" />;
 };
 
 export default Chat;

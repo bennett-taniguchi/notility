@@ -114,6 +114,7 @@ export default function ChatSidebar({ Router, location, props }) {
   return (
     <CommandGroup className="pb-[50px]">
       {/* Prompt Bar Component  (Chat) */}
+      <Link href="/chat">
       <CommandItem
         onSelect={handleNavChat}
         className={
@@ -123,7 +124,7 @@ export default function ChatSidebar({ Router, location, props }) {
         }
       >
         <span className="text-md text-zinc-600 font-medium ">
-          <Link href="/chat"> Chat with Notes 📖</Link>
+          Chat with Notes 📖
         </span>
         <Dialog modal={true}>
           <DialogTrigger asChild>
@@ -191,15 +192,18 @@ export default function ChatSidebar({ Router, location, props }) {
           </DialogContent>
         </Dialog>
       </CommandItem>
+      </Link>
       <div>
         {props.analyzed.map((item,idx) => (
           <div key={idx}>
+            <Link href={'/chat/'+item.title}>
             <CommandItem
               onSelect={(e) => handleNavAnalyzed(item.title)}
               className="landingCard"
             >
               {item.title}
             </CommandItem>
+            </Link>
           </div>
         ))}
       </div>

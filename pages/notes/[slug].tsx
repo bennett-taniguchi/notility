@@ -70,7 +70,11 @@ const Notes: React.FC<Props> = (props) => {
       </Layout>
     );
 
-  return <div>Data is invalid</div>;
+  return   (
+    <Layout>
+     <div></div>
+    </Layout>
+  );
 };
 
 export default Notes;

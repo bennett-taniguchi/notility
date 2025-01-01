@@ -19,7 +19,12 @@ import { Separator } from "../../components/ui/separator";
 import Link from "next/link";
 import { Button } from "../../components/ui/button";
 import { SelectedRowsContext } from "../../components/context/context";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@radix-ui/react-tooltip";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@radix-ui/react-tooltip";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -90,7 +95,6 @@ export type Props = {
 };
 
 const Chat: React.FC<Props> = (props) => {
-  
   const { data: session } = useSession();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
@@ -99,14 +103,6 @@ const Chat: React.FC<Props> = (props) => {
 
   const { selectedRows, setSelectedRows, selectedTitles, setSelectedTitles } =
     useContext(SelectedRowsContext);
-  if (!session) {
-    return (
-      <Layout>
-        <div/>
-      </Layout>
-    );
-  }
-
   function rowNumsToTitles() {
     console.log();
   }
@@ -117,18 +113,27 @@ const Chat: React.FC<Props> = (props) => {
     }
     return "";
   }
+
+  if (!session) {
+    return (
+      <Layout>
+        <div />
+      </Layout>
+    );
+  }
+
   if (props)
     return (
       <Layout>
-        <SelectedRowsContext.Provider
-          value={{
-            selectedRows: selectedRowsL,
-            setSelectedRows: setSelectedRowsL,
-            selectedTitles: selectedTitlesL,
-            setSelectedTitles: setSelectedTitlesL,
-          }}
-        >
-          <div className="page">
+        <div className="page">
+          <SelectedRowsContext.Provider
+            value={{
+              selectedRows: selectedRowsL,
+              setSelectedRows: setSelectedRowsL,
+              selectedTitles: selectedTitlesL,
+              setSelectedTitles: setSelectedTitlesL,
+            }}
+          >
             <ResizablePanelGroup direction="horizontal" className="fixed ">
               <ResizablePanel
                 minSize={20}
@@ -165,28 +170,31 @@ const Chat: React.FC<Props> = (props) => {
                     </div>
                     <div className="translate-y-[-20px]">
                       <TablePage cards={props.flashcards} />
-                     
+
                       <div className="pl-9 translate-y-[-15px] ">
                         <div className="flex flex-row">
-                      <p className="m-0 left-0 text-sm pb-5 -ml-4">{(selectedRowsL.length+0) + ' selected rows'}</p>
-                      <TooltipProvider>
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild> 
-          <div  className="w-5 h-5 -mb-2 ml-2">
-          <FaRegQuestionCircle className="my-auto"/>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent className="bg-black rounded -mb-2">
-          <p className="text-white text-sm">Click on Rows to Select</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-                      </div>
+                          <p className="m-0 left-0 text-sm pb-5 -ml-4">
+                            {selectedRowsL.length + 0 + " selected rows"}
+                          </p>
+                          <TooltipProvider>
+                            <Tooltip delayDuration={0}>
+                              <TooltipTrigger asChild>
+                                <div className="w-5 h-5 -mb-2 ml-2">
+                                  <FaRegQuestionCircle className="my-auto" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-black rounded -mb-2">
+                                <p className="text-white text-sm">
+                                  Click on Rows to Select
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                         {!props.flashcards ? (
                           <div></div>
                         ) : (
                           <div className="flex flex-row">
-                          
                             <div>
                               <Button disabled={selectedRowsL.length == 0}>
                                 <Link
@@ -195,7 +203,7 @@ const Chat: React.FC<Props> = (props) => {
                           JSON.stringify(selectedRowsL)
                         )}`}
                                 >
-                                  { "Study Selected" }
+                                  {"Study Selected"}
                                 </Link>
                               </Button>
                             </div>
@@ -204,13 +212,13 @@ const Chat: React.FC<Props> = (props) => {
                               <Button disabled={selectedRowsL.length == 0}>
                                 {" "}
                                 <Link
-                                shallow={true}
+                                  shallow={true}
                                   href={`
                         /learn/test/${encodeURIComponent(
                           JSON.stringify(selectedRowsL)
                         )}`}
                                 >
-                                   {"Take a Test on Selected"} 
+                                  {"Take a Test on Selected"}
                                 </Link>
                               </Button>
                             </div>
@@ -222,12 +230,16 @@ const Chat: React.FC<Props> = (props) => {
                 </ResizablePanelGroup>
               </ResizablePanel>
             </ResizablePanelGroup>
-          </div>
-        </SelectedRowsContext.Provider>
+          </SelectedRowsContext.Provider>
+        </div>
       </Layout>
     );
 
-  return <div>Data is invalid</div>;
+  return (
+    <Layout>
+      <div></div>
+    </Layout>
+  );
 };
 
 export default Chat;

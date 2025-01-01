@@ -14,6 +14,7 @@ export default function LearnSidebar({ location, Router }) {
   return (
     <CommandGroup className="pb-[50px]">
       {/* Learn, Flashcards, Tests, etc */}
+      <Link href="/learn">
       <CommandItem
         onSelect={handleNavLearn}
         className={
@@ -23,9 +24,10 @@ export default function LearnSidebar({ location, Router }) {
         }
       >
         <span className="text-md text-zinc-600 font-medium ">
-          <Link href="/learn">Learn 🏫</Link>
+        Learn 🏫
         </span>
       </CommandItem>
+      </Link>
     </CommandGroup>
   );
 }

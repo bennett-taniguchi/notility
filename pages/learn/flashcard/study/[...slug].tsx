@@ -1,6 +1,5 @@
 // where RAG-related chat exists
 // would be cool to have open source database files to prompt chat for basic subjects such as calculus, econ, and what not
-
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
 import prisma from "../../../../lib/prisma";
@@ -13,14 +12,12 @@ import {
 import Sidebar from "../../../../components/sidebar/Sidebar";
 
 import { useEffect, useState } from "react";
-import { Card, CardTitle } from "../../../../components/ui/card";
-import DemoPage from "../../../../components/learn/table/page";
-import { Separator } from "../../../../components/ui/separator";
-import Link from "next/link";
+import { Card } from "../../../../components/ui/card";
 import { Button } from "../../../../components/ui/button";
 import { Textarea } from "../../../../components/ui/textarea";
 import { Flashcard } from "@prisma/client";
 import { useRouter } from 'next/router';
+import { Progress } from "../../../../components/ui/progress";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -105,10 +102,15 @@ const Chat: React.FC<Props> = (props) => {
   const [currentScore, setCurrentScore] = useState(0);
   const router = useRouter();
   const {slug} = router.query
+  const [progress, setProgress] =  useState(13)
+ 
+  useEffect(() => {
+    const timer = setTimeout(() => setProgress(66), 500)
+    return () => clearTimeout(timer)
+  }, [])
+
 
   useEffect(() => {
-
-    // if(slug && practiceTerms.length == 0)
     retrieve()
 
   },[])
@@ -156,9 +158,6 @@ const Chat: React.FC<Props> = (props) => {
     return;
 
   }
-  //const [practiceTerms, setPracticeTerms] = useState<Card[]>()
-  // will be provided as comp param
-
 
   if (!session || !practiceTerms) {
     return (
@@ -313,7 +312,7 @@ const Chat: React.FC<Props> = (props) => {
       </Layout>
     );
 
-  return <div>Data is invalid</div>;
+    return <Progress value={progress} className="w-[60%] m-auto mt-[50svh]" />
 };
 
 export default Chat;

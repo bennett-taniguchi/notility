@@ -3,17 +3,13 @@
 
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
-import prisma from "../lib/prisma";
-import Layout from "../components/Layout";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "../components/ui/resizable";
-import Sidebar from "../components/sidebar/Sidebar";
-import ChatWindow from "../components/chat/ChatWindow";
 import { useState } from "react";
-// figure out vector search, use diff namespaced stuff: "default_calculus"
+import ChatWindow from "../../components/chat/ChatWindow";
+import Layout from "../../components/Layout";
+import Sidebar from "../../components/sidebar/Sidebar";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "../../components/ui/resizable";
+import prisma from "../../lib/prisma";
+ 
 // then prompt using context from closest cosine similarity from vec db
 // then initiate chat
 
