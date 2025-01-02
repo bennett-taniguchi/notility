@@ -258,39 +258,39 @@ const Tiptap = ({
 
   return (
     <>
-      <ResizablePanel className="min-h-[50px] max-h-[50px] " defaultSize={1}>
+      <ResizablePanel className=" min-h-[50px] max-h-[50px] " defaultSize={1} >
         <div className="position: static flex justify-center top-0px">
           <MenuBar editor={editor} />
 
-          <HoverCard openDelay={0}>
+          <HoverCard openDelay={0} closeDelay={0}>
             <HoverCardTrigger>
               <NextButton
                 variant="outline"
                 value="paperplane"
                 aria-label="Toggle paperplane"
                 onClick={saveNotes}
-                className="absolute top-[6.5svh] right-[2svw] z-10 bg-emerald-200"
+                className="absolute top-[6.7svh] right-[2svw] z-10 bg-emerald-200"
               >
                 <PaperPlaneIcon className="h-4 w-4" />
               </NextButton>
             </HoverCardTrigger>
-            <HoverCardContent className="w-[8] h-[5]">Save Page</HoverCardContent>
+            <HoverCardContent className="w-[7svw] h-[5] left-[12.5svw] top-[9svh] absolute">Save Page</HoverCardContent>
           </HoverCard>
 
 
-          <HoverCard  openDelay={0}>
+          <HoverCard  openDelay={0} closeDelay={0}>
             <HoverCardTrigger>
             <NextButton
             variant="outline"
             value="cross"
             aria-label="toggle cross"
             onClick={(e) => deleteNotes(e, title)}
-            className="absolute top-[6.5svh] right-[6svw] z-10 bg-rose-200"
+            className="absolute top-[6.7svh] right-[6svw] z-10 bg-rose-200"
           >
             <Cross1Icon className="h-4 w-4" />
           </NextButton>
             </HoverCardTrigger>
-            <HoverCardContent className="w-[8] h-[5]">Delete Page</HoverCardContent>
+            <HoverCardContent className="w-[7svw] h-[5] left-[9.5svw] top-[9svh] absolute">Delete Page</HoverCardContent>
           </HoverCard>
 
 

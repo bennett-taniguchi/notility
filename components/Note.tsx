@@ -103,7 +103,7 @@ export default function Note(props) {
               saveNotes={saveNotes}
               deleteNotes={deleteNotes}
             />
-            {/* <Tiptap2 /> */}
+           
           </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -111,7 +111,4 @@ export default function Note(props) {
   );
 }
 
-// div class = bubble-menu
-// button >Bold<
-// button >Italic<
-// button >Strike<
+ 

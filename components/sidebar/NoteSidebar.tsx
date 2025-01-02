@@ -1,6 +1,6 @@
 import {
   MinusCircledIcon,
-  Pencil1Icon,
+ 
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { CommandGroup, CommandItem } from "../ui/command";
@@ -43,11 +43,7 @@ export default function NoteSidebar({
     await Router.push("/notes/landing");
   }
 
-  const handlePencilClick = (e: React.SyntheticEvent) => {
-    //console.log(e.currentTarget);
-    //parentRef.current.focus();
-  };
-
+ 
   // Create new Note
   const handlePlusClick = (e: React.SyntheticEvent) => {
     createNewNote(e);
@@ -220,15 +216,7 @@ export default function NoteSidebar({
                 {note.title}
               </span>
 
-              <span>
-                <Pencil1Icon
-                  id={index + ""}
-                  onClick={handlePencilClick}
-                  className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 translate-x-[-1.5rem] scale-110 translate-y-[-.5rem]"
-                  onMouseEnter={(e) => setPencilHover(true)}
-                  onMouseLeave={(e) => setPencilHover(false)}
-                />
-              </span>
+         
               <span>
                 <MinusCircledIcon
                   id={index + ""}
