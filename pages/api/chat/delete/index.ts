@@ -12,6 +12,15 @@ export default async function handle(req, res) {
       title: title,
     },
   });
+
+ 
+  await prisma.upload.delete({
+    where: {title_authorId: {
+     
+      title: title, 
+      authorId: session!.id,
+    }}
+  })
   res.json(result);
 }
 

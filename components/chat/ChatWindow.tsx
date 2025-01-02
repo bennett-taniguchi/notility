@@ -64,6 +64,7 @@ export default function ChatWindow({ messagesLoaded, title }) {
  
   // delete all chat logs
   async function handleDeleteChat(e: React.SyntheticEvent) {
+    console.log('chat title',title)
     const body = { title };
     await fetch("/api/chat/delete", {
       method: "DELETE",

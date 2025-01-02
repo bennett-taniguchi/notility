@@ -16,10 +16,11 @@ import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import Link from "next/link";
+import { MinusCircledIcon } from "@radix-ui/react-icons";
 
 export default function ChatSidebar({ Router, location, props }) {
   const [checkboxSelected, setCheckboxSelected] = useState<number[]>([]); // modal
-
+  const [minusHover, setMinusHover] = useState(false);
   async function handleCheckboxClicked(e: React.SyntheticEvent) {
     const checked = (e.target as HTMLInputElement).getAttribute("data-state");
 
@@ -111,6 +112,27 @@ export default function ChatSidebar({ Router, location, props }) {
       body: JSON.stringify(body),
     });
   };
+ // Delete Clicked Note
+ const deleteNotes = async (e: React.SyntheticEvent, title: string) => {
+  e.preventDefault();
+  const body = {title}
+  const res = await fetch("/api/chat/delete/" , {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  
+
+  await Router.push("/chat/");
+};
+   // for minus icon
+   const handleMinusClick = (e: React.SyntheticEvent) => {
+    let removedNote = props.notes[(e.target as HTMLElement).id];
+    if (removedNote) {
+      deleteNotes(e, removedNote.title);
+    }
+  };
+  
   return (
     <CommandGroup className="pb-[50px]">
       {/* Prompt Bar Component  (Chat) */}
@@ -202,6 +224,15 @@ export default function ChatSidebar({ Router, location, props }) {
               className="landingCard"
             >
               {item.title}
+                  <span>
+                              <MinusCircledIcon
+                                id={idx + ""}
+                                onClick={handleMinusClick}
+                                className="stroke-zinc-600 stroke-[.5px] right-5 position: absolute hover:stroke-zinc-200 scale-110 translate-y-[-.5rem]"
+                                onMouseEnter={(e) => setMinusHover(true)}
+                                onMouseLeave={(e) => setMinusHover(false)}
+                              />
+                            </span>
             </CommandItem>
             </Link>
           </div>

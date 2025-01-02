@@ -14,7 +14,7 @@ import { DotsVerticalIcon } from "@radix-ui/react-icons";
 //   ];
 // }
 
-export default function TablePage({ cards }) {
+export default function TablePage({ sets }) {
   //const data = await getData();
 
   //cards : [ {index Int @id @default(autoincrement())
@@ -25,21 +25,21 @@ export default function TablePage({ cards }) {
   // practiceCount Int?
 
   // cards Card[]}]
-  console.log(cards);
+  
   let cardsUsed = [] as any;
 
-  if (!cards) {
+  if (!sets) {
     return <div></div>;
   }
 
-  for (let i = 0; i < cards.length; i++) {
+  for (let i = 0; i < sets.length; i++) {
     cardsUsed.push({
       id: "" + i,
-      name: cards[i].title,
+      name: sets[i].title,
       status: "pending",
       email: "a@gmail.com",
       difficulty: "🟩",
-      amount: cards[i].length,
+      amount: sets[i].length,
       last_practiced: new Date("2019-09-09").toDateString(),
     });
   }

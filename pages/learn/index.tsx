@@ -25,6 +25,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@radix-ui/react-tooltip";
+import { useRouter } from "next/router";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -66,10 +67,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     where: { authorId: (session as any).id },
   });
 
-  let testcards = "";
+  const cards = await prisma.card.findMany({
+    where: { authorId: (session as any).id },
+  });
 
   return {
-    props: { messages, notes, analyzed, flashcards, testcards },
+    props: { messages, notes, analyzed, flashcards, cards },
   };
 };
 // define messages
@@ -92,6 +95,7 @@ export type Props = {
   analyzed: Analyzed[];
   testcards: any;
   flashcards: any;
+  cards: any;
 };
 
 const Chat: React.FC<Props> = (props) => {
@@ -100,16 +104,18 @@ const Chat: React.FC<Props> = (props) => {
   const [content, setContent] = useState<string>("");
   const [selectedRowsL, setSelectedRowsL] = useState<number[]>([]);
   const [selectedTitlesL, setSelectedTitlesL] = useState<string[]>([]);
-
+  const Router = useRouter();
   const { selectedRows, setSelectedRows, selectedTitles, setSelectedTitles } =
     useContext(SelectedRowsContext);
+
+  useEffect(() => {}, [Router.asPath]);
   function rowNumsToTitles() {
-    console.log();
+    //console.log();
   }
   function titlesToString(selectedRowsL: any[]) {
-    console.log(selectedRowsL);
+    // console.log(selectedRowsL);
     for (const row of selectedRows) {
-      console.log(row);
+      //console.log(row);
     }
     return "";
   }
@@ -169,7 +175,7 @@ const Chat: React.FC<Props> = (props) => {
                       </Link>
                     </div>
                     <div className="translate-y-[-20px]">
-                      <TablePage cards={props.flashcards} />
+                      <TablePage sets={props.flashcards} />
 
                       <div className="pl-9 translate-y-[-15px] ">
                         <div className="flex flex-row">

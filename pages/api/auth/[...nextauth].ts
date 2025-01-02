@@ -7,8 +7,6 @@ import prisma from "../../../lib/prisma";
 import GoogleProvider from "next-auth/providers/google";
 
 export const options = {
- 
- 
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID!,
@@ -26,15 +24,16 @@ export const options = {
   callbacks: {
     async session({ user, session }) {
       session.id = user.id;
-      console.log(session.id);
-
       return session;
     },
-
- 
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    }
   },
-
- 
 };
 
 const authHandler: NextApiHandler = (req, res) => NextAuth(req, res, options);

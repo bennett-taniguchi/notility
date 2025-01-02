@@ -166,7 +166,6 @@ const Chat: React.FC<Props> = (props) => {
   }
   //const [practiceTerms, setPracticeTerms] = useState<Card[]>()
   // will be provided as comp param
-
   if (!session || !practiceTerms) {
     return (
       <Layout>
@@ -240,7 +239,88 @@ const Chat: React.FC<Props> = (props) => {
 
     handleRestart();
   }
-
+  interface ControlsOverlayProps {
+    handleStringToInt: (value: string) => void;
+    numOptions: number;
+    multipleChoiceOn: boolean;
+    setMultipleChoiceOn: (value: boolean) => void;
+    shortAnswerOn: boolean;
+    setShortAnswerOn: (value: boolean) => void;
+  }
+  
+  const ControlsOverlay: React.FC<ControlsOverlayProps> = ({
+    handleStringToInt,
+    numOptions,
+    multipleChoiceOn,
+    setMultipleChoiceOn,
+    shortAnswerOn,
+    setShortAnswerOn,
+  }) => {
+    return (
+      <div>
+        <div className="ml-[.5svw] left-[19.75svw] top-[9.5svh] absolute bg-gradient-to-r from-teal-300 to-emerald-200 w-[12.5svw] justify-items-center py-[2svh] rounded-2xl h-[24.75svh]" />
+        <div className="ml-[.5svw] left-[20svw] top-[10svh] absolute bg-gradient-to-r from-emerald-300 to-emerald-200 w-[12svw] justify-items-center py-[2svh] rounded-2xl">
+          <Label className="text-sm font-bold">Select amount of choices</Label>
+          <div className="z-10">
+            <Select
+              onValueChange={handleStringToInt}
+              defaultValue={String(numOptions)}
+            >
+              <SelectTrigger className="w-[180px] bg-zinc-200">
+                <SelectValue 
+                  className="text-xs"
+                  placeholder="Pick # of options"
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="2">3</SelectItem>
+                  <SelectItem value="3">4</SelectItem>
+                  <SelectItem value="4">5</SelectItem>
+                  <SelectItem value="5">6</SelectItem>
+                  <SelectItem value="6">7</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+  
+          <div className="mt-5 py-2 bg-gray-200 rounded-lg px-2">
+            <Label className="text-sm ml-2">Multiple Choice?</Label>
+            <Switch
+              checked={multipleChoiceOn}
+              onCheckedChange={setMultipleChoiceOn}
+              className="ml-4 data-[state=checked]:bg-emerald-500"
+            />
+          </div>
+  
+          <div className="mt-5 py-2 bg-gray-200 rounded-lg px-2">
+            <Label className="text-sm ml-2">Short Answer?</Label>
+            <Switch
+              checked={shortAnswerOn}
+              onCheckedChange={setShortAnswerOn}
+              className="ml-7 data-[state=checked]:bg-emerald-500"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+  function SubmitButton({ multipleChoiceOn, shortAnswerOn }: any) {
+    return (
+      <div>
+        {multipleChoiceOn || shortAnswerOn ? (
+          <div className="justify-items-end pt-5  bg-transparent absolute bottom-0 w-[80svw] ">
+            <Button className=" w-[15svw] right-[5svw] mr-[8svw]  mb-[2svh]">
+              Submit
+            </Button>
+            <p className="mx-auto italic text-center"></p>
+          </div>
+        ) : (
+          <div></div>
+        )}
+      </div>
+    );
+  }
   function QuestionHeader({ question, q_num, children }: any) {
     return (
       <div className="w-1/2 place-items-center  pt-[2svh]">
@@ -249,18 +329,17 @@ const Chat: React.FC<Props> = (props) => {
         </p>
         <Separator className="w-[43svw] ml-[29svw]" />
         <div className="bg-zinc-200 rounded-xl w-[40svw] ml-[30svw] ">
-        <p className="  bold text-xl  my-[2svh] p-[2svh] text-center">
-          {question}
-        </p>
+          <p className="  bold text-xl  my-[2svh] p-[2svh] text-center">
+            {question}
+          </p>
         </div>
-     
+
         {children}
       </div>
     );
   }
   // options [a,b,c,d]
   // correct is [0] by default
-  //
   function QuizMultipleChoice({ answer, question, num }: any) {
     let options = [answer];
     for (let i = 0; i < numOptions; i++) {
@@ -294,8 +373,8 @@ const Chat: React.FC<Props> = (props) => {
   // count is amount of words to randomly block out
   function QuizShortAnswer({ question, answer, num }: any) {
     return (
-      <QuestionHeader question={question} answer={answer} q_num={num} >
-        <Input className="  w-[10svw]   ml-[30svw]"/>
+      <QuestionHeader question={question} answer={answer} q_num={num}>
+        <Input className="  w-[10svw]   ml-[30svw]" />
       </QuestionHeader>
     );
   }
@@ -312,7 +391,7 @@ const Chat: React.FC<Props> = (props) => {
   function ConvertAllToTest({ multipleChoice, shortAnswer }: any) {
     if (multipleChoice && !shortAnswer)
       return (
-        <ScrollArea className="overflow-auto mb-5">
+        <ScrollArea className="overflow-auto  mb-[10svh]">
           {practiceTerms.map((term, idx) => (
             <div>
               <QuizMultipleChoice
@@ -322,12 +401,11 @@ const Chat: React.FC<Props> = (props) => {
               />
             </div>
           ))}
-
         </ScrollArea>
       );
     if (multipleChoice && shortAnswer)
       return (
-        <ScrollArea className="overflow-auto mb-5">
+        <ScrollArea className="overflow-auto  mb-[10svh]">
           {practiceTerms.map((term, idx) => (
             <div>
               {idx % 2 == 0 ? (
@@ -350,7 +428,7 @@ const Chat: React.FC<Props> = (props) => {
 
     if (shortAnswer) {
       return (
-        <ScrollArea className="overflow-auto mb-5">
+        <ScrollArea className="overflow-auto mb-[10svh]">
           {practiceTerms.map((term, idx) => (
             <div>
               <QuizShortAnswer
@@ -396,69 +474,66 @@ const Chat: React.FC<Props> = (props) => {
                   multipleChoice={multipleChoiceOn}
                   shortAnswer={shortAnswerOn}
                 />
-               
 
-                {multipleChoiceOn || shortAnswerOn ?
+                <SubmitButton
+                  shortAnswerOn={shortAnswerOn}
+                  multipleChoiceOn={multipleChoiceOn}
+                />
+                <ControlsOverlay
+                  handleStringToInt={handleStringToInt}
+                  numOptions={numOptions}
+                  multipleChoiceOn={multipleChoiceOn}
+                  setMultipleChoiceOn={setMultipleChoiceOn}
+                  shortAnswerOn={shortAnswerOn}
+                  setShortAnswerOn={setShortAnswerOn}
+                />
 
-                <div className="justify-items-end pt-5  bg-zinc-200 ">
-                 
-                  <Button className=" w-[15svw] right-[5svw] mr-[8svw]  mb-[2svh]">
-                  Submit
-                </Button>
-                <p className="mx-auto italic text-center"></p>
-                
-            </div> :   <div></div>
-                }
-                  
-           
-                 
-          
-
-                <div className="left-[20svw] top-[10svh] absolute">
-                  <label className="text-sm ml-5">
-                    Select amount of options
-                  </label>
-                  <div className="ml-5">
-                    <Select
-                      onValueChange={handleStringToInt}
-                      defaultValue={numOptions + ""}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue
-                          className="text-xs"
-                          placeholder="Pick # of options"
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="2">3</SelectItem>
-                          <SelectItem value="3">4</SelectItem>
-                          <SelectItem value="4">5</SelectItem>
-                          <SelectItem value="5">6</SelectItem>
-                          <SelectItem value="6">7</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="ml-5 mt-5 py-2 bg-gray-200 rounded-lg">
-                    <Label className="text-sm ml-2">Multiple Choice? </Label>
-                    <Switch
-                      value={Number(multipleChoiceOn)}
-                      className="ml-4"
-                      onClick={() => setMultipleChoiceOn(!multipleChoiceOn)}
-                      defaultChecked={true}
-                    />
-                  </div>
-
-                  <div className="ml-5 mt-5 py-2 bg-gray-200 rounded-lg ">
-                    <Label className="text-sm ml-2">Short Answer? </Label>
-                    <Switch
-                      value={Number(shortAnswerOn)}
-                      onClick={() => setShortAnswerOn(!shortAnswerOn)}
-                      className="ml-7"
-                    />
-                  </div>
-                </div>
+{/* <div>
+        <div className="ml-[.5svw] left-[19.75svw] top-[9.5svh] absolute bg-gradient-to-r from-teal-300 to-emerald-200 w-[12.5svw] justify-items-center py-[2svh] rounded-2xl h-[24.75svh]" />
+        <div className="ml-[.5svw] left-[20svw] top-[10svh] absolute bg-gradient-to-r from-emerald-300 to-emerald-200 w-[12svw] justify-items-center py-[2svh] rounded-2xl">
+          <Label className="text-sm font-bold">Select amount of choices</Label>
+          <div className="z-10">
+            <Select
+              onValueChange={handleStringToInt}
+              defaultValue={String(numOptions)}
+            >
+              <SelectTrigger className="w-[180px] bg-zinc-200">
+                <SelectValue 
+                  className="text-xs"
+                  placeholder="Pick # of options"
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="2">3</SelectItem>
+                  <SelectItem value="3">4</SelectItem>
+                  <SelectItem value="4">5</SelectItem>
+                  <SelectItem value="5">6</SelectItem>
+                  <SelectItem value="6">7</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+  
+          <div className="mt-5 py-2 bg-gray-200 rounded-lg px-2">
+            <Label className="text-sm ml-2">Multiple Choice?</Label>
+            <Switch
+              checked={multipleChoiceOn}
+              onCheckedChange={setMultipleChoiceOn}
+              className="ml-4 data-[state=checked]:bg-emerald-500"
+            />
+          </div>
+  
+          <div className="mt-5 py-2 bg-gray-200 rounded-lg px-2">
+            <Label className="text-sm ml-2">Short Answer?</Label>
+            <Switch
+              checked={shortAnswerOn}
+              onCheckedChange={setShortAnswerOn}
+              className="ml-7 data-[state=checked]:bg-emerald-500"
+            />
+          </div>
+        </div>
+      </div> */}
               </ResizablePanelGroup>
             </ResizablePanel>
           </ResizablePanelGroup>
