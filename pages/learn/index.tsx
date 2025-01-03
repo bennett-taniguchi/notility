@@ -12,7 +12,7 @@ import {
 } from "../../components/ui/resizable";
 import Sidebar from "../../components/sidebar/Sidebar";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useReducer, useState } from "react";
  
 import TablePage from "../../components/learn/table/page";
 import { Separator } from "../../components/ui/separator";
@@ -102,11 +102,15 @@ export type Props = {
 
 const Chat: React.FC<Props> = (props) => {
   const { data: session } = useSession();
+  const Router = useRouter();
+
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
+
+
   const [selectedRowsL, setSelectedRowsL] = useState<number[]>([]);
   const [selectedTitlesL, setSelectedTitlesL] = useState<string[]>([]);
-  const Router = useRouter();
+ 
   const { selectedRows, setSelectedRows, selectedTitles, setSelectedTitles } =
     useContext(SelectedRowsContext);
 

@@ -132,7 +132,7 @@ export default function ChatSidebar({ Router, location, props }) {
       deleteNotes(e, removedNote.title);
     }
   };
-  console.log(Router.asPath)
+ 
   return (
     <CommandGroup className="pb-[50px]">
       {/* Prompt Bar Component  (Chat) */}

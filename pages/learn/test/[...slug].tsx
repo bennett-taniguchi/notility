@@ -6,7 +6,7 @@ import { getSession, useSession } from "next-auth/react";
 
 import { Flashcard } from "@prisma/client";
 import { Router, useRouter } from "next/router";
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, useReducer, Dispatch } from "react";
 import Layout from "../../../components/Layout";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import { Button } from "../../../components/ui/button";
@@ -108,22 +108,84 @@ type Card = {
 };
 const Chat: React.FC<Props> = (props) => {
   const Router = useRouter();
-  const [answered, setAnswered] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<string[]>([]);
-
-  const [multipleChoiceOn, setMultipleChoiceOn] = useState(true);
-  const [shortAnswerOn, setShortAnswerOn] = useState(false);
+    //////////////////////////////////
+  
+    function reducer(state , action  )   {
+  switch (action.type) {
+    case 'user_restart':
+      return {
+        ...state,
+        answered: false,
+        userAnswers: [],
+      };
+    case 'user_answered': 
+    
+      return {
+       ...state,
+       answered:true
+      };
+    
+   
+    case 'short_answer_toggled': 
+      
+      return {
+        ...state,
+         shortAnswerOn: !state.shortAnswerOn
+      };
+    
+    case 'multiple_choice_toggled': 
+      return {
+        ...state,
+        multipleChoiceOn: !state.multipleChoiceOn
+      };
+    
+    case 'options_changed': 
+      return {
+       ...state,
+       numOptions: action.numOptions
+      };
+    
+    case 'user_answer_inputted': 
+    console.log(action)
+      return {
+        ...state,
+        userAnswers: action.userAnswers
+      };
+    
+      case 'init_user_answers': 
+      console.log(action)
+      return {
+        ...state,
+        userAnswers: action.userAnswers
+      }
+      
+      
+    default:return state;
+  }
+ 
+}
+ 
+  const initialState = 
+   { answered:false, userAnswers:[], multipleChoiceOn:true, shortAnswerOn:false, numOptions:4,
+      practiceTerms: []
+    }
+  ;
+// answered:boolean, userAnswers:[], multipleChoiceOn:boolean, 
+// shortAnswerOn:boolean , numOptions:number, practiceTerms: Card[] (any[])
+ 
+  const [val, dispatch] = useReducer (reducer, initialState);
+  
+  /////////////////
+ 
+ 
   const [numOptions, setNumOptions] = useState(4);
   const [practiceTerms, setPracticeTerms] = useState<any[]>([]);
-  const [cardClicked, setCardClicked] = useState(false);
+ 
   const { data: session } = useSession();
 
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [text, setText] = useState();
-  const [currentCard, setCurrentCard] = useState(0);
-  const [currentScore, setCurrentScore] = useState(0);
-
+ 
   const { slug } = Router.query;
 
   const [progress, setProgress] = useState(13);
@@ -135,9 +197,11 @@ const Chat: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (practiceTerms.length == 0) retrieve();
+   
   }, []);
 
-  useEffect(() => {}, [multipleChoiceOn, shortAnswerOn]);
+  useEffect(() => {   }, [val.multipleChoiceOn, val.shortAnswerOn, val.answered,]);
+
   async function retrieve() {
     let titles = JSON.parse((slug as any)[0]);
 
@@ -154,6 +218,11 @@ const Chat: React.FC<Props> = (props) => {
           vals.push({ front: each.term, back: each.answer });
         }
       setPracticeTerms(vals);
+      dispatch({
+        type:'init_user_answers',
+        userAnswers: new Array(vals.length)
+      })
+    
     } else {
       const res = await fetch("/api/flashcard/get/" + titles, {
         method: "GET",
@@ -167,11 +236,15 @@ const Chat: React.FC<Props> = (props) => {
           vals.push({ front: each.term, back: each.answer });
         }
       setPracticeTerms(vals);
+      dispatch({
+        type:'init_user_answers',
+        userAnswers: new Array(vals.length)
+      })
     }
+   
     return;
   }
-  //const [practiceTerms, setPracticeTerms] = useState<Card[]>()
-  // will be provided as comp param
+ 
   if (!session || !practiceTerms) {
     return (
       <Layout>
@@ -180,85 +253,19 @@ const Chat: React.FC<Props> = (props) => {
     );
   }
 
-  function handleCardClick(e: React.SyntheticEvent) {
-    if (!cardClicked) {
-      setCardClicked(!cardClicked);
-    } else {
-      if (currentCard != practiceTerms.length - 1) {
-        setCurrentCard(currentCard + 1);
-        setCardClicked(false);
-      }
-    }
-  }
-
-  function handleFormSubmit(e?: React.SyntheticEvent) {
-    e?.preventDefault();
-    setCardClicked(true);
-    if (text === practiceTerms[currentCard].back && cardClicked != true) {
-      if (currentCard != practiceTerms.length - 1) {
-        setCardClicked(false);
-        setCurrentCard(currentCard + 1);
-        setCurrentScore(currentScore + 1);
-
-        console.log(currentCard + 1);
-      } else {
-        setCurrentCard(0);
-      }
-    }
-
-    // check correctness of card
-    // increment counter if true (index and score)
-    // flip and green effect
-    // flip and red effect
-
-    // need click to continue on already flipped card
-  }
-  function handleEnterPress(e: React.KeyboardEvent) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleFormSubmit();
-    }
-  }
-
-  function handleRestart() {
-    setCurrentCard(0);
-    setCardClicked(false);
-    setCurrentScore(0);
-  }
-
-  function handleShuffle() {
-    let i = practiceTerms.length;
-    let arr = new Array(0);
-    for (let j = 0; j < practiceTerms.length; j++) {
-      arr[j] = practiceTerms[j];
-    }
-    // While there remain elements to shuffle...
-    while (i != 0) {
-      // Pick a remaining element...
-      let randomIndex = Math.floor(Math.random() * i);
-      i--;
-
-      // And swap it with the current element.
-      [arr[i], arr[randomIndex]] = [arr[randomIndex], arr[i]];
-    }
-    setPracticeTerms(arr);
-
-    handleRestart();
-  }
+ 
   interface ControlsOverlayProps {
     handleStringToInt: (value: string) => void;
     numOptions: number;
-    multipleChoiceOn: boolean;
-    setMultipleChoiceOn: (value: boolean) => void;
-    shortAnswerOn: boolean;
-    setShortAnswerOn: (value: boolean) => void;
+  
+    
   }
 
   function AnswersOverlay({ s }: any) {
     function GetFinalRatio({ s }: any) {
-      if (answered) {
+      if (val.answered) {
         let correctNum = practiceTerms.filter(
-          (term, idx) => term.back === userAnswers[idx]
+          (term, idx) => term.back === val.userAnswers[idx]
         );
 
         return (
@@ -271,22 +278,22 @@ const Chat: React.FC<Props> = (props) => {
       return <div> </div>;
     }
     function GetResult({ idx }: any) {
-      if (!answered)
+      if (!val.answered)
         return (
           <p className="ml-2 pt-1 font-light text-sm ">Question {idx + 1} </p>
         );
-      if (!userAnswers[idx])
+      if (!val.userAnswers[idx])
         return (
           <p className="ml-2 pt-1 font-light text-sm ">
             Question {(idx = 1)}{" "}
-            {answered && !userAnswers[idx] ? (
+            {val.answered && !val.userAnswers[idx] ? (
               <span className="text-xs text-red-400  ">Unanswered</span>
             ) : (
               ""
             )}
           </p>
         );
-      if (userAnswers[idx] == practiceTerms[idx].back) {
+      if (val.userAnswers[idx] == practiceTerms[idx].back) {
         return (
           <p className="ml-2 pt-1 font-light text-sm ">
             {"Question " + (idx + 1)}
@@ -314,7 +321,7 @@ const Chat: React.FC<Props> = (props) => {
           >
             <div className="overflow-y-auto">
               {practiceTerms.map((term, idx) => (
-                <GetResult idx={idx} />
+                <GetResult idx={idx}  key={idx}/>
               ))}
             </div>
           </ScrollArea>
@@ -326,10 +333,8 @@ const Chat: React.FC<Props> = (props) => {
   const ControlsOverlay: React.FC<ControlsOverlayProps> = ({
     handleStringToInt,
     numOptions,
-    multipleChoiceOn,
-    setMultipleChoiceOn,
-    shortAnswerOn,
-    setShortAnswerOn,
+   
+   
   }) => {
     return (
       <div>
@@ -362,8 +367,8 @@ const Chat: React.FC<Props> = (props) => {
           <div className="mt-5 py-2 bg-gray-200 rounded-lg px-2">
             <Label className="text-sm ml-2">Multiple Choice?</Label>
             <Switch
-              checked={multipleChoiceOn}
-              onCheckedChange={setMultipleChoiceOn}
+              checked={val.multipleChoiceOn}
+              onCheckedChange={(e) => dispatch({type:'multiple_choice_toggled'})}
               className="ml-4 data-[state=checked]:bg-emerald-500"
             />
           </div>
@@ -371,8 +376,8 @@ const Chat: React.FC<Props> = (props) => {
           <div className="mt-5 py-2 bg-gray-200 rounded-lg px-2">
             <Label className="text-sm ml-2">Short Answer?</Label>
             <Switch
-              checked={shortAnswerOn}
-              onCheckedChange={setShortAnswerOn}
+              checked={val.shortAnswerOn}
+              onCheckedChange={(e)=> dispatch({type:'short_answer_toggled' })}
               className="ml-7 data-[state=checked]:bg-emerald-500"
             />
           </div>
@@ -380,34 +385,35 @@ const Chat: React.FC<Props> = (props) => {
       </div>
     );
   };
+ 
 
   function RestartButton({}: any) {
-    function restart() {
-      setUserAnswers([])
-      setAnswered(false)
-     
-    }
+
+
     return (
      
         
         <Button
           className=" w-[8svw] right-[15svw]    mb-[2svh]  "
-          onClick={() => restart()}
+          onClick={ (e)=> dispatch({
+            type:'user_restart'
+          })}
         >
           Restart
         </Button> 
      
     );
   }
-  function SubmitRestartButton({ multipleChoiceOn, shortAnswerOn }: any) {
+  function SubmitRestartButton({   }: any) {
+  
     return (
       <div>
-        {multipleChoiceOn || shortAnswerOn ? (
+        {val.multipleChoiceOn || val.shortAnswerOn ? (
           <div className="justify-items-end pt-5  bg-transparent absolute bottom-0 ml-[60svw] flex flex-col   ">
             
             <Button
               className=" w-[8svw] right-[5svw] mr-[5svw]  mb-[2svh]  "
-              onClick={() => setAnswered(true)}
+              onClick={(e) => dispatch({type:'user_answered' })}
             >
               Submit
             </Button>
@@ -437,10 +443,13 @@ const Chat: React.FC<Props> = (props) => {
       </div>
     );
   }
-  function updateAnswers(val: string, num: number) {
-    let vals = userAnswers;
-    vals[num] = val;
-    setUserAnswers(vals);
+  function updateAnswers(ans: string, num: number) {
+    let vals = [...val.userAnswers];
+    vals[num] = ans;
+   dispatch({
+    type:'user_answer_inputted',
+    userAnswers: vals
+   })
   }
 
   // options [a,b,c,d]
@@ -473,9 +482,9 @@ const Chat: React.FC<Props> = (props) => {
       return "bg-transparent";
     }
 
-    if (answered) {
-      let user_ans = options.indexOf(userAnswers[num]);
-      console.log("user_ans", user_ans, userAnswers[num], options);
+    if (val.answered) {
+      let user_ans = options.indexOf(val.userAnswers[num]);
+     console.log(options)
       return (
         <QuestionHeader question={question} q_num={q_num}>
           <RadioGroup
@@ -511,27 +520,28 @@ const Chat: React.FC<Props> = (props) => {
         >
           {options.map((ans, idx) => (
             <div className=" ml-[30svw] flex items-end space-x-2  " key={idx}>
-              <RadioGroupItem value={ans} id={idx + "r"} />
+              <RadioGroupItem checked={val.userAnswers[num] == ans}value={ans} id={idx + "r"} />
               <Label htmlFor={"r" + idx}>{ans}</Label>
             </div>
           ))}
         </RadioGroup>
       </QuestionHeader>
     );
+
   }
-  // question is string
-  // count is amount of words to randomly block out
+
+  // Answer with vocab word
   function QuizShortAnswer({ question, answer, num }: any) {
     function compareAnswer() {
-      if (answer == userAnswers[num] && userAnswers[num] == answer) {
+      if (answer == val.userAnswers[num] && val.userAnswers[num] == answer) {
         return "outline outline-offset-2 outline-emerald-500 ";
       }
       return "outline outline-offset-2 outline-rose-500 ";
     }
 
-    if (answered) {
+    if (val.answered) {
       let incorrect = !(
-        answer == userAnswers[num] && userAnswers[num] == answer
+        answer == val.userAnswers[num] && val.userAnswers[num] == answer
       );
       return (
         <QuestionHeader question={question} answer={answer} q_num={num}>
@@ -568,12 +578,13 @@ const Chat: React.FC<Props> = (props) => {
     setNumOptions(parseInt(value));
   };
 
-  function ConvertAllToTest({ multipleChoice, shortAnswer }: any) {
-    if (multipleChoice && !shortAnswer)
+  function ConvertAllToTest({  }: any) {
+   
+    if (val.multipleChoiceOn && !val.shortAnswerOn)
       return (
         <ScrollArea className="overflow-auto  pb-[10svh]" viewportRef={null}>
           {practiceTerms.map((term, idx) => (
-            <div>
+            <div key={idx}>
               <QuizMultipleChoice
                 question={term.front}
                 answer={term.back}
@@ -583,11 +594,12 @@ const Chat: React.FC<Props> = (props) => {
           ))}
         </ScrollArea>
       );
-    if (multipleChoice && shortAnswer)
+    if (val.multipleChoiceOn && val.shortAnswerOn)
+     
       return (
         <ScrollArea className="overflow-auto  pb-[10svh]" viewportRef={null}>
           {practiceTerms.map((term, idx) => (
-            <div>
+            <div  key={idx}>
               {idx % 2 == 0 ? (
                 <QuizMultipleChoice
                   question={term.front}
@@ -606,11 +618,11 @@ const Chat: React.FC<Props> = (props) => {
         </ScrollArea>
       );
 
-    if (shortAnswer) {
+    if (val.shortAnswerOn) {
       return (
         <ScrollArea className="overflow-auto pb-[10svh]" viewportRef={null}>
           {practiceTerms.map((term, idx) => (
-            <div>
+            <div  key={idx}>
               <QuizShortAnswer
                 question={term.front}
                 answer={term.back}
@@ -651,23 +663,22 @@ const Chat: React.FC<Props> = (props) => {
                 {/* perfect scrolling method */}
 
                 <ConvertAllToTest
-                  multipleChoice={multipleChoiceOn}
-                  shortAnswer={shortAnswerOn}
+                  
+                 
                 />
                
                 <SubmitRestartButton
-                  shortAnswerOn={shortAnswerOn}
-                  multipleChoiceOn={multipleChoiceOn}
+                  
+               
                 />   
                 
                
                 <ControlsOverlay
                   handleStringToInt={handleStringToInt}
                   numOptions={numOptions}
-                  multipleChoiceOn={multipleChoiceOn}
-                  setMultipleChoiceOn={setMultipleChoiceOn}
-                  shortAnswerOn={shortAnswerOn}
-                  setShortAnswerOn={setShortAnswerOn}
+                
+               
+                 
                 />
                 <AnswersOverlay />
               </ResizablePanelGroup>

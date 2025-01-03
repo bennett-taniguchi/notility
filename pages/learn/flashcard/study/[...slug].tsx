@@ -11,7 +11,7 @@ import {
 } from "../../../../components/ui/resizable";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Card } from "../../../../components/ui/card";
 import { Button } from "../../../../components/ui/button";
 import { Textarea } from "../../../../components/ui/textarea";
@@ -89,21 +89,24 @@ type Card = {
   back: string;
 };
 const Chat: React.FC<Props> = (props) => {
-  
-  
+  const { data: session } = useSession()
+  const router = useRouter();
+  const {slug} = router.query
+
+
+
   const [practiceTerms, setPracticeTerms] = useState<Card[]>([]);
   const [cardClicked, setCardClicked] = useState(false);
-  const { data: session } = useSession();
- 
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const [text, setText] = useState();
   const [currentCard, setCurrentCard] = useState(0);
   const [currentScore, setCurrentScore] = useState(0);
-  const router = useRouter();
-  const {slug} = router.query
   const [progress, setProgress] =  useState(13)
+
  
+
+
   useEffect(() => {
     const timer = setTimeout(() => setProgress(66), 500)
     return () => clearTimeout(timer)
