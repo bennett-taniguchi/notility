@@ -210,7 +210,7 @@ const Chat: React.FC<Props> = (props) => {
 
       let body = { title, description, cards };
 
-      const result = await fetch("/api/flashcard/create", {
+      await fetch("/api/flashcard/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -313,6 +313,7 @@ const Chat: React.FC<Props> = (props) => {
                       >
                         -
                       </Button>
+                      
                       <Button
                         variant="outline"
                         className="w-15 h-10 right-[0px] fixed top-[5px] span-2  mt-[5px] mr-[50px] rounded-full"
@@ -320,6 +321,7 @@ const Chat: React.FC<Props> = (props) => {
                       >
                         Save
                       </Button>
+                     
                     </div>
                   </div>
                 </ScrollArea>

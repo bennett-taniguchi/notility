@@ -1,5 +1,5 @@
 "use client";
-
+import { CiCirclePlus } from "react-icons/ci";
 import {
   ColumnDef,
   flexRender,
@@ -45,10 +45,27 @@ import Router from "next/router";
 import Link from "next/link";
 import { SelectedRowsContext } from "../../context/context";
 import { cn } from "../../lib/utils";
+
 import {
-  TableRowComponent,
-  TableRowProps,
-} from "react-markdown/lib/ast-to-react";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../ui/dialog";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../../ui/select";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -59,10 +76,15 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [toggleAlert, setToggleAlert] = useState(undefined as undefined | true);
+  const [open, setOpen] = useState(false);
+  const [selectedTitle, setSelectedTitle] = useState("");
+  const [newTitle,setNewTitle] = useState('')
+  const [selectedDifficulty, setSelectedDifficulty] = useState("");
+  const [newDifficulty, setNewDifficulty] = useState("");
   const [sorting, setSorting] = useState<SortingState>([
     { id: "last_practiced", desc: true },
   ]);
+
   const { selectedRows, setSelectedRows, setSelectedTitles } =
     useContext(SelectedRowsContext);
 
@@ -77,20 +99,10 @@ export function DataTable<TData, TValue>({
     onSortingChange: setSorting,
   });
 
-  function setAlertState() {
-    if (toggleAlert == undefined) {
-      setToggleAlert(true);
-    } else {
-      setToggleAlert(undefined);
-    }
-  }
-
   async function deleteCard(cardName: string) {
     // delete
     // toggle alert
-
-    await setAlertState();
-
+    setOpen(false)
     await fetch("/api/flashcard/delete/" + cardName, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -98,19 +110,41 @@ export function DataTable<TData, TValue>({
     await Router.push("/learn");
   }
 
-  async function editCardName() {}
+    function editCard(name: string, difficulty: string) {
+      setSelectedTitle(name);
+    setSelectedDifficulty(difficulty);
+      setNewTitle(name) 
+      setNewDifficulty(difficulty)
+    setOpen(true);
+    
+  } 
+  async function updateCard() {
+    setOpen(false)
+    if(selectedTitle != newTitle || newDifficulty != selectedDifficulty) {
+      const title = newTitle;
+      const difficulty = newDifficulty;
+      const oldTitle = selectedTitle;
+      const body = { title, difficulty, oldTitle };
 
-  async function editCards(title: string) {
-    const res = await fetch("/api/card/get/" + title, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    let result = await res.json();
-    await console.log(result.cards);
+      await fetch("/api/flashcard/update/" , {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      await Router.push("/learn");
+    }
   }
 
+  // async function editCards(title: string) {
+  //   const res = await fetch("/api/card/get/" + title, {
+  //     method: "GET",
+  //     headers: { "Content-Type": "application/json" },
+  //   });
+  //   let result = await res.json();
+  //   await console.log(result.cards);
+  // }
+
   function onCellClicked(idx: number, row: any) {
-    if (toggleAlert) return;
     row.toggleSelected();
     let name = row.getValue("name");
     if (selectedRows.includes(name)) {
@@ -121,10 +155,66 @@ export function DataTable<TData, TValue>({
     }
   }
 
-  useEffect(() => {}, [selectedRows, toggleAlert]);
+  useEffect(() => {}, [selectedRows]);
 
   return (
     <div className="rounded-md border">
+      <Dialog modal={true} open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-[425px]  ">
+          <DialogHeader>
+            <DialogTitle>Edit Set</DialogTitle>
+            <DialogDescription>
+              Change difficulty, name, or delete set
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+       
+            <div className="grid grid-cols-4 items-center gap-4 -ml-[3svw]">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input id="name" onChange={e => setNewTitle(e.currentTarget.value)} value={newTitle} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4 -ml-[3svw]">
+              <Label htmlFor="username" className="text-right">
+                Difficulty
+              </Label>
+              <Select onValueChange={setNewDifficulty} value={newDifficulty}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder={newDifficulty} />
+                </SelectTrigger>
+                <SelectContent defaultValue={newDifficulty}>
+                  <SelectGroup>
+                    <SelectItem value="🟩">🟩</SelectItem>
+                    <SelectItem value="🟨">🟨</SelectItem>
+                    <SelectItem value="🟥">🟥</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+                <div  className="ml-[5svw]">
+            <Link href=''>
+            <Button variant={'secondary'}>
+              Edit Terms <CiCirclePlus className="ml-2 w-5 h-5"/>
+            </Button>
+            </Link></div>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant={"destructive"}
+              className="mx-auto ml-0"
+              type="submit"
+              onClick={()=>deleteCard(selectedTitle) }
+            >
+              Delete Set
+            </Button>
+            <Button className="mx-auto" type="submit" onClick={()=>updateCard()}  >
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -155,64 +245,22 @@ export function DataTable<TData, TValue>({
                 {row.getVisibleCells().map((cell, idx) =>
                   idx == 0 ? (
                     <TableCell key={cell.id} className={"flex flex-grow"}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger>
-                          {" "}
-                          <DotsVerticalIcon className="translate-x-[-5px] stroke-gray scale-110 hover:bg-zinc-200 rounded" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem
-                            className="text-red-600 focus:text-red-600"
-                            onClick={() => setAlertState()}
-                          >
-                            Delete
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>Rename</DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => editCards(row.getValue("name"))}
-                          >
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>Share</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      <AlertDialog
-                        open={toggleAlert}
-                        onOpenChange={setToggleAlert as any}
-                      >
-                        <AlertDialogTrigger asChild></AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Are you absolutely sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Confirm that you want to permanately delete this
-                              file.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setAlertState()}>
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deleteCard(row.getValue("name"))}
-                            >
-                              Continue
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-
-                     
-                        <u className="hover:text-zinc-400">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </u>
-                     
+                      {" "}
+                      <DotsVerticalIcon
+                        className="translate-x-[-5px] stroke-gray scale-110 hover:bg-zinc-200 rounded"
+                        onClick={() =>
+                          editCard(
+                            row.getValue("name"),
+                            row.getValue("difficulty")
+                          )
+                        }
+                      />
+                      <u className="hover:text-zinc-400">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </u>
                     </TableCell>
                   ) : (
                     <TableCell key={cell.id}>

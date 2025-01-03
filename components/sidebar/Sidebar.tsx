@@ -22,10 +22,10 @@ export default function Sidebar({
   if (!props) return <div></div>;
 
   return (
-    <ScrollArea className="rounded-md">
-      <Command className="  size-full rounded-lg bg-teal-50">
-        <CommandInput placeholder="Search Title:" />
-        <CommandList className="overflow-hidden h-screen">
+    <ScrollArea className=" ">
+      <Command className="  size-full  sidebarGradient opacity-90  ">
+        <CommandInput className=" " placeholder="Search Title:"    />
+        <CommandList className="overflow-hidden h-screen  ">
           <CommandEmpty>No results found.</CommandEmpty>
           <NoteSidebar
             Router={Router}

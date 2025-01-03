@@ -7,7 +7,7 @@ import { Flashcard } from "@prisma/client";
 export default async function handle(req, res) {
   const  title  = req.query.title;
    
-  console.log('taaa',title)
+ 
   const session = await getServerSession(req, res, authOptions);
  
   

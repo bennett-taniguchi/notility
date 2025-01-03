@@ -112,6 +112,9 @@ body {
   background-size: 400% 400%;
   animation: gradient 9s ease infinite;
 }
+.sidebarGradient {
+  background-image: linear-gradient(to right top, #c0e652, #bfe054, #bed955, #bcd357, #bacd59, #aecd62, #a2cd6c, #97cd75, #80d18b, #6ad4a2, #58d5b8, #4ed5cc);
+}
 
 @keyframes gradient {
   0% {

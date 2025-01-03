@@ -24,6 +24,7 @@ export default async function handle(req, res) {
       rating: 0,
       practiceCount: 0,
       cards: { create: flashcards },
+      last_practiced: (new Date()).toDateString(),
     },
   });
 

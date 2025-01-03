@@ -8,7 +8,7 @@ export default async function handle(req, res) {
   const  {cardName}  = req.body;
    
   const session = await getServerSession(req, res, authOptions);
- console.log(cardName,session.id)
+ 
   
  
   const result = await prisma.card.deleteMany({

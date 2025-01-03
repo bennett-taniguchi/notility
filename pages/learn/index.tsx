@@ -13,7 +13,7 @@ import {
 import Sidebar from "../../components/sidebar/Sidebar";
 
 import { useContext, useEffect, useState } from "react";
-import { Card, CardTitle } from "../../components/ui/card";
+ 
 import TablePage from "../../components/learn/table/page";
 import { Separator } from "../../components/ui/separator";
 import Link from "next/link";
@@ -26,6 +26,7 @@ import {
   TooltipContent,
 } from "@radix-ui/react-tooltip";
 import { useRouter } from "next/router";
+import { Card, Flashcard } from "@prisma/client";
 
 // figure out vector search, use diff namespaced stuff: "default_calculus"
 // then prompt using context from closest cosine similarity from vec db
@@ -75,6 +76,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     props: { messages, notes, analyzed, flashcards, cards },
   };
 };
+ 
 // define messages
 type Message = {
   index?: number;
@@ -93,8 +95,8 @@ type Analyzed = {
 export type Props = {
   messages: Message[];
   analyzed: Analyzed[];
-  testcards: any;
-  flashcards: any;
+ 
+  flashcards: Flashcard[];
   cards: any;
 };
 
@@ -128,6 +130,16 @@ const Chat: React.FC<Props> = (props) => {
     );
   }
 
+  async function updateLastPracticed(rows:any) {
+    
+    await fetch("/api/flashcard/update/last_practiced/" + rows, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+    });
+   
+ 
+  }
+  
   if (props)
     return (
       <Layout>
@@ -175,17 +187,17 @@ const Chat: React.FC<Props> = (props) => {
                       </Link>
                     </div>
                     <div className="translate-y-[-20px]">
-                      <TablePage sets={props.flashcards} />
+                      <TablePage sets={props.flashcards} cards={props.cards}/>
 
                       <div className="pl-9 translate-y-[-15px] ">
-                        <div className="flex flex-row">
-                          <p className="m-0 left-0 text-sm pb-5 -ml-4">
-                            {selectedRowsL.length + 0 + " selected rows"}
+                        <div className="flex flex-row justify-end ">
+                          <p className="m-0 left-0 text-sm pb-5 mr-[2svw]">
+                            {selectedRowsL.length + 0 + " selected"}
                           </p>
                           <TooltipProvider>
                             <Tooltip delayDuration={0}>
                               <TooltipTrigger asChild>
-                                <div className="w-5 h-5 -mb-2 ml-2">
+                                <div className="w-5 h-5   mr-[2svw] -mb-1">
                                   <FaRegQuestionCircle className="my-auto" />
                                 </div>
                               </TooltipTrigger>
@@ -202,7 +214,7 @@ const Chat: React.FC<Props> = (props) => {
                         ) : (
                           <div className="flex flex-row">
                             <div>
-                              <Button disabled={selectedRowsL.length == 0}>
+                              <Button disabled={selectedRowsL.length == 0} onClick={()=>updateLastPracticed(selectedRowsL)}>
                                 <Link
                                   href={`
                         /learn/flashcard/study/${encodeURIComponent(
@@ -215,7 +227,7 @@ const Chat: React.FC<Props> = (props) => {
                             </div>
 
                             <div className="pl-5">
-                              <Button disabled={selectedRowsL.length == 0}>
+                              <Button disabled={selectedRowsL.length == 0} onClick={()=>updateLastPracticed(selectedRowsL)}>
                                 {" "}
                                 <Link
                                   shallow={true}

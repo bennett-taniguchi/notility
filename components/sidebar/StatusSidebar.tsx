@@ -11,9 +11,9 @@ export default function StatusSidebar() {
   const { data: session, status } = useSession();
 
   return (
-    <Menubar className="bottom-0 fixed flex justify-center bg-emerald-200 shadow-inner w-[20vw] overflow-hidden">
+    <Menubar className="bottom-0 fixed flex justify-center bg-gradient-to-r from-white to-emerald-200 to-50% shadow-inner w-[20vw] overflow-hidden border-0 rounded-none">
       <MenubarMenu>
-        <div className="font-bold pr-2 hover:bg-emerald-300 rounded pl-2 w-max bg-emerald-300 landingCard">
+        <div className="font-bold pr-2 landingCard">
           <Link href="/">Notility</Link>
         </div>
       </MenubarMenu>
@@ -47,7 +47,7 @@ export default function StatusSidebar() {
         {session ? (
           <MenubarTrigger
             onClick={() => signOut()}
-            className="text-sm inline-block whitespace-nowrap hover:bg-emerald-300 justify-self-end pr-2 landingCard  data-[state=open]:bg-emerald-600 data-[state=closed]:bg-emerald-300 p-1"
+            className="text-sm inline-block whitespace-nowrap  justify-self-end pr-2 landingCard  data-[state=open]:bg-transparent data-[state=closed]:bg-transparent p-1"
           >
             Log Out
           </MenubarTrigger>

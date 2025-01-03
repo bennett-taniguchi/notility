@@ -19,8 +19,8 @@ export default function LearnSidebar({ location, Router }) {
         onSelect={handleNavLearn}
         className={
           location === "learn"
-            ? "bg-emerald-300 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(31,78,47,.5)] landingCard"
-            : "bg-[rgba(168,225,213,.5)] landingCard"
+            ? "bg-emerald-100  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(31,78,47,.5)] landingCard"
+            : "bg-[rgba(177,218,74,0.81)]  landingCard "
         }
       >
         <span className="text-md text-zinc-600 font-medium ">

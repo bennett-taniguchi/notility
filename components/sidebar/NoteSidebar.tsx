@@ -4,8 +4,9 @@ import {
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { CommandGroup, CommandItem } from "../ui/command";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function NoteSidebar({
   Router,
@@ -148,6 +149,10 @@ export default function NoteSidebar({
   // Update Edited Note
   const updateNote = async (e: React.SyntheticEvent, newTitle, newContent) => {
     e.preventDefault();
+    const Router = useRouter()
+    useEffect(()=>{
+
+    },[Router.asPath])
     if (newTitle === title) {
       return;
     }
@@ -177,8 +182,8 @@ export default function NoteSidebar({
         onSelect={handleNavNotes}
         className={
           location === "notes"
-            ? "bg-emerald-300  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(31,78,47,.5)] landingCard"
-            : "bg-[rgba(168,225,213,.5)]   landingCard"
+            ? "bg-emerald-100   drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(31,78,47,.5)] landingCard"
+            : "bg-[rgba(177,218,74,0.81)]  landingCard"
         }
       >
         <span className="text-md text-zinc-600 font-medium ">
@@ -195,9 +200,10 @@ export default function NoteSidebar({
           <Link href={"/notes/" + note.title} key={index}>
             <CommandItem
               className={
-                note.title == title
-                  ? "bg-cyan-100 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] my-[5px] landingCard"
-                  : "hover:box-shadow-[5px_5px_5px_rgba(103,232,249,.5)] my-[5px] landingCard"
+                decodeURIComponent(Router.asPath).includes(note.title) && location=='notes' ?
+                 "landingCard bg-emerald-200 mt-1"
+                :
+                "landingCard bg-[rgba(177,218,74,0.2)] mt-1"
               }
               id={note.title}
               onSelect={

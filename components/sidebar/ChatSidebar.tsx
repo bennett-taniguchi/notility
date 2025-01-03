@@ -132,7 +132,7 @@ export default function ChatSidebar({ Router, location, props }) {
       deleteNotes(e, removedNote.title);
     }
   };
-  
+  console.log(Router.asPath)
   return (
     <CommandGroup className="pb-[50px]">
       {/* Prompt Bar Component  (Chat) */}
@@ -141,8 +141,8 @@ export default function ChatSidebar({ Router, location, props }) {
         onSelect={handleNavChat}
         className={
           location === "chat"
-            ? "bg-emerald-300 drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(31,78,47,.5)] landingCard"
-            : "bg-[rgba(168,225,213,.5)]  landingCard"
+            ? "bg-emerald-100  drop-shadow-[5px_5px_5px_rgb(103,232,249,.5)] hover:drop-shadow-[5px_5px_5px_rgb(31,78,47,.5)] landingCard"
+            : "bg-[rgba(177,218,74,0.81)] landingCard"
         }
       >
         <span className="text-md text-zinc-600 font-medium ">
@@ -221,10 +221,15 @@ export default function ChatSidebar({ Router, location, props }) {
             <Link href={'/chat/'+item.title}>
             <CommandItem
               onSelect={(e) => handleNavAnalyzed(item.title)}
-              className="landingCard"
+              className={
+                decodeURIComponent(Router.asPath).includes(item.title) ?
+                 "landingCard bg-emerald-200 mt-1 text-slate-600"
+                :
+                "landingCard bg-[rgba(177,218,74,0.2)] mt-1 text-slate-600"
+              }
             >
               {item.title}
-                  <span>
+                  <span className="outline-none ">
                               <MinusCircledIcon
                                 id={idx + ""}
                                 onClick={handleMinusClick}

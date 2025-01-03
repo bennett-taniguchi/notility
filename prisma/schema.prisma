@@ -1,17 +1,14 @@
 generator client {
   provider = "prisma-client-js"
- 
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("SUPABASE_POSTGRES_PRISMA_URL") // uses connection pooling
+  provider  = "postgresql"
+  url       = env("SUPABASE_POSTGRES_PRISMA_URL") // uses connection pooling
   directUrl = env("SUPABASE_POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 // schema.prisma
-
- 
 
 model Account {
   id                 String  @id @default(cuid())
@@ -29,30 +26,30 @@ model Account {
   oauth_token_secret String?
   oauth_token        String?
 
-  user User @relation(fields:[userId], references:[id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  }
+}
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique@map("session_token")
+  sessionToken String   @unique @map("session_token")
   userId       String   @map("user_id")
   expires      DateTime
-  user         User     @relation(fields:[userId], references:[id], onDelete: Cascade)
-  }
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String?@unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
- 
-  accounts      Account[]
-  sessions      Session[]
-  notes         Notes[]
-  }
+
+  accounts Account[]
+  sessions Session[]
+  notes    Notes[]
+}
 
 model VerificationToken {
   id         Int      @id @default(autoincrement())
@@ -61,63 +58,60 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-  }
+}
 
 model Notes {
-  id         Int      @id @default(autoincrement())
-  title      String
-  content       String
-  author    User? @relation(fields:[authorId], references:[id])
-  authorId  String?
-  
-  @@unique([title,authorId])
+  id       Int     @id @default(autoincrement())
+  title    String
+  content  String
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  @@unique([title, authorId])
 }
 
 model Message {
-  index Int
-  authorId String 
-  role String
-  content String
-  title String
-  @@unique([index,authorId,title])
+  index    Int
+  authorId String
+  role     String
+  content  String
+  title    String
+
+  @@unique([index, authorId, title])
 }
 
 model Upload {
-  index Int @id @default(autoincrement())
+  index    Int    @id @default(autoincrement())
   authorId String
-  title String
-  content String
-  @@unique([title,authorId])
+  title    String
+  content  String
+
+  @@unique([title, authorId])
 }
 
 model Card {
   index Int @id @default(autoincrement())
 
-  title String
+  title    String
   authorId String
-  term String
-  answer String
+  term     String
+  answer   String
 
- 
- @@unique([term,answer,title])
-  
-flashcard Flashcard @relation(fields: [title, authorId], references: [title, authorId], onDelete: Cascade)
+  flashcard Flashcard @relation(fields: [title, authorId], references: [title, authorId], onDelete: Cascade)
 
+  @@unique([term, answer, title])
 }
 
 model Flashcard {
-  index Int @id @default(autoincrement())
-  authorId String
-  title String 
-  description String
-  rating Int
-  practiceCount Int?
-  
- 
-  
- cards    Card[]
-  @@unique([title,authorId])
- 
-}
+  index          Int    @id @default(autoincrement())
+  authorId       String
+  title          String
+  description    String
+  rating         Int
+  practiceCount  Int?
+  last_practiced String
 
- 
+  cards Card[]
+
+  @@unique([title, authorId])
+}

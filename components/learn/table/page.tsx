@@ -14,7 +14,7 @@ import { DotsVerticalIcon } from "@radix-ui/react-icons";
 //   ];
 // }
 
-export default function TablePage({ sets }) {
+export default function TablePage({ sets,cards }) {
   //const data = await getData();
 
   //cards : [ {index Int @id @default(autoincrement())
@@ -32,47 +32,35 @@ export default function TablePage({ sets }) {
     return <div></div>;
   }
 
+  function ratingToDifficulty(rating:number) {
+    if(rating==0)
+      return"🟩"
+    if(rating==1)
+      return"🟨"
+    if(rating==2)
+      return"🟥"
+    return"🟩"
+  }
+
+  function getCardAmt(title:string){
+    let arr = cards.filter((card) => card.title==title)
+    return arr.length
+  }
+
+  console.log(sets)
   for (let i = 0; i < sets.length; i++) {
     cardsUsed.push({
       id: "" + i,
       name: sets[i].title,
       status: "pending",
       email: "a@gmail.com",
-      difficulty: "🟩",
-      amount: sets[i].length,
-      last_practiced: new Date("2019-09-09").toDateString(),
+      difficulty: ratingToDifficulty(sets[i].rating),
+      amount: getCardAmt(sets[i].title),
+      last_practiced: (sets[i].last_practiced ) ,
     });
   }
 
-  // const data = [
-  //   {
-  //     id: "728ed52f",
-  //     name: "German 100 Flashcards",
-  //     status: "pending",
-  //     email: "m@example.com",
-  //     difficulty: "🟩",
-  //     amount: 30,
-  //     last_practiced: new Date("2019-09-09").toDateString(),
-  //   },
-  //   {
-  //     id: "728ed52g",
-  //     name: "Calculus Midterm I Material",
-  //     status: "pending",
-  //     email: "m@example.com",
-  //     difficulty: "🟨",
-  //     amount: 100,
-  //     last_practiced: new Date("2024-01-03").toDateString(),
-  //   },
-  //   {
-  //     id: "728ed52h",
-  //     name: "English - To Kill a Mockingbird Summary",
-  //     status: "pending",
-  //     email: "m@example.com",
-  //     difficulty: "🟥",
-  //     amount: 50,
-  //     last_practiced: new Date().toDateString(),
-  //   },
-  // ];
+
 
   return (
     <div className="container mx-auto py-10">
