@@ -40,8 +40,9 @@ const Blog = () => {
   const alignCenter = { display: "flex", alignItems: "center" };
   return (
     <Layout>
-      <div className=" bg-gradient-to-r from-yellow-200 from-1% via-emerald-500 via-30% to-yellow-200 to-100%  to h-[100svh] w-[100svw] ">
-        <Parallax pages={7}>
+      
+      <div  className="  bg-gradient-to-r from-yellow-200 from-1% via-emerald-500 via-30% to-yellow-200 to-100%  to h-[100svh] w-[100svw] ">
+        <Parallax pages={7}   className="no-scrollbar">
           <ParallaxLayer
             offset={0}
             speed={0.5}

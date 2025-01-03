@@ -11,9 +11,9 @@ export default function StatusSidebar() {
   const { data: session, status } = useSession();
 
   return (
-    <Menubar className="bottom-0 fixed flex justify-center bg-gradient-to-r from-white to-emerald-200 to-50% shadow-inner w-[20vw] overflow-hidden border-0 rounded-none">
+    <Menubar className="bottom-0 fixed flex justify-center bg-gradient-to-r from-white to-emerald-300 to-30% shadow-inner w-[20vw] overflow-hidden border-0 rounded-none">
       <MenubarMenu>
-        <div className="font-bold pr-2 landingCard">
+        <div className="font-bold pr-2 landingCard ">
           <Link href="/">Notility</Link>
         </div>
       </MenubarMenu>
