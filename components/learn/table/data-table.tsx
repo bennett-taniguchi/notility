@@ -191,8 +191,9 @@ export function DataTable<TData, TValue>({
                   </SelectGroup>
                 </SelectContent>
                 <div  className="ml-[5svw]">
-            <Link href=''>
-            <Button variant={'secondary'}>
+            <Link href={'/learn/flashcard/edit/'+selectedTitle}>
+           
+            <Button variant={'secondary'} >
               Edit Terms <CiCirclePlus className="ml-2 w-5 h-5"/>
             </Button>
             </Link></div>

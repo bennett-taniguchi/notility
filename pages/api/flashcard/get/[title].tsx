@@ -25,7 +25,7 @@ export default async function handle(req, res) {
       authorId: session!.id,
     },
   });
-  console.log("result", result);
+
   res.json(result);
 }
 

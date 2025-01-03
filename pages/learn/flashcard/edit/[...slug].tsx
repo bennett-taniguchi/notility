@@ -92,6 +92,7 @@ export type Props = {
 const Chat: React.FC<Props> = (props) => {
   const [cardClicked, setCardClicked] = useState(false);
   const Router = useRouter();
+  const {slug} = Router.query
   const { data: session } = useSession();
   type Card = {
     front: string;
@@ -116,7 +117,12 @@ const Chat: React.FC<Props> = (props) => {
       back: "",
     },
   ]);
-
+  useEffect(() => {
+   
+    getTerms(slug+"")
+    setName(slug+"")
+    setDescription("")
+  },[])
   if (!session || !practiceTerms) {
     return (
       <Layout>
@@ -124,6 +130,32 @@ const Chat: React.FC<Props> = (props) => {
       </Layout>
     );
   }
+
+  async function getTerms(title:string) {
+
+    const res = await fetch("/api/flashcard/get/"+JSON.stringify(title), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+  
+    });
+     const data = await res.json()
+     console.log(data)
+
+    let mapped= data.map((datum) => ({front: datum.term, back: datum.answer }))
+    console.log(mapped)
+    setPracticeTerms(mapped)
+
+
+    const desc = await fetch("/api/flashcard/get/set/"+(title), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+  
+    });
+     const desc_data = await desc.json()
+     setDescription(desc_data.description)
+  }
+
+ 
   function handlePlusClicked(e: React.SyntheticEvent) {
     setPracticeTerms([...practiceTerms, { front: "", back: "" } as Card]);
     setSize(size + 1);
@@ -189,7 +221,7 @@ const Chat: React.FC<Props> = (props) => {
 
     let noTitle = titleEmpty();
     if (noTitle) {
-      msg += ". Please fill out your flashcard set name";
+      msg += "Please fill out your flashcard set name";
     } else if (msg == "" && noTitle) {
       msg = "Please fill out your flashcard set name";
     }
@@ -210,8 +242,8 @@ const Chat: React.FC<Props> = (props) => {
 
       let body = { title, description, cards };
 
-      const result = await fetch("/api/flashcard/create", {
-        method: "POST",
+      const result = await fetch("/api/flashcard/update/set", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
@@ -262,14 +294,15 @@ const Chat: React.FC<Props> = (props) => {
                       id="set"
                       className="self-center resize-none text-2xl  bg-white mb-1"
                       onChange={handleNameChange}
-                      placeholder="Title for Flashcards"
+                      value={ (slug)+""}
                       disabled
                     ></Textarea>
                     <Textarea
                       id="set"
                       className="self-center resize-none text-md  bg-white"
                       onChange={handleDescriptionChange}
-                      placeholder="Description for Flashcards"
+                      placeholder="Description for math"
+                      defaultValue={description}
                     ></Textarea>
                   </div>
 
@@ -278,8 +311,10 @@ const Chat: React.FC<Props> = (props) => {
                       <Card className="py-[10px] mx-[50px] pb-10 mb-5">
                         <div className=" justify-center mx-5 pb-5 pt-5">
                           <CardTitle className="pb-5">Term {idx + 1}</CardTitle>
-                          <Label htmlFor="term">{term.front}</Label>
+                           
                           <Textarea
+                           
+                          defaultValue={practiceTerms[idx].front}
                             className="resize-none"
                             id="term"
                             placeholder="Write a title"
@@ -289,8 +324,9 @@ const Chat: React.FC<Props> = (props) => {
                         </div>
 
                         <div className=" justify-center mx-5">
-                          <Label htmlFor="definition">{term.back}</Label>
+                          
                           <Textarea
+                          defaultValue={practiceTerms[idx].back}
                             className="resize-none"
                             id="definition"
                             placeholder="Write a definition"
