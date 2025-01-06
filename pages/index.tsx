@@ -71,7 +71,7 @@ const Blog = () => {
           >
             <Card
               className={
-                " w-[45svw] h-[60svh] spectrum-background ml-[10svw] border-transparent "
+                " w-[45svw] h-[65svh] spectrum-background ml-[10svw] border-transparent "
               }
             >
               <CardHeader>
@@ -156,7 +156,7 @@ const Blog = () => {
           >
             <Card
               className={
-                "w-[45svw] h-[60svh] spectrum-background mr-[5svw] border-transparent "
+                "w-[45svw] h-[65svh] spectrum-background mr-[5svw] border-transparent "
               }
             >
               <CardHeader>
