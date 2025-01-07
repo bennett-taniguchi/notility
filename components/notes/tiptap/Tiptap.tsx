@@ -35,13 +35,9 @@ import { Textarea } from "../../ui/textarea";
 import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
 import { cn } from "../../lib/utils";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../../ui/hover-card";
 
-const MenuBar = ({ editor }) => {
+
+const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
   if (!editor) {
     return null;
   }
@@ -49,6 +45,7 @@ const MenuBar = ({ editor }) => {
   return (
     <div className="control-group ">
       <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.6svh]">
+    
         <NextButton
           variant="outline"
           onClick={() =>
@@ -182,7 +179,7 @@ const MenuBar = ({ editor }) => {
 };
 
 const Tiptap = ({
- 
+ setEditorVisible, editorVisible
 }) => {
   const [initial, setInitial] = useState(true);
 
@@ -254,8 +251,9 @@ const Tiptap = ({
   return (
     <>
       <ResizablePanel className=" min-h-[50px] max-h-[50px] bg-zinc-200" defaultSize={1} >
+      <MenuBar editor={editor} editorVisible={editorVisible} setEditorVisible={setEditorVisible}/>
         <div className="position: static flex justify-center top-0px">
-          <MenuBar editor={editor} />
+        
 
           {/* <HoverCard openDelay={0} closeDelay={0}>
             <HoverCardTrigger>
