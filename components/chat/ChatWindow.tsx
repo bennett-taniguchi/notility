@@ -98,14 +98,17 @@ export default function ChatWindow({ messagesLoaded, title }) {
  
   return (
     
-      <ScrollArea className="bg-zinc-100 " viewportRef={viewportRef}>
-        <ResizablePanel defaultSize={1}>
-          {/* (AI?) Buttons go here */}
+<div>
+        <ResizablePanel defaultSize={1} className={'bg-zinc-200  '}  >
+         
+          <CardTitle className="text-4xl text-sky-800 ml-[2svw] border-none my-auto py-[.6svh]   ">
+            Chat
+          </CardTitle>
         </ResizablePanel>
 
         <ResizablePanel>
-          <Separator />
-          <div className="flex flex-col w-3/4 max-w-1/2 py-10 mx-auto stretch gap-y-2 bg-zinc-100 pb-[200px]">
+           <ScrollArea className="bg-zinc-100 h-[80svh]" viewportRef={viewportRef}> 
+          <div className="flex flex-col w-3/4 max-w-1/2 py-10 mx-auto stretch gap-y-2 min-h-[80svh] bg-zinc-100 pb-[200px]">
           
             {messagesLoaded && messagesLoaded.length != 0 ? (
               messagesLoaded.map((m: any) => (
@@ -149,8 +152,11 @@ export default function ChatWindow({ messagesLoaded, title }) {
               ))
             ) : (
               <Card>
-                <CardContent className="text-sm text-mono  h-[100px] text-center py-10">
-                  Try typing a message to talk to the AI
+                <CardContent className="text-md text-mono    text-center py-10 text-slate-600">
+                
+                  # Sources Selected
+                  "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat."
+                 
                 </CardContent>
               </Card>
             )}
@@ -166,27 +172,33 @@ export default function ChatWindow({ messagesLoaded, title }) {
 
             <CardTitle>
               <div className="flex justify-center">
-                <div className="fixed bottom-0 bg-white h-[100px] w-[80vw] flex justify-center border border-gray-300" />
+                <div className="fixed bottom-0 w-[50svw] bg-white h-[10svh]    flex justify-center border border-gray-300" />
               </div>
             </CardTitle>
-            <CardContent>
-              <TrashIcon
-                className=" fixed bottom-10 right-10 translate-x-[-5rem] scale-150 hover:stroke-zinc-400 hover:bg-zinc-200 hover:stroke-[.5] rounded-full"
-                onClick={handleDeleteChat}
-              />
+           
+            
+              <div>
 
+          
               <form onSubmit={handleSubmit} className="flex justify-center ">
                 <input
-                  className="fixed bottom-0 w-[60vw] p-2 mb-8 border border-gray-300 rounded shadow-xl"
+                  className="fixed bottom-0  mx-auto p-2 my-8 border border-gray-300 rounded shadow-xl w-[40svw]"
                   value={input}
                   placeholder="Say something..."
                   onChange={handleInputChange}
                 />
-              </form>
-            </CardContent>
-          </div>
+              </form> 
+              <TrashIcon
+                className=" fixed  bottom-[5svh] right-[52svw] scale-150 hover:stroke-zinc-400 hover:bg-zinc-200 hover:stroke-[.5] rounded-full"
+                onClick={handleDeleteChat}
+              />
+              </div>
+            
+            </div>
+        
+            </ScrollArea>
         </ResizablePanel>
-      </ScrollArea>
+ </div>
     
   );
 }

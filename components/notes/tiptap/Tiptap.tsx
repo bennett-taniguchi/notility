@@ -48,7 +48,7 @@ const MenuBar = ({ editor }) => {
 
   return (
     <div className="control-group ">
-      <div className="button-group  flex h-10 text-center text-sm justify-center justify-items-center pt-2">
+      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.6svh]">
         <NextButton
           variant="outline"
           onClick={() =>
@@ -182,12 +182,7 @@ const MenuBar = ({ editor }) => {
 };
 
 const Tiptap = ({
-  setTitle,
-  title,
-  content,
-  setContent,
-  deleteNotes,
-  saveNotes,
+ 
 }) => {
   const [initial, setInitial] = useState(true);
 
@@ -249,49 +244,49 @@ const Tiptap = ({
   }, [editor]);
 
   // updates on changed prop, 1st and third to maintain previous cursor positionining
-  useEffect(() => {
-    if (!editor) return;
-    const { from, to } = editor.state.selection;
-    editor?.commands.setContent(content, false);
-    editor.commands.setTextSelection({ from, to });
-  }, [content]);
+  // useEffect(() => {
+  //   if (!editor) return;
+  //   const { from, to } = editor.state.selection;
+  //   editor?.commands.setContent(content, false);
+  //   editor.commands.setTextSelection({ from, to });
+  // }, [content]);
 
   return (
     <>
-      <ResizablePanel className=" min-h-[50px] max-h-[50px] " defaultSize={1} >
+      <ResizablePanel className=" min-h-[50px] max-h-[50px] bg-zinc-200" defaultSize={1} >
         <div className="position: static flex justify-center top-0px">
           <MenuBar editor={editor} />
 
-          <HoverCard openDelay={0} closeDelay={0}>
+          {/* <HoverCard openDelay={0} closeDelay={0}>
             <HoverCardTrigger>
               <NextButton
                 variant="outline"
                 value="paperplane"
                 aria-label="Toggle paperplane"
-                onClick={saveNotes}
+                
                 className="absolute top-[6.7svh] right-[2svw] z-10 bg-emerald-200"
               >
                 <PaperPlaneIcon className="h-4 w-4" />
               </NextButton>
             </HoverCardTrigger>
             <HoverCardContent className="w-[7svw] h-[5] left-[12.5svw] top-[9svh] absolute">Save Page</HoverCardContent>
-          </HoverCard>
+          </HoverCard> */}
 
 
-          <HoverCard  openDelay={0} closeDelay={0}>
+          {/* <HoverCard  openDelay={0} closeDelay={0}>
             <HoverCardTrigger>
             <NextButton
             variant="outline"
             value="cross"
             aria-label="toggle cross"
-            onClick={(e) => deleteNotes(e, title)}
+            
             className="absolute top-[6.7svh] right-[6svw] z-10 bg-rose-200"
           >
             <Cross1Icon className="h-4 w-4" />
           </NextButton>
             </HoverCardTrigger>
             <HoverCardContent className="w-[7svw] h-[5] left-[9.5svw] top-[9svh] absolute">Delete Page</HoverCardContent>
-          </HoverCard>
+          </HoverCard> */}
 
 
        
@@ -304,8 +299,7 @@ const Tiptap = ({
         <ScrollArea viewportRef={null}>
           <Textarea
             placeholder="Write a Title"
-            onChange={(e) => setTitle(e.target.value)}
-            value={title}
+           
             className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0 z-0 bg-white"
           />
 
@@ -313,9 +307,7 @@ const Tiptap = ({
 
           <EditorContent
             editor={editor}
-            content={content}
-            onChange={setContent(editor?.getHTML())}
-            value={content}
+            
             className="focus-visible:ring-0 border-0 bg-white h-[85svh] mx-3"
           />
         </ScrollArea>
