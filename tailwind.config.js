@@ -14,6 +14,7 @@ module.exports = {
       greyQo: ["Grey-Qo", "sans-serif"],
       roboto: ["Roboto", "sans-serif"],
       quicksand: ["Quicksand", "sans-serif"],
+      zenDots: ['Zen_Dots', "sans-serif"]
     },
 
     container: {

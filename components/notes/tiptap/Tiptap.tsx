@@ -43,8 +43,8 @@ const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
   }
 
   return (
-    <div className="control-group ">
-      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.6svh]">
+    <div className="control-group   ">
+      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.5svh]">
     
         <NextButton
           variant="outline"
@@ -250,7 +250,7 @@ const Tiptap = ({
 
   return (
     <>
-      <ResizablePanel className=" min-h-[50px] max-h-[50px] bg-zinc-200" defaultSize={1} >
+      <ResizablePanel className="    h-[10svh] chat-background" defaultSize={1} >
       <MenuBar editor={editor} editorVisible={editorVisible} setEditorVisible={setEditorVisible}/>
         <div className="position: static flex justify-center top-0px">
         

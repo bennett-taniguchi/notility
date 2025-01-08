@@ -38,6 +38,20 @@ import {
 } from "../../components/ui/table";
 import { IoReturnUpBack } from "react-icons/io5";
 import { Checkbox } from "../../components/ui/checkbox";
+import { FaFilePdf } from "react-icons/fa";
+import { FaMarkdown } from "react-icons/fa";
+import { SiLatex } from "react-icons/si";
+import { BsFiletypeCsv } from "react-icons/bs";
+import { TbJson } from "react-icons/tb";
+import { TbTxt } from "react-icons/tb";
+import { UploadButton } from "@bytescale/upload-widget-react";
+import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from "../../components/ui/menubar";
+
+const options = {
+    apiKey: "public_W142iw5A2CjLkNdU7G6px7mYYKZH", // This is your API key.
+    maxFileCount: 1
+  };
+
 function OutputTable({ editorVisible, setEditorVisible }) {
   const data = [
     {
@@ -142,56 +156,79 @@ function OutputArea({ editorVisible, setEditorVisible }: any) {
   );
 }
 function SourcesDrawer() {
+  // FaFilePdf
+  // FaMarkdown
+  // SiLatex
+  //  BsFiletypeCsv
+  //  TbJson
+  //  TbTxt
+
+  const sources = [
+    {
+      name: "Source 1",
+    },
+    {
+      name: "Source 2",
+    },
+    {
+      name: "Source 3",
+    },
+  ];
   return (
     <Drawer>
+         
       <DrawerTrigger asChild>
-        <Button variant="outline">Access Sources</Button>
+        <div className="ml-[-7svw] flex flex-row py-[1svw]">
+       
+      <UploadButton options={options}
+                onComplete={files => alert(files.map(x => x.fileUrl).join("\n"))}>
+    {({onClick}) =>
+      <Button variant='outline' onClick={onClick} className="text-xl mr-[1svw] w-[10svw] h-[5svh]">
+        Upload a file...
+      </Button>
+    }
+  </UploadButton>
+        <Button variant="outline" className="w-[10svw] h-[5svh]">Select Sources</Button>
+        </div>
       </DrawerTrigger>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-sm">
-          <DrawerHeader>
+        <div className="mx-auto w-full max-w-sm h-[80svh]">
+          <DrawerHeader className="absolute left-[1.5svw]">
             <DrawerTitle>Selected Sources:</DrawerTitle>
-            <DrawerDescription>Upload or enter</DrawerDescription>
+            <DrawerDescription>Upload or Enter Link</DrawerDescription>
           </DrawerHeader>
-          <div className="p-4 pb-0">
-            <div className="flex items-center justify-center space-x-2 flex-col">
+          <div className="p-4 pb-0 mt-[3svw]">
+            <div className="flex items-center justify-center space-x-2 flex-col group">
+              {sources.map((source) => (
+                <div className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5 bg-zinc-200 px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw] border-t-2 border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  ">
+                  <div className="my-auto  ">
+                    <Checkbox
+                      id={source.name}
+                      className="mr-3 hover:bg-cyan-100/30"
+                    />
+                    <label
+                      htmlFor={source.name}
+                      className="text-slate-700 font-roboto text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  "
+                    >
+                      {source.name}
+                    </label>
+                  </div>
 
-              <div className="ml-1.5 bg-zinc-200 px-[1svw] rounded-md">
-                <Checkbox id="source1" className="mr-3"   />
-                <label
-                  htmlFor="source1"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >Source 1
-                </label>
-              </div>
+                  <BsThreeDotsVertical className="right-0 absolute mr-[2svw] h-[1.5svw] w-[1.5svw] mt-[.9svh]  fill-slate-700" />
 
-              <div>
-                <Checkbox id="source2"  className="mr-3"  />
-                <label
-                  htmlFor="source2"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Source 2
-                </label>
-              </div>
-
-              <div>
-                {" "}
-                <Checkbox id="source3" className="mr-3" />
-                <label
-                  htmlFor="source3"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Source 3
-                </label>
-              </div>
+                  <TbJson className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-yellow-600" />
+                </div>
+              ))}
+             
             </div>
             <div className="mt-3 h-[40svh]"></div>
           </div>
-          <DrawerFooter>
-            <Button>Submit</Button>
+          <DrawerFooter className="flex flex-row absolute ml-[4.5svw]">
+            <Button className="w-[10svh] ">Submit</Button>
             <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button className="w-[10svh]  " variant="outline">
+                Cancel
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </div>
@@ -204,56 +241,59 @@ export default function Notespace() {
   const { slug } = Router.query;
   const [editorVisible, setEditorVisible] = useState(true);
   return (
-    <div className="w-[100svw] h-[100svh] bg-zinc-100 grid grid-rows-1 gap-2">
+    <div className="w-[100svw] h-[100svh] bg-cyan-500/60 grid grid-rows-1 gap-2">
       <Suspense fallback={Loading}>
-        <div className="w-[100svw] h-[10svh] border-b-slate-200 border-b-2 flex flex-row divide-x-2">
+        <div className="w-[100svw] h-[10svh] border-b-slate-200 reverse-chat-background flex flex-row divide-x-2">
           <div
             className="basis-1/3 text-center text-black flex flex-row-2"
             id="top_info"
           >
-            <div className="span-1/4  my-auto mr-[1svw] hover:bg-zinc-200 ml-[1svw] rounded-md">
+            <div className="span-1/4  my-auto mr-[1svw]  ml-[1svw] rounded-md mt-[3svh]">
               <Link href="/notespace">
-                <RiHome2Fill className="w-[3svw] h-[5svh]" />
+                <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70" />
               </Link>
             </div>
-            <Textarea className="span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-center text-xl text-zinc-600 font-roboto">
-              {"Practice Set"}
-            </Textarea>
+            <Textarea
+              className="overflow-y-hidden bg-gradient-to-r from-slate-200/30 to-cyan-200/20 text-cyan-600/80 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
+              defaultValue={"Practice Set"}
+            />
           </div>
 
           <div id="top_sources" className="basis-1/3  m-auto  ">
-            <div className={"ml-[13svw]"}>
-              <SourcesDrawer />
-            </div>
+            <div className={"ml-[13svw]"}></div>
           </div>
 
           <div
-            className="basis-1/3 text-center flex flex-row-3 m-auto"
+            className="border-transparent border-l-2 basis-1/3 text-center flex flex-row-3 m-auto  rounded-xl mr-[2svw] pb-[1svh]"
             id="top_sources"
           >
-            <div className="span-1/3 m-auto ">
-              Settings
-              <FaGear className="w-[4svw] h-[4svh] cursor-pointer" />
+            <div className="ml-[20svw] span-1/3   text-cyan-800    ">
+              
+              <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
             </div>
-            <div className="span-1/3 m-auto">
-              Share
-              <FaShare className="w-[4svw] h-[4svh] cursor-pointer" />{" "}
+            <div className=" span-1/3  text-cyan-800">
+           
+             
+              <FaShare className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />{" "}
             </div>
 
-            <div className="span-1/3 m-auto" id="top_dash">
-              {" "}
-              User
-              <FaUserAlt className="w-[4svw] h-[4svh] cursor-pointer" />
+            <div className="span-1/3 " id="top_dash text-cyan-800">
+              
+              <FaUserAlt className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
             </div>
           </div>
         </div>
         <div className="w-[100svw] h-[90svh]">
           <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel>
-              <ChatWindow messagesLoaded={undefined} title={undefined} />
+            <ResizablePanel  >
+              <ChatWindow messagesLoaded={undefined} title={undefined}>
+
+             
+                <SourcesDrawer />
+              </ChatWindow>
             </ResizablePanel>
-            <ResizableHandle disabled />
-            <ResizablePanel>
+            <ResizableHandle disabled className="bg-transparent w-[0px]" />
+            <ResizablePanel      >
               <OutputArea
                 editorVisible={editorVisible}
                 setEditorVisible={setEditorVisible}
