@@ -8,13 +8,13 @@
 @layer utilities {
   @property --myColor1 {
     syntax: "<color>";
-    initial-value: theme(colors.cyan.500);
+    initial-value: theme(colors.sky.100);
     inherits: false;
   }
 
   @property --myColor2 {
     syntax: "<color>";
-    initial-value: theme(colors.emerald.100);
+    initial-value: theme(colors.sky.100);
     inherits: false;
   }
 
@@ -24,8 +24,8 @@
   }
 
   .animated-button:hover {
-    --myColor1: theme(colors.sky.500);
-    --myColor2: theme(colors.teal.500);
+    --myColor1: theme(colors.sky.200);
+    --myColor2: theme(colors.indigo.100);
   }
   .font-stretch {
     font-stretch: ult;
@@ -124,11 +124,14 @@
 
 .chat-background {
   background: rgb(103,232,249);
-  background: linear-gradient(180deg, rgba(103,232,249,1) 0%, rgba(165,180,252,1) 100%);
+  background: linear-gradient(180deg, rgba(103,232,249,1) 0%, rgba(165,180,252,1) 133%);
 }
 .reverse-chat-background {
   background: rgb(103,232,249);
   background: linear-gradient(0deg, rgba(103,232,249,1) 0% 100%);
+}
+.chat-inner-background {
+  background-image: linear-gradient(to right, #a5b4fc, #8fc0ff, #7bcaff, #6ad4ff, #63ddff, #63ddff, #63ddff, #63ddff, #6ad4ff, #7bcaff, #8fc0ff, #a5b4fc);
 }
 
 

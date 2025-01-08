@@ -46,6 +46,7 @@ import { TbJson } from "react-icons/tb";
 import { TbTxt } from "react-icons/tb";
 import { UploadButton } from "@bytescale/upload-widget-react";
 import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from "../../components/ui/menubar";
+import { Separator } from "../../components/ui/separator";
 
 const options = {
     apiKey: "public_W142iw5A2CjLkNdU7G6px7mYYKZH", // This is your API key.
@@ -135,10 +136,11 @@ function OutputArea({ editorVisible, setEditorVisible }: any) {
       {editorVisible ? (
         <div>
           <Button
-            className="ml-[1svw] mt-[.7svh] fixed"
+          variant='outline'
+            className="ml-[1svw] mt-[.5svh] fixed bg-sky-100/50 border-none  "
             onClick={() => setEditorVisible(!editorVisible)}
           >
-            <IoReturnUpBack />
+            <IoReturnUpBack className="text-zinc-700 scale-150"  />
           </Button>
 
           <Tiptap
@@ -183,12 +185,15 @@ function SourcesDrawer() {
       <UploadButton options={options}
                 onComplete={files => alert(files.map(x => x.fileUrl).join("\n"))}>
     {({onClick}) =>
-      <Button variant='outline' onClick={onClick} className="text-xl mr-[1svw] w-[10svw] h-[5svh]">
+      <Button variant='outline' onClick={onClick} className="hover:drop-shadow-sm border-sky-400/50 animated-button text-sm mr-[1svw] w-[8svw] h-[5svh]">
+        <svg  className='mr-1' width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 2C3.22386 2 3 2.22386 3 2.5V12.5C3 12.7761 3.22386 13 3.5 13H11.5C11.7761 13 12 12.7761 12 12.5V6H8.5C8.22386 6 8 5.77614 8 5.5V2H3.5ZM9 2.70711L11.2929 5H9V2.70711ZM2 2.5C2 1.67157 2.67157 1 3.5 1H8.5C8.63261 1 8.75979 1.05268 8.85355 1.14645L12.8536 5.14645C12.9473 5.24021 13 5.36739 13 5.5V12.5C13 13.3284 12.3284 14 11.5 14H3.5C2.67157 14 2 13.3284 2 12.5V2.5Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
         Upload a file...
       </Button>
     }
   </UploadButton>
-        <Button variant="outline" className="w-[10svw] h-[5svh]">Select Sources</Button>
+        <Button variant="outline" className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]">
+        <svg className='mr-1' width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3H12V12H3L3 3ZM2 3C2 2.44771 2.44772 2 3 2H12C12.5523 2 13 2.44772 13 3V12C13 12.5523 12.5523 13 12 13H3C2.44771 13 2 12.5523 2 12V3ZM10.3498 5.51105C10.506 5.28337 10.4481 4.97212 10.2204 4.81587C9.99275 4.65961 9.6815 4.71751 9.52525 4.94519L6.64048 9.14857L5.19733 7.40889C5.02102 7.19635 4.7058 7.16699 4.49327 7.34329C4.28073 7.5196 4.25137 7.83482 4.42767 8.04735L6.2934 10.2964C6.39348 10.4171 6.54437 10.4838 6.70097 10.4767C6.85757 10.4695 7.00177 10.3894 7.09047 10.2601L10.3498 5.51105Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            Select Sources</Button>
         </div>
       </DrawerTrigger>
       <DrawerContent>
@@ -243,6 +248,7 @@ export default function Notespace() {
   return (
     <div className="w-[100svw] h-[100svh] bg-cyan-500/60 grid grid-rows-1 gap-2">
       <Suspense fallback={Loading}>
+
         <div className="w-[100svw] h-[10svh] border-b-slate-200 reverse-chat-background flex flex-row divide-x-2">
           <div
             className="basis-1/3 text-center text-black flex flex-row-2"
@@ -254,7 +260,7 @@ export default function Notespace() {
               </Link>
             </div>
             <Textarea
-              className="overflow-y-hidden bg-gradient-to-r from-slate-200/30 to-cyan-200/20 text-cyan-600/80 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
+              className="overflow-y-hidden bg-gradient-to-r from-zinc-400/50 to-cyan-400/50 text-sky-100 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
               defaultValue={"Practice Set"}
             />
           </div>
@@ -286,13 +292,13 @@ export default function Notespace() {
         <div className="w-[100svw] h-[90svh]">
           <ResizablePanelGroup direction="horizontal">
             <ResizablePanel  >
-              <ChatWindow messagesLoaded={undefined} title={undefined}>
+              <ChatWindow   messagesLoaded={undefined} title={undefined}>
 
              
                 <SourcesDrawer />
               </ChatWindow>
             </ResizablePanel>
-            <ResizableHandle disabled className="bg-transparent w-[0px]" />
+             
             <ResizablePanel      >
               <OutputArea
                 editorVisible={editorVisible}

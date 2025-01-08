@@ -13,6 +13,7 @@ import ListItem from "@tiptap/extension-list-item";
 import React from "react";
 import { Button as NextButton } from "../../ui/button";
 import { Separator } from "../../ui/separator";
+ import SVG1 from '../../../public/svg/svg-1.svg'
 import {
   FontBoldIcon,
   FontItalicIcon,
@@ -35,27 +36,33 @@ import { Textarea } from "../../ui/textarea";
 import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
 import { cn } from "../../lib/utils";
+import { CardTitle } from "../../ui/card";
 
 
 const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
   if (!editor) {
     return null;
   }
-
+  let buttonStyle = 'mr-1 bg-sky-100/50 border-none hover:bg-sky-400 '
+  let svgStyle=  "stroke-zinc-700  scale-150"
+  let textSvgStyle = 'text-zinc-700 scale-150'
   return (
     <div className="control-group   ">
-      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.5svh]">
+      <CardTitle>
+      <div className="absolute left-[52svw] top-[15svh] text-sky-100 text-3xl  ">Output</div>
+      </CardTitle>
+      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.5svh]   ">
     
         <NextButton
           variant="outline"
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 1 }).run()
           }
-          className={
-            editor.isActive("heading", { level: 1 }) ? "is-active" : ""
+          className={cn(    editor.isActive("heading", { level: 1 }) ? "is-active" : "",buttonStyle)
+        
           }
         >
-          <LuHeading1 />
+          <LuHeading1 className={svgStyle}/>
         </NextButton>
 
         <NextButton
@@ -63,11 +70,11 @@ const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 2 }).run()
           }
-          className={
-            editor.isActive("heading", { level: 2 }) ? "is-active" : ""
+          className={cn(  editor.isActive("heading", { level: 2 }) ? "is-active" : "",buttonStyle)
+          
           }
         >
-          <LuHeading2 />
+          <LuHeading2 className={svgStyle}/>
         </NextButton>
 
         <NextButton
@@ -76,102 +83,123 @@ const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
             editor.chain().focus().toggleHeading({ level: 3 }).run()
           }
           className={
-            editor.isActive("heading", { level: 3 }) ? "is-active" : ""
+            cn( editor.isActive("heading", { level: 3 }) ? "is-active" : "",buttonStyle)
+           
           }
         >
-          <LuHeading3 />
+          <LuHeading3 className={svgStyle} />
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setParagraph().run()}
-          className={editor.isActive("paragraph") ? "is-active" : ""}
+          className={
+            cn( editor.isActive("paragraph") ? "is-active" : "",buttonStyle)
+           }
         >
-          <PilcrowIcon />
+          <PilcrowIcon className={textSvgStyle}/>
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive("bold") ? "is-active" : ""}
+          className={
+            cn(editor.isActive("bold") ? "is-active" : "",buttonStyle)
+            }
         >
-          <FontBoldIcon />
+          <FontBoldIcon className={textSvgStyle}/>
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive("italic") ? "is-active" : ""}
+          className={
+            cn( editor.isActive("italic") ? "is-active" : "",buttonStyle)
+           }
         >
-          <FontItalicIcon />
+          <FontItalicIcon className={textSvgStyle} />
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={editor.isActive("strike") ? "is-active" : ""}
+          className={
+            cn(editor.isActive("strike") ? "is-active" : "",buttonStyle)
+            }
         >
-          <StrikethroughIcon />
+          <StrikethroughIcon  className={textSvgStyle}/>
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleHighlight().run()}
-          className={editor.isActive("highlight") ? "is-active" : ""}
+          className={
+            cn(  editor.isActive("highlight") ? "is-active" : "",buttonStyle)
+          }
         >
-          <FaHighlighter />
+          <FaHighlighter className={textSvgStyle} />
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
-          className={editor.isActive({ textAlign: "left" }) ? "is-active" : ""}
+          className={
+            cn( editor.isActive({ textAlign: "left" }) ? "is-active" : "",buttonStyle)
+           }
         >
-          <TextAlignLeftIcon />
+          <TextAlignLeftIcon className={textSvgStyle} />
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("center").run()}
           className={
-            editor.isActive({ textAlign: "center" }) ? "is-active" : ""
+            cn( editor.isActive({ textAlign: "center" }) ? "is-active" : "",buttonStyle)
+           
           }
         >
-          <TextAlignCenterIcon />
+          <TextAlignCenterIcon  className={textSvgStyle}/>
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("right").run()}
-          className={editor.isActive({ textAlign: "right" }) ? "is-active" : ""}
+          className={
+            cn(  editor.isActive({ textAlign: "right" }) ? "is-active" : "",buttonStyle)
+          }
         >
-          <TextAlignRightIcon />
+          <TextAlignRightIcon className={textSvgStyle} />
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().setTextAlign("justify").run()}
           className={
-            editor.isActive({ textAlign: "justify" }) ? "is-active" : ""
+            cn(  editor.isActive({ textAlign: "justify" }) ? "is-active" : "",buttonStyle)
+          
           }
         >
-          <TextAlignJustifyIcon />
+          <TextAlignJustifyIcon className={textSvgStyle} />
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive("orderedList") ? "is-active" : ""}
+          className={
+            cn( editor.isActive("orderedList") ? "is-active" : "",buttonStyle)
+           }
         >
-          <FaListOl />
+          <FaListOl className={textSvgStyle} />
         </NextButton>
 
         <NextButton
           variant="outline"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive("bulletList") ? "is-active" : ""}
+          className={
+            cn( editor.isActive("bulletList") ? "is-active" : "",buttonStyle)
+           }
         >
-          <FaListUl />
+          <FaListUl className={textSvgStyle} />
         </NextButton>
       </div>
     </div>
@@ -250,7 +278,7 @@ const Tiptap = ({
 
   return (
     <>
-      <ResizablePanel className="    h-[10svh] chat-background" defaultSize={1} >
+      <ResizablePanel className="    h-[9.8svh] chat-background" defaultSize={1} >
       <MenuBar editor={editor} editorVisible={editorVisible} setEditorVisible={setEditorVisible}/>
         <div className="position: static flex justify-center top-0px">
         
@@ -291,22 +319,23 @@ const Tiptap = ({
         </div>
       </ResizablePanel>
 
-      <ResizablePanel className="bg-white ">
-        <Separator />
+      <ResizablePanel    >
+        
 
-        <ScrollArea viewportRef={null}>
-          <Textarea
+        <ScrollArea viewportRef={null} >
+        <Textarea
             placeholder="Write a Title"
-           
-            className="max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0 z-0 bg-white"
-          />
+            
+            className="bg-indigo-100 z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0   "
+          />    
+       
+<SVG1   className={'ml-[0svw] z-0 absolute mt-[0svh]'}/>
 
-          <Separator />
 
           <EditorContent
             editor={editor}
-            
-            className="focus-visible:ring-0 border-0 bg-white h-[85svh] mx-3"
+           
+            className=" pl-5 shadow-inner   focus-visible:ring-0 border-0  h-[85svh]  bg-transparent"
           />
         </ScrollArea>
       </ResizablePanel>
