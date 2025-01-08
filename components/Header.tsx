@@ -20,7 +20,7 @@ export default function Header(): ReactElement {
   }
 
   return (
-    <Menubar className="top-1/2 right-[47.7svw] fixed w-[85px] h-[45px] bg-white">
+    <Menubar className="top-1/2 ">
       <MenubarMenu>
         <MenubarTrigger>
         <Link href='/api/auth/signin' className={buttonVariants({ variant: "link",size:'sm' })}>Log In</Link>

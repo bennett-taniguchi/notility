@@ -24,9 +24,42 @@ import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "../..
 import { useEffect, useReducer, useState } from "react";
 import { FaPlusSquare } from "react-icons/fa"
 import { cn } from "../../components/lib/utils";
+import { GetServerSideProps } from "next";
+import { getSession } from "next-auth/react";
+import prisma from "../../lib/prisma";
+import { Notespace } from "@prisma/client";
+import { v4 } from "uuid";
+import { empty } from "@prisma/client/runtime/library";
+import Header from "../../components/Header";
 
+// retrieve notes and messages with chatbot, don't need to fetch both if only one is needed...
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const session = await getSession({ req });
+
+  if (!session) {
+    res.statusCode = 403;
+    return { props: { notes: [] } };
+  }
+
+  const notespaces = await prisma.notespace.findMany({
+    where: {
+      authorId:   session?.user.id ,
+    },
+  });
+ 
+
+  return {
+    props: { notespaces },
+  };
+};
+
+ type Props = {
+  notespaces: Notespace[];
+};
 
 function TableView({data,Router}) {
+
+  if(!data) return (<div></div>)
     return (
 <Table className="w-[80svw] mx-auto">
        
@@ -39,41 +72,43 @@ function TableView({data,Router}) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((datum) => (
+          {  data.map((datum) => (
             <TableRow
               key={datum.title}
               className="w-max h-max hover:bg-slate-200/50  "
             >
               <TableCell
-                onClick={() => Router.push("/notespace/" + datum.title)}
+                onClick={() => Router.push("/notespace/" + datum.uri)}
                 className="font-medium cursor-pointer "
               >
                 {datum.title}
               </TableCell>
               <TableCell
-                onClick={() => Router.push("/notespace/" + datum.title)}
+                onClick={() => Router.push("/notespace/" + datum.uri)}
                 className={"cursor-pointer"}
               >
                 {datum.sources}
               </TableCell>
               <TableCell
-                onClick={() => Router.push("/notespace/" + datum.title)}
+                onClick={() => Router.push("/notespace/" + datum.uri)}
                 className={"cursor-pointer"}
               >
-                {datum.createdOn}
+                {datum.created_on}
               </TableCell>
               <TableCell
-                onClick={() => Router.push("/notespace/" + datum.title)}
+                onClick={() => Router.push("/notespace/" + datum.uri)}
                 className="text-right cursor-pointer"
               >
-                {datum.ownedBy}
+                {datum.owner}
               </TableCell>
               <TableCell className="w-[2svw] h-[5svh] hover:bg-white">
                 {" "}
                 <BsThreeDotsVertical className="cursor-pointer w-5 h-5" />
               </TableCell>
             </TableRow>
-          ))}
+          ))
+         
+        }
         </TableBody>
       </Table>
 
@@ -81,9 +116,10 @@ function TableView({data,Router}) {
 }
 
 function CardView({data,Router}) {
+  if(!data) return (<div></div>)
 return(
     <div className="w-[80svw] mx-auto">
-        {data.map((datum) => (
+        {data ? data.map((datum) => (
             <Card onClick={()=>Router.push('/notespace/'+datum.title)} className="cursor-pointer w-[25svw] h-[20svh] bg-gradient-to-r from-cyan-500 to-white opacity-85 hover:opacity-100 ">
                 <CardTitle className="ml-[2svw] mt-[1svh]">
                     {datum.title}
@@ -98,7 +134,8 @@ return(
                     Created on {datum.createdOn}
                 </CardFooter>
             </Card>
-        ))}
+        )) :
+        <div></div>}
         </div>
 )
 }
@@ -111,26 +148,28 @@ function viewReducer(views,action) {
             return {view:'list'}
     }
 }
-export default function Notespaces() {
+
+
+
+
+
+export default function Notespaces({notespaces}: Props) {
+  const createAndNavigate = async () => {
+    let uuid = v4()
+    const res = await fetch('/api/notespace/create/'+uuid, { method: 'POST' });
+   
+    Router.push(`notespace/${uuid}`);
+  };
+
   const Router = useRouter();
   const initialView = {view:'list'};
 const [view,dispatch] = useReducer(viewReducer, initialView)
-  const data = [
-    {
-      title: "Math Equations",
-      sources: 3,
-      createdOn: "1/6/2025",
-      ownedBy: "Me",
-    }, {
-        title: "English",
-        sources: 3,
-        createdOn: "1/6/2025",
-        ownedBy: "Me",
-      },
-  ];
+
+ 
  
   return (
     <div style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 100svh' }} className="w-[100svw] h-[100svh] bg-white pt-[20svh] ">
+      <Header/>
       <h1 className="font-roboto text-7xl  drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,1)]  text-white ml-[10svw] mb-[1.85svh]">Notespaces</h1>
       <Separator className="mx-auto w-[80svw] my-[1svh] py-[.2svh] bg-black" />
       <div className=" place-items-end w-[80svw] mx-auto ">
@@ -139,8 +178,9 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
         <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
-                <div className="cursor-pointer absolute left-[10svw] " onClick={()=>Router.push('/notespace/new')}>
-                <FaPlusSquare className=" h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg"/>
+                <div className="cursor-pointer absolute left-[10svw] flex flex-row bg-white/50 rounded-xl px-5" onClick={()=>createAndNavigate()}>
+               
+                <div className="text-md font-bold ml-2 text-white drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,.5)]">  Make New Notespace </div>
                 </div>
               </TooltipTrigger>
               <TooltipContent >
@@ -179,15 +219,15 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
         </div>
       </div>
       {view!.view =='list' ?
-      <TableView Router={Router} data={data} />
+      <TableView Router={Router} data={notespaces} />
       :
-      <CardView Router={Router} data={data}/>
+      <CardView Router={Router} data={notespaces}/>
     }
-    <div className="mt-2">
+    {/* <div className="mt-2">
     <h1 className="font-roboto text-7xl  drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,1)]  text-white ml-[10svw] mb-[1.85svh]">Tracks</h1>
     <Separator className="mx-auto w-[80svw] my-[1svh] py-[.2svh] bg-black" />
      <TableView  Router={Router} data={data} />
-     </div>
+     </div> */}
     </div>
   );
 }

@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { TrashIcon, Pencil2Icon } from "@radix-ui/react-icons";
 import { Skeleton } from "../ui/skeleton";
 
-export default function ChatWindow({ messagesLoaded, title,children }) {
+export default function ChatWindow({ messagesLoaded, title, children,blurb }) {
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // const [messages, setMessages] = useState<Message[]>(messagesLoaded); // potential future use for editing singular message
@@ -42,7 +42,7 @@ export default function ChatWindow({ messagesLoaded, title,children }) {
       Router.push("/chat");
     } else {
       const body = { prompt, messages, title };
-     await fetch("/api/chat/update/rag/", {
+      await fetch("/api/chat/update/rag/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -50,8 +50,7 @@ export default function ChatWindow({ messagesLoaded, title,children }) {
         setInput("");
         setLoading(false);
         Router.push("/chat/" + title);
-      })
-     
+      });
     }
   }
 
@@ -61,10 +60,9 @@ export default function ChatWindow({ messagesLoaded, title,children }) {
     setInput((e.target as HTMLInputElement).value);
   };
 
- 
   // delete all chat logs
   async function handleDeleteChat(e: React.SyntheticEvent) {
-    console.log('chat title',title)
+    console.log("chat title", title);
     const body = { title };
     await fetch("/api/chat/delete", {
       method: "DELETE",
@@ -72,18 +70,14 @@ export default function ChatWindow({ messagesLoaded, title,children }) {
       body: JSON.stringify(body),
     }).then(() => {
       Router.push("/chat");
-    })
-
-  
+    });
   }
 
   useEffect(() => {
- 
     scrollMsg();
   }, [messagesLoaded]);
 
   const scrollMsg = (amt = 99999999) => {
-   
     if (viewportRef !== null && viewportRef.current !== null) {
       // here scroll, Ex: to the right
       console.log("view");
@@ -95,29 +89,25 @@ export default function ChatWindow({ messagesLoaded, title,children }) {
       });
     }
   };
- 
+
   return (
-    
-<div>
-        <ResizablePanel defaultSize={1} className={'chat-background '}  >
-         
-          <CardTitle className="  text-3xl text-sky-800 ml-[2svw] border-none my-auto py-[0svh]  flex flex-row">
+    <div>
+      <ResizablePanel defaultSize={1} className={"chat-background "}>
+        <CardTitle className="  text-3xl text-sky-800 ml-[2svw] border-none my-auto py-[0svh]  flex flex-row">
           <div className="absolute left-[2svw] top-[12svh] text-sky-100 ">
-          Chat
+            Chat
           </div>
-          
-          
-            <div className="ml-[30svw] mb-[1svh]">
-            {children}
-            </div>
-          
-          </CardTitle>
-        </ResizablePanel>
- 
-        <ResizablePanel  >
-           <ScrollArea  className=" shadow-inner  bg-sky-100  h-[80svh]  " viewportRef={viewportRef}> 
-          <div  className="   bg-sky-100 w-[45svw]  flex flex-col  max-w-1/2 py-10 mx-auto stretch gap-y-2 min-h-[80svh]  pb-[200px]">
-          
+
+          <div className="ml-[30svw] mb-[1svh]">{children}</div>
+        </CardTitle>
+      </ResizablePanel>
+
+      <ResizablePanel>
+        <ScrollArea
+          className=" shadow-inner  bg-sky-100  h-[80svh]  "
+          viewportRef={viewportRef}
+        >
+          <div className="   bg-sky-100 w-[45svw]  flex flex-col  max-w-1/2 py-10 mx-auto stretch gap-y-2 min-h-[80svh]  pb-[200px]">
             {messagesLoaded && messagesLoaded.length != 0 ? (
               messagesLoaded.map((m: any) => (
                 <div
@@ -159,12 +149,9 @@ export default function ChatWindow({ messagesLoaded, title,children }) {
                 </div>
               ))
             ) : (
-              <Card   className="bg-indigo-300">
-                <CardContent className="bg-white/50 text-md text-mono   text-center py-10 text-slate-600/90">
-                
-                  # Sources Selected
-                  "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat."
-                 
+              <Card className="rounded-xl bg-indigo-300">
+                <CardContent className="rounded-xl bg-white/50 text-md text-mono   text-center py-10 text-slate-600/90">
+                 {blurb ? blurb : 'No Sources yet, add some above'}
                 </CardContent>
               </Card>
             )}
@@ -180,34 +167,27 @@ export default function ChatWindow({ messagesLoaded, title,children }) {
 
             <CardTitle>
               <div className="flex justify-center ">
-                <div className="rounded-xl mb-2 fixed bottom-0 w-[45svw] bg-white/50 h-[10svh]    flex justify-center border border-gray-300 " />
+ 
               </div>
             </CardTitle>
-           
-            
-              <div   >
 
-          
+            <div>
               <form onSubmit={handleSubmit} className="flex justify-center ">
                 <input
-                  className="rounded-md focus:ring-[2px] focus:outline-none fixed bottom-0  mx-auto p-2 my-8  ml-[-3svw] border-gray-300  shadow-xl w-[40svw]"
+                  className="h-[90px] align-top rounded-md focus:ring-[2px] focus:outline-none fixed bottom-0  mx-auto p-2 my-[1svh]  ml-[0svw] border-gray-300   shadow-md shadow-indigo-100 w-[46svw]"
                   value={input}
                   placeholder="Say something..."
                   onChange={handleInputChange}
                 />
-              </form> 
+              </form>
               <TrashIcon
                 className=" fixed  bottom-[5svh] right-[54svw] scale-150 hover:stroke-zinc-400 hover:bg-zinc-200/50 hover:stroke-[.5] rounded-full  "
                 onClick={handleDeleteChat}
               />
-              </div>
-            
             </div>
-        
-            </ScrollArea>
-        </ResizablePanel>
-        </div>
- 
-    
+          </div>
+        </ScrollArea>
+      </ResizablePanel>
+    </div>
   );
 }

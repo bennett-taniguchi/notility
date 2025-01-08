@@ -45,7 +45,11 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-
+  notespace_theme String?
+  creation_theme String?
+  tracks_theme String?
+  premium_start String?
+  premium_end String?
   accounts Account[]
   sessions Session[]
   notes    Notes[]
@@ -66,52 +70,51 @@ model Notes {
   content  String
   author   User?   @relation(fields: [authorId], references: [id])
   authorId String?
+  uri      String
+  createdBy String
+  prompt_type      String?
+  prompt    String?
 
-  @@unique([title, authorId])
+  notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
+
+  @@unique([uri])
 }
 
 model Message {
-  index    Int
+  id    Int  @id @default(autoincrement())
   authorId String
   role     String
   content  String
   title    String
+  uri      String
 
-  @@unique([index, authorId, title])
+  notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
+
+  @@unique([id, uri])
 }
 
-model Upload {
-  index    Int    @id @default(autoincrement())
+model Shared {
   authorId String
-  title    String
-  content  String
+  uri String
+  level Int
+  
+  notespace Notespace @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
-  @@unique([title, authorId])
+  @@unique([uri,authorId])
 }
 
-model Card {
-  index Int @id @default(autoincrement())
-
-  title    String
+model Notespace {
+  id    Int  @id @default(autoincrement())
   authorId String
-  term     String
-  answer   String
-
-  flashcard Flashcard @relation(fields: [title, authorId], references: [title, authorId], onDelete: Cascade)
-
-  @@unique([term, answer, title])
-}
-
-model Flashcard {
-  index          Int    @id @default(autoincrement())
-  authorId       String
-  title          String
-  description    String
-  rating         Int
-  practiceCount  Int?
-  last_practiced String
-
-  cards Card[]
-
-  @@unique([title, authorId])
+  created_on String
+  uri String
+  title String
+  owner String
+  
+  notes Notes[]
+  messages Message[]
+  sources_count Int?
+  sources_blurb String?
+  shared Shared[]
+  @@unique([uri])
 }

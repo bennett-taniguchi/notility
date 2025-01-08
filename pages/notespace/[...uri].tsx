@@ -47,11 +47,62 @@ import { TbTxt } from "react-icons/tb";
 import { UploadButton } from "@bytescale/upload-widget-react";
 import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from "../../components/ui/menubar";
 import { Separator } from "../../components/ui/separator";
+import { UploadWidgetReactConfig } from "@bytescale/upload-widget-react/dist/UploadWidgetReactConfig";
+import { getSession } from "next-auth/react";
+import { Notespace } from "@prisma/client";
+ 
+import prisma from "../../lib/prisma";
+import { GetServerSideProps } from "next";
+import Header from "../../components/Header";
 
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+ 
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59'
+  )
+
+  let uuid = req.url?.split('/')[2] // need middleware workaround??
+ 
+  const session = await getSession({ req });
+
+  if (!session) {
+    res.statusCode = 403;
+    return { props: { notes: [] } };
+  }
+
+  const notespace = await prisma.notespace.findUnique({
+    where: {
+      uri : uuid ,
+    },
+  });
+ 
+
+  return {
+    props: { notespace },
+  };
+};
+
+ type Props = {
+  notespace: Notespace;
+};
+
+// maxFileSize curr 2 MB
 const options = {
     apiKey: "public_W142iw5A2CjLkNdU7G6px7mYYKZH", // This is your API key.
-    maxFileCount: 1
-  };
+    maxFileCount: 1,
+    maxFileSizeBytes: 2000000,
+    path: {
+        fileName: "{actualFilename}+{,}+{someHashedName?}",
+        fileNameFallback: "/uploads",
+        folderPath: "/uploads/"+`[...hashed]`+'/',
+
+    },
+    mimeTypes: [
+        "image/jpeg", "pdf", "txt", "tex","..."
+    ]
+  } as  UploadWidgetReactConfig;
+  
 
 function OutputTable({ editorVisible, setEditorVisible }) {
   const data = [
@@ -184,7 +235,7 @@ function SourcesDrawer() {
         <div className="ml-[-7svw] flex flex-row py-[1svw]">
        
       <UploadButton options={options}
-                onComplete={files => alert(files.map(x => x.fileUrl).join("\n"))}>
+                onComplete={files => alert(files.map(x  => x.fileUrl).join("\n"))}>
     {({onClick}) =>
       <Button variant='outline' onClick={onClick} className="hover:drop-shadow-sm border-sky-400/50 animated-button text-sm mr-[1svw] w-[8svw] h-[5svh]">
         <svg  className='mr-1' width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 2C3.22386 2 3 2.22386 3 2.5V12.5C3 12.7761 3.22386 13 3.5 13H11.5C11.7761 13 12 12.7761 12 12.5V6H8.5C8.22386 6 8 5.77614 8 5.5V2H3.5ZM9 2.70711L11.2929 5H9V2.70711ZM2 2.5C2 1.67157 2.67157 1 3.5 1H8.5C8.63261 1 8.75979 1.05268 8.85355 1.14645L12.8536 5.14645C12.9473 5.24021 13 5.36739 13 5.5V12.5C13 13.3284 12.3284 14 11.5 14H3.5C2.67157 14 2 13.3284 2 12.5V2.5Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
@@ -205,8 +256,8 @@ function SourcesDrawer() {
           </DrawerHeader>
           <div className="p-4 pb-0 mt-[3svw]">
             <div className="flex items-center justify-center space-x-2 flex-col group">
-              {sources.map((source) => (
-                <div className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5 bg-zinc-200 px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw] border-t-2 border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  ">
+              {sources.map((source,idx) => (
+                <div key={idx} className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5 bg-zinc-200 px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw] border-t-2 border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  ">
                   <div className="my-auto  ">
                     <Checkbox
                       id={source.name}
@@ -242,12 +293,18 @@ function SourcesDrawer() {
     </Drawer>
   );
 }
-export default function Notespace() {
+export default function NotespacesPage({notespace}:Props) {
   const Router = useRouter();
   const { slug } = Router.query;
   const [editorVisible, setEditorVisible] = useState(true);
+
+  if(!notespace) return (<div>Notespace Doesn't exist</div>)
+    useEffect(() => {
+
+    },[notespace])
   return (
-    <div className="w-[100svw] h-[100svh] bg-cyan-500/60 grid grid-rows-1 gap-2">
+    <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
+      <Header/>
       <Suspense fallback={Loading}>
 
         <div className="w-[100svw] h-[10svh] border-b-slate-200 reverse-chat-background flex flex-row divide-x-2">
@@ -293,7 +350,7 @@ export default function Notespace() {
         <div className="w-[100svw] h-[90svh]">
           <ResizablePanelGroup direction="horizontal">
             <ResizablePanel  >
-              <ChatWindow   messagesLoaded={undefined} title={undefined}>
+              <ChatWindow   messagesLoaded={undefined} title={undefined} blurb={notespace.sources_blurb}>
 
              
                 <SourcesDrawer />
