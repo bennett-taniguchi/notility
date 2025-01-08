@@ -159,7 +159,7 @@ export default function ChatWindow({ messagesLoaded, title,children }) {
                 </div>
               ))
             ) : (
-              <Card   className="bg-indigo-400">
+              <Card   className="bg-indigo-300">
                 <CardContent className="bg-white/50 text-md text-mono   text-center py-10 text-slate-600/90">
                 
                   # Sources Selected

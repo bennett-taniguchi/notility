@@ -63,8 +63,9 @@ function OutputTable({ editorVisible, setEditorVisible }) {
     },
   ];
   return (
-    <div>
-      <Table className="w-[49svw] mx-auto">
+    <div >
+        <div className="w-[50svw] h-[9.8svh] chat-background"/>
+      <Table className="w-[49svw] mx-auto mt-[10svh]">
         <TableCaption>Your recent Notespaces</TableCaption>
         <TableHeader>
           <TableRow>
@@ -137,7 +138,7 @@ function OutputArea({ editorVisible, setEditorVisible }: any) {
         <div>
           <Button
           variant='outline'
-            className="ml-[1svw] mt-[.5svh] fixed bg-sky-100/50 border-none  "
+            className="ml-[1svw] mt-[4.5svh] fixed bg-sky-100/50 border-none  "
             onClick={() => setEditorVisible(!editorVisible)}
           >
             <IoReturnUpBack className="text-zinc-700 scale-150"  />

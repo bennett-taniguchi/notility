@@ -13,7 +13,7 @@ import ListItem from "@tiptap/extension-list-item";
 import React from "react";
 import { Button as NextButton } from "../../ui/button";
 import { Separator } from "../../ui/separator";
- import SVG1 from '../../../public/svg/svg-1.svg'
+//  import SVG1 from '../../../public/svg/svg-1.svg'
 import {
   FontBoldIcon,
   FontItalicIcon,
@@ -37,8 +37,8 @@ import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
 import { cn } from "../../lib/utils";
 import { CardTitle } from "../../ui/card";
-
-
+import bg from '../../../public/pic/complex-bg.png'
+ 
 const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
   if (!editor) {
     return null;
@@ -49,9 +49,9 @@ const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
   return (
     <div className="control-group   ">
       <CardTitle>
-      <div className="absolute left-[52svw] top-[15svh] text-sky-100 text-3xl  ">Output</div>
+      <div className="absolute left-[51svw] top-[9svh] text-sky-100 text-3xl  ">Output</div>
       </CardTitle>
-      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.5svh]   ">
+      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.5svh] mt-[4svh]   ">
     
         <NextButton
           variant="outline"
@@ -319,19 +319,18 @@ const Tiptap = ({
         </div>
       </ResizablePanel>
 
-      <ResizablePanel    >
+      <ResizablePanel    style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }} >
         
 
         <ScrollArea viewportRef={null} >
         <Textarea
             placeholder="Write a Title"
-            
-            className="bg-indigo-100 z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0   "
+         
+            className="bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0   "
           />    
        
-<SVG1   className={'ml-[0svw] z-0 absolute mt-[0svh]'}/>
 
-
+ 
           <EditorContent
             editor={editor}
            

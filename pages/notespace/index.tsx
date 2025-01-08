@@ -22,25 +22,27 @@ import {
 } from "../../components/ui/tooltip";
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "../../components/ui/card";
 import { useEffect, useReducer, useState } from "react";
+import { FaPlusSquare } from "react-icons/fa"
 import { cn } from "../../components/lib/utils";
+
 
 function TableView({data,Router}) {
     return (
 <Table className="w-[80svw] mx-auto">
-        <TableCaption>Your recent Notespaces</TableCaption>
-        <TableHeader  >
+       
+        <TableHeader    >
           <TableRow>
-            <TableHead className="w-[100px]">Title</TableHead>
-            <TableHead>Amount of Sources</TableHead>
-            <TableHead>Created On</TableHead>
-            <TableHead className="text-right">Owner</TableHead>
+            <TableHead className="w-[100px] text-black">Title</TableHead>
+            <TableHead className="text-black">Amount of Sources</TableHead>
+            <TableHead  className="text-black">Created On</TableHead>
+            <TableHead className="text-right text-black">Owner</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.map((datum) => (
             <TableRow
               key={datum.title}
-              className="w-max h-max hover:bg-zinc-200  "
+              className="w-max h-max hover:bg-slate-200/50  "
             >
               <TableCell
                 onClick={() => Router.push("/notespace/" + datum.title)}
@@ -119,21 +121,41 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
       sources: 3,
       createdOn: "1/6/2025",
       ownedBy: "Me",
-    },
+    }, {
+        title: "English",
+        sources: 3,
+        createdOn: "1/6/2025",
+        ownedBy: "Me",
+      },
   ];
  
   return (
-    <div className="w-[100svw] h-[100svh] bg-white mt-[20svh] ">
-      <h1 className="text-7xl text-sky-600 ml-[10svw]">Notespaces</h1>
-      <Separator className="mx-auto w-[80svw] my-[2svh] py-[.5svh]" />
+    <div style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 100svh' }} className="w-[100svw] h-[100svh] bg-white pt-[20svh] ">
+      <h1 className="font-roboto text-7xl  drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,1)]  text-white ml-[10svw] mb-[1.85svh]">Notespaces</h1>
+      <Separator className="mx-auto w-[80svw] my-[1svh] py-[.2svh] bg-black" />
       <div className=" place-items-end w-[80svw] mx-auto ">
         <div className="flex flex-row-2 gap-2">
+
+        <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <div className="cursor-pointer absolute left-[10svw] " onClick={()=>Router.push('/notespace/new')}>
+                <FaPlusSquare className=" h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg"/>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent >
+                <p>New Notespace</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+      
 
           <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <div className="cursor-pointer" onClick={(e)=>dispatch({type:'list'})}>
-                  <HiViewList className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-200 rounded-lg" />
+                  <HiViewList className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg" />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
@@ -146,7 +168,7 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <div className="cursor-pointer"  onClick={(e)=>dispatch({type:'card'})}>
-                  <PiCardsFill className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-200 rounded-lg  " />
+                  <PiCardsFill className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg  " />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
@@ -161,10 +183,11 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
       :
       <CardView Router={Router} data={data}/>
     }
-      
-      <Button className="ml-[10svw] mt-[1.5svh]" variant={"outline"}>
-        Create New
-      </Button>
+    <div className="mt-2">
+    <h1 className="font-roboto text-7xl  drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,1)]  text-white ml-[10svw] mb-[1.85svh]">Tracks</h1>
+    <Separator className="mx-auto w-[80svw] my-[1svh] py-[.2svh] bg-black" />
+     <TableView  Router={Router} data={data} />
+     </div>
     </div>
   );
 }

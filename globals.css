@@ -8,13 +8,13 @@
 @layer utilities {
   @property --myColor1 {
     syntax: "<color>";
-    initial-value: theme(colors.sky.100);
+    initial-value: theme('colors.sky.100');
     inherits: false;
   }
 
   @property --myColor2 {
     syntax: "<color>";
-    initial-value: theme(colors.sky.100);
+    initial-value: theme('colors.sky.100');
     inherits: false;
   }
 
