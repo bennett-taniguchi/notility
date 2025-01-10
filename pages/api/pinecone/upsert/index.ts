@@ -7,7 +7,7 @@ import prisma from "../../../../lib/prisma";
 // Optional fields in body: content
 import { Pinecone } from "@pinecone-database/pinecone";
 export default async function handle(req, res) {
-  const { batch } = req.body;
+  const { batch, uri } = req.body;
 
   const session = await getServerSession(req, res, authOptions);
 
@@ -15,10 +15,9 @@ export default async function handle(req, res) {
     apiKey: process.env.PINECONE_API_KEY as string,
   });
 
-  let index = pc.index("notility");
-  let namespace = session.user.email;
-
-  const result = await index.namespace(namespace).upsert(batch);
+  let index = pc.index("notespace");
+  
+  const result = await index.namespace(uri).upsert(batch);
 
   res.json(result);
 }

@@ -31,6 +31,9 @@ import { Notespace } from "@prisma/client";
 import { v4 } from "uuid";
 import { empty } from "@prisma/client/runtime/library";
 import Header from "../../components/Header";
+import { ScrollArea } from "../../components/ui/scroll-area";
+ 
+ 
 
 // retrieve notes and messages with chatbot, don't need to fetch both if only one is needed...
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
@@ -61,17 +64,20 @@ function TableView({data,Router}) {
 
   if(!data) return (<div></div>)
     return (
+      
 <Table className="w-[80svw] mx-auto">
        
         <TableHeader    >
-          <TableRow>
+          
+          <TableRow >
             <TableHead className="w-[100px] text-black">Title</TableHead>
             <TableHead className="text-black">Amount of Sources</TableHead>
             <TableHead  className="text-black">Created On</TableHead>
             <TableHead className="text-right text-black">Owner</TableHead>
           </TableRow>
-        </TableHeader>
-        <TableBody>
+        </TableHeader>   
+        <TableBody> 
+      
           {  data.map((datum) => (
             <TableRow
               key={datum.title}
@@ -87,7 +93,7 @@ function TableView({data,Router}) {
                 onClick={() => Router.push("/notespace/" + datum.uri)}
                 className={"cursor-pointer"}
               >
-                {datum.sources}
+                {datum.sources ? datum.sources : 0}
               </TableCell>
               <TableCell
                 onClick={() => Router.push("/notespace/" + datum.uri)}
@@ -109,9 +115,28 @@ function TableView({data,Router}) {
           ))
          
         }
-        </TableBody>
-      </Table>
 
+<TableRow>
+            <TableCell className="h-[5svh]">
+            <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild >
+                <div className="cursor-pointer absolute left-[10svw] flex flex-row bg-white/50 rounded-xl px-5 active:bg-indigo-300 hover:scale-105" onClick={()=>createAndNavigate(Router)}>
+               
+                <div className="text-md font-bold ml-2 text-white drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,.5)]">  Make New Notespace </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent >
+                <p>New Notespace</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      
+      </Table>
+    
     )
 }
 
@@ -151,15 +176,28 @@ function viewReducer(views,action) {
 
 
 
+const createAndNavigate = async (Router) => {
+  let uuid = v4()
+  try {
+    const res = await fetch('/api/notespace/create/'+uuid, { method: 'POST' })
+    if(!res.ok) throw new Error('Notespace creation failed')
 
+    
+
+  
+    Router.push(`notespace/${uuid}`) 
+        
+    
+   
+
+  } catch(e) {
+    console.log(e,'Error in creation of Notespace')
+  }
+  
+};
 
 export default function Notespaces({notespaces}: Props) {
-  const createAndNavigate = async () => {
-    let uuid = v4()
-    const res = await fetch('/api/notespace/create/'+uuid, { method: 'POST' });
-   
-    Router.push(`notespace/${uuid}`);
-  };
+
 
   const Router = useRouter();
   const initialView = {view:'list'};
@@ -168,26 +206,15 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
  
  
   return (
-    <div style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 100svh' }} className="w-[100svw] h-[100svh] bg-white pt-[20svh] ">
+   
+    <div style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }} className=" bg-white pt-[20svh] ">
       <Header/>
       <h1 className="font-roboto text-7xl  drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,1)]  text-white ml-[10svw] mb-[1.85svh]">Notespaces</h1>
       <Separator className="mx-auto w-[80svw] my-[1svh] py-[.2svh] bg-black" />
       <div className=" place-items-end w-[80svw] mx-auto ">
         <div className="flex flex-row-2 gap-2">
 
-        <TooltipProvider>
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <div className="cursor-pointer absolute left-[10svw] flex flex-row bg-white/50 rounded-xl px-5" onClick={()=>createAndNavigate()}>
-               
-                <div className="text-md font-bold ml-2 text-white drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,.5)]">  Make New Notespace </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent >
-                <p>New Notespace</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+    
 
       
 
@@ -218,16 +245,19 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
           </TooltipProvider>
         </div>
       </div>
+    
       {view!.view =='list' ?
       <TableView Router={Router} data={notespaces} />
       :
       <CardView Router={Router} data={notespaces}/>
     }
+  
     {/* <div className="mt-2">
     <h1 className="font-roboto text-7xl  drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,1)]  text-white ml-[10svw] mb-[1.85svh]">Tracks</h1>
     <Separator className="mx-auto w-[80svw] my-[1svh] py-[.2svh] bg-black" />
      <TableView  Router={Router} data={data} />
      </div> */}
     </div>
+   
   );
 }

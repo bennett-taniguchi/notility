@@ -1,5 +1,5 @@
 import { Router, useRouter } from "next/router";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useReducer, useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -45,64 +45,71 @@ import { BsFiletypeCsv } from "react-icons/bs";
 import { TbJson } from "react-icons/tb";
 import { TbTxt } from "react-icons/tb";
 import { UploadButton } from "@bytescale/upload-widget-react";
-import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from "../../components/ui/menubar";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarTrigger,
+} from "../../components/ui/menubar";
 import { Separator } from "../../components/ui/separator";
 import { UploadWidgetReactConfig } from "@bytescale/upload-widget-react/dist/UploadWidgetReactConfig";
-import { getSession } from "next-auth/react";
-import { Notespace } from "@prisma/client";
- 
+import { getSession, useSession } from "next-auth/react";
+import { Notespace, Upload } from "@prisma/client";
+
 import prisma from "../../lib/prisma";
 import { GetServerSideProps } from "next";
 import Header from "../../components/Header";
+import { ScrollArea } from "../../components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../components/ui/tooltip";
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
- 
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  res,
+  resolvedUrl,
+}) => {
   res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=10, stale-while-revalidate=59'
-  )
+    "Cache-Control",
+    "public, s-maxage=10, stale-while-revalidate=59"
+  );
 
-  let uuid = req.url?.split('/')[2] // need middleware workaround??
- 
+  let uuid = resolvedUrl.split("/")[2]; // need middleware workaround??
+
   const session = await getSession({ req });
 
   if (!session) {
     res.statusCode = 403;
-    return { props: { notes: [] } };
+    return { props: { notespace: [] } };
   }
 
   const notespace = await prisma.notespace.findUnique({
     where: {
-      uri : uuid ,
+      uri: uuid,
     },
   });
- 
+
+  const sources = await prisma.upload.findMany({
+    where: {
+      uri: uuid,
+    },
+  });
 
   return {
-    props: { notespace },
+    props: { notespace, sources },
   };
 };
 
- type Props = {
+type Props = {
   notespace: Notespace;
+  sources: Upload[];
 };
-
-// maxFileSize curr 2 MB
-const options = {
-    apiKey: "public_W142iw5A2CjLkNdU7G6px7mYYKZH", // This is your API key.
-    maxFileCount: 1,
-    maxFileSizeBytes: 2000000,
-    path: {
-        fileName: "{actualFilename}+{,}+{someHashedName?}",
-        fileNameFallback: "/uploads",
-        folderPath: "/uploads/"+`[...hashed]`+'/',
-
-    },
-    mimeTypes: [
-        "image/jpeg", "pdf", "txt", "tex","..."
-    ]
-  } as  UploadWidgetReactConfig;
-  
 
 function OutputTable({ editorVisible, setEditorVisible }) {
   const data = [
@@ -114,8 +121,8 @@ function OutputTable({ editorVisible, setEditorVisible }) {
     },
   ];
   return (
-    <div >
-        <div className="w-[50svw] h-[9.8svh] chat-background"/>
+    <div>
+      <div className="w-[50svw] h-[9.8svh] chat-background" />
       <Table className="w-[49svw] mx-auto mt-[10svh]">
         <TableCaption>Your recent Notespaces</TableCaption>
         <TableHeader>
@@ -187,13 +194,15 @@ function OutputArea({ editorVisible, setEditorVisible }: any) {
     <div>
       {editorVisible ? (
         <div>
-          <Button
-          variant='outline'
-            className="ml-[1svw] mt-[4.5svh] fixed bg-sky-100/50 border-none  "
+          <div
+            className="  hover:bg-sky-100  ml-[8svw] mt-[.7svh] fixed   border-none  text-sm font-bold text-zinc-700 cursor-pointer bg-white/80 rounded px-2"
             onClick={() => setEditorVisible(!editorVisible)}
           >
-            <IoReturnUpBack className="text-zinc-700 scale-150"  />
-          </Button>
+            <div className="flex flex-row  ">
+              <IoReturnUpBack className="mr-1 mt-1" />
+              Go back
+            </div>
+          </div>
 
           <Tiptap
             setEditorVisible={setEditorVisible}
@@ -209,43 +218,109 @@ function OutputArea({ editorVisible, setEditorVisible }: any) {
     </div>
   );
 }
-function SourcesDrawer() {
-  // FaFilePdf
-  // FaMarkdown
-  // SiLatex
-  //  BsFiletypeCsv
-  //  TbJson
-  //  TbTxt
 
-  const sources = [
-    {
-      name: "Source 1",
-    },
-    {
-      name: "Source 2",
-    },
-    {
-      name: "Source 3",
-    },
-  ];
+// Need to add:
+// add files to pinecone
+// variable chunk based on file
+
+async function addFileNamesToDB(files: any, uri: string) {
+  if (!files || files.length == 0) return;
+  let uploads: any[] = [];
+  function splitOnFileType(filename: string) {
+    let lastDotI = filename.lastIndexOf(".");
+    let fileExtension = filename.substring(lastDotI, filename.length);
+    let name = filename.substring(0, lastDotI);
+
+    return { extension: fileExtension, name: name };
+  }
+
+  files.map((file) => {
+    let { name, extension } = splitOnFileType(
+      file.originalFile.originalFileName
+    );
+    let upload = {
+      uri: uri,
+      fileUrl: file.fileUrl,
+      originalFileName: file.originalFile.originalFileName,
+      title: name,
+      filetype: extension,
+    };
+    uploads.push(upload);
+  });
+
+  const body = { uploads };
+
+
+  await fetch("/api/upload/create/createMany/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+function SourcesDrawer({ selected, slug, sources, isChild, setIsChild, options,dispatch }) {
+  function FileIcon({ extension }) {
+    switch (extension) {
+      case ".pdf":
+        return (
+          <FaFilePdf className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-rose-800 fill-rose-800" />
+        );
+      case ".md":
+        return (
+          <FaMarkdown className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-blue-800 fill-blue-800" />
+        );
+      case ".csv":
+        return (
+          <BsFiletypeCsv className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-green-800 fill-green-800" />
+        );
+      case ".tex":
+        return (
+          <SiLatex className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-green-400 fill-green-400" />
+        );
+      case ".json":
+        return (
+          <TbJson className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-yellow-600" />
+        );
+
+      case ".txt":
+        return (
+          <TbTxt className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-zinc-600" />
+        );
+    }
+    return (
+      <TbTxt className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-zinc-600" />
+    );
+  }
+ 
+  
+  if(selected.length!=0 && sources)
   return (
-    <Drawer>
-         
+    <Drawer dismissible={true} open={isChild}>
       <DrawerTrigger asChild>
         <div className="ml-[-7svw] flex flex-row py-[1svw]">
-       
-      <UploadButton options={options}
-                onComplete={files => alert(files.map(x  => x.fileUrl).join("\n"))}>
-    {({onClick}) =>
-      <Button variant='outline' onClick={onClick} className="hover:drop-shadow-sm border-sky-400/50 animated-button text-sm mr-[1svw] w-[8svw] h-[5svh]">
-        <svg  className='mr-1' width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 2C3.22386 2 3 2.22386 3 2.5V12.5C3 12.7761 3.22386 13 3.5 13H11.5C11.7761 13 12 12.7761 12 12.5V6H8.5C8.22386 6 8 5.77614 8 5.5V2H3.5ZM9 2.70711L11.2929 5H9V2.70711ZM2 2.5C2 1.67157 2.67157 1 3.5 1H8.5C8.63261 1 8.75979 1.05268 8.85355 1.14645L12.8536 5.14645C12.9473 5.24021 13 5.36739 13 5.5V12.5C13 13.3284 12.3284 14 11.5 14H3.5C2.67157 14 2 13.3284 2 12.5V2.5Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-        Upload a file...
-      </Button>
-    }
-  </UploadButton>
-        <Button variant="outline" className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]">
-        <svg className='mr-1' width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3H12V12H3L3 3ZM2 3C2 2.44771 2.44772 2 3 2H12C12.5523 2 13 2.44772 13 3V12C13 12.5523 12.5523 13 12 13H3C2.44771 13 2 12.5523 2 12V3ZM10.3498 5.51105C10.506 5.28337 10.4481 4.97212 10.2204 4.81587C9.99275 4.65961 9.6815 4.71751 9.52525 4.94519L6.64048 9.14857L5.19733 7.40889C5.02102 7.19635 4.7058 7.16699 4.49327 7.34329C4.28073 7.5196 4.25137 7.83482 4.42767 8.04735L6.2934 10.2964C6.39348 10.4171 6.54437 10.4838 6.70097 10.4767C6.85757 10.4695 7.00177 10.3894 7.09047 10.2601L10.3498 5.51105Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-            Select Sources</Button>
+        
+          <Button
+            onClick={() => setIsChild(true)}
+            variant="outline"
+            className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]"
+          >
+            <svg
+              className="mr-1"
+              width="15"
+              height="15"
+              viewBox="0 0 15 15"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 3H12V12H3L3 3ZM2 3C2 2.44771 2.44772 2 3 2H12C12.5523 2 13 2.44772 13 3V12C13 12.5523 12.5523 13 12 13H3C2.44771 13 2 12.5523 2 12V3ZM10.3498 5.51105C10.506 5.28337 10.4481 4.97212 10.2204 4.81587C9.99275 4.65961 9.6815 4.71751 9.52525 4.94519L6.64048 9.14857L5.19733 7.40889C5.02102 7.19635 4.7058 7.16699 4.49327 7.34329C4.28073 7.5196 4.25137 7.83482 4.42767 8.04735L6.2934 10.2964C6.39348 10.4171 6.54437 10.4838 6.70097 10.4767C6.85757 10.4695 7.00177 10.3894 7.09047 10.2601L10.3498 5.51105Z"
+                fill="currentColor"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            Select Sources
+          </Button>
         </div>
       </DrawerTrigger>
       <DrawerContent>
@@ -256,34 +331,86 @@ function SourcesDrawer() {
           </DrawerHeader>
           <div className="p-4 pb-0 mt-[3svw]">
             <div className="flex items-center justify-center space-x-2 flex-col group">
-              {sources.map((source,idx) => (
-                <div key={idx} className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5 bg-zinc-200 px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw] border-t-2 border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  ">
+              
+              {sources.map((source: Upload, idx) => (
+                <div
+                  key={idx}
+                  className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5  animated-button px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
+                >
                   <div className="my-auto  ">
                     <Checkbox
-                      id={source.name}
+                      id={source.title}
                       className="mr-3 hover:bg-cyan-100/30"
+                      defaultChecked={selected.map.get(source.title)}
+                      value={selected.map.get(source.title)}
+                      onClick={(e) => dispatch({type:'toggle_source',title:source.title})}
                     />
                     <label
-                      htmlFor={source.name}
+                      htmlFor={source.title}
                       className="text-slate-700 font-roboto text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  "
                     >
-                      {source.name}
+                      {source.title}
                     </label>
                   </div>
 
                   <BsThreeDotsVertical className="right-0 absolute mr-[2svw] h-[1.5svw] w-[1.5svw] mt-[.9svh]  fill-slate-700" />
-
-                  <TbJson className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-yellow-600" />
+                  <FileIcon extension={source.filetype as any} />
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <div className="w-[2svw] h-[5svh]   right-0 absolute" />
+                      </TooltipTrigger>
+                      <TooltipContent>{source.filetype}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               ))}
-             
             </div>
             <div className="mt-3 h-[40svh]"></div>
-          </div>
-          <DrawerFooter className="flex flex-row absolute ml-[4.5svw]">
+          </div> <div className="text-md">
+              {selected.selected}
+           </div>
+          <DrawerFooter className="flex flex-row  ml-[2svw]   mx-auto">
+           
+            <Button>Add a link</Button>
+            <UploadButton
+              options={options(slug)}
+              onComplete={(files) => addFileNamesToDB(files, slug)}
+            >
+              {({ onClick }) => (
+                <Button
+                  variant="outline"
+                  onClick={onClick}
+                  className="hover:drop-shadow-sm border-sky-400/50 animated-button text-sm mr-[1svw] w-[8svw] h-[5svh]"
+                >
+                  <svg
+                    className="mr-1"
+                    width="15"
+                    height="15"
+                    viewBox="0 0 15 15"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3.5 2C3.22386 2 3 2.22386 3 2.5V12.5C3 12.7761 3.22386 13 3.5 13H11.5C11.7761 13 12 12.7761 12 12.5V6H8.5C8.22386 6 8 5.77614 8 5.5V2H3.5ZM9 2.70711L11.2929 5H9V2.70711ZM2 2.5C2 1.67157 2.67157 1 3.5 1H8.5C8.63261 1 8.75979 1.05268 8.85355 1.14645L12.8536 5.14645C12.9473 5.24021 13 5.36739 13 5.5V12.5C13 13.3284 12.3284 14 11.5 14H3.5C2.67157 14 2 13.3284 2 12.5V2.5Z"
+                      fill="currentColor"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Upload a file...
+                </Button>
+              )}
+            </UploadButton>
             <Button className="w-[10svh] ">Submit</Button>
             <DrawerClose asChild>
-              <Button className="w-[10svh]  " variant="outline">
+              <Button
+                className="w-[10svh]  "
+                variant="outline"
+                onClick={() => {
+                  setIsChild(false);
+                }}
+              >
                 Cancel
               </Button>
             </DrawerClose>
@@ -292,83 +419,215 @@ function SourcesDrawer() {
       </DrawerContent>
     </Drawer>
   );
+
+  {
+    return (
+      <Drawer>
+        <DrawerTrigger asChild>
+          <div className="ml-[-7svw] flex flex-row py-[1svw]">
+            <Button
+              variant="outline"
+              className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]"
+            >
+              <svg
+                className="mr-1"
+                width="15"
+                height="15"
+                viewBox="0 0 15 15"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3 3H12V12H3L3 3ZM2 3C2 2.44771 2.44772 2 3 2H12C12.5523 2 13 2.44772 13 3V12C13 12.5523 12.5523 13 12 13H3C2.44771 13 2 12.5523 2 12V3ZM10.3498 5.51105C10.506 5.28337 10.4481 4.97212 10.2204 4.81587C9.99275 4.65961 9.6815 4.71751 9.52525 4.94519L6.64048 9.14857L5.19733 7.40889C5.02102 7.19635 4.7058 7.16699 4.49327 7.34329C4.28073 7.5196 4.25137 7.83482 4.42767 8.04735L6.2934 10.2964C6.39348 10.4171 6.54437 10.4838 6.70097 10.4767C6.85757 10.4695 7.00177 10.3894 7.09047 10.2601L10.3498 5.51105Z"
+                  fill="currentColor"
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+              Select Sources
+            </Button>
+          </div>
+        </DrawerTrigger>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-sm h-[80svh]">
+            <DrawerHeader className="absolute left-[1.5svw]">
+              <DrawerTitle>Selected Sources:</DrawerTitle>
+              <DrawerDescription>Upload or Enter Link</DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 pb-0 mt-[3svw]">
+              <div className="flex items-center justify-center space-x-2 flex-col group"></div>
+              <div className="mt-3 h-[40svh]"></div>
+            </div>
+            <DrawerFooter className="flex flex-row absolute ml-[4.5svw]">
+              <Button className="w-[10svh] ">Submit</Button>
+              <DrawerClose asChild>
+                <Button className="w-[10svh]  " variant="outline">
+                  Cancel
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 }
-export default function NotespacesPage({notespace}:Props) {
+function selectedReducer(state,action) {
+ 
+switch(action.type) {
+  case 'init_sources':
+    let stateMap = new Map<string,boolean>()
+    action.sources.forEach((item) => {
+      stateMap.set(item.title,false)
+    })
+    return { map : stateMap, selected:""}
+  case 'toggle_source' :
+    
+    state.map.set(action.title,!state.map.get(action.title))
+    
+    const keys = state.map.keys();
+
+    let str = ''
+    let c = 0
+    for (const key of keys) {
+      if(state.map.get(key)) {str += "`"+key+"`"; c++}
+      
+    }
+    if(c==0) {
+      str = 'No Sources Selected, select from above!'
+    } else if(c==1) {
+      str = c + " Source Selected: " + str
+    } else{
+      str = c + " Sources Selected: " + str
+    }
+ 
+    return {map:state.map, selected:str};
+}
+}
+
+export default function NotespacesPage({ notespace, sources }: Props) {
   const Router = useRouter();
-  const { slug } = Router.query;
+  const slug = Router.asPath.split("/")[2];
+  const initialState = { map:new Map<string,boolean>(), selected:""}
   const [editorVisible, setEditorVisible] = useState(true);
+  const [isChild, setIsChild] = useState(false);
+  const [selected, dispatch] = useReducer(selectedReducer,initialState)
+  const { data: session } = useSession();
 
-  if(!notespace) return (<div>Notespace Doesn't exist</div>)
-    useEffect(() => {
+  useEffect(() => {
+    dispatch({type:'init_sources',sources:sources})
+  },[])
+  useEffect(()=> {
 
-    },[notespace])
-  return (
-    <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
-      <Header/>
-      <Suspense fallback={Loading}>
+  },[selected])
+  function validateFile(originalFilename: string) {
+    if (!sources) return false;
+    if (sources.length >= 25)
+      for (let i = 0; i < sources.length; i++) {
+        if (sources[i].originalFileName == originalFilename) return true;
+      }
+    return false;
+  }
+  const options = (uri) => {
+    return {
+      apiKey: "public_W142iw5A2CjLkNdU7G6px7mYYKZH", // This is your API key.
+      maxFileCount: 1,
+      maxFileSizeBytes: 2000000,
+      path: {
+        folderPath: "/uploads/" + uri,
+      },
+      onPreUpload(file: File) {
+        if (validateFile(file.name))
+          return {
+            errorMessage:
+              "Duplicate Filename: Please rename file on your device",
+            transformedObject: file,
+          };
+        return;
+      },
+      mimeTypes: ["application/pdf", "text/plain"],
+    } as UploadWidgetReactConfig;
+  };
 
-        <div className="w-[100svw] h-[10svh] border-b-slate-200 reverse-chat-background flex flex-row divide-x-2">
-          <div
-            className="basis-1/3 text-center text-black flex flex-row-2"
-            id="top_info"
-          >
-            <div className="span-1/4  my-auto mr-[1svw]  ml-[1svw] rounded-md mt-[3svh]">
-              <Link href="/notespace">
-                <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70" />
-              </Link>
-            </div>
-            <Textarea
-              className="overflow-y-hidden bg-gradient-to-r from-zinc-400/50 to-cyan-400/50 text-sky-100 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
-              defaultValue={"Practice Set"}
-            />
-          </div>
+  if (!session) return <div>Login to see page</div>;
+  if (!Router.isReady && session) {
+    return <div>Loading...</div>;
+  }
 
-          <div id="top_sources" className="basis-1/3  m-auto  ">
-            <div className={"ml-[13svw]"}></div>
-          </div>
-
-          <div
-            className="border-transparent border-l-2 basis-1/3 text-center flex flex-row-3 m-auto  rounded-xl mr-[2svw] pb-[1svh]"
-            id="top_sources"
-          >
-            <div className="ml-[20svw] span-1/3   text-cyan-800    ">
-              
-              <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
-            </div>
-            <div className=" span-1/3  text-cyan-800">
-           
-             
-              <FaShare className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />{" "}
-            </div>
-
-            <div className="span-1/3 " id="top_dash text-cyan-800">
-              
-              <FaUserAlt className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
-            </div>
-          </div>
-        </div>
-        <div className="w-[100svw] h-[90svh]">
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel  >
-              <ChatWindow   messagesLoaded={undefined} title={undefined} blurb={notespace.sources_blurb}>
-
-             
-                <SourcesDrawer />
-              </ChatWindow>
-            </ResizablePanel>
-             
-            <ResizablePanel      >
-              <OutputArea
-                editorVisible={editorVisible}
-                setEditorVisible={setEditorVisible}
+  if (notespace)
+    return (
+      <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
+        <Header />
+        <Suspense fallback={Loading}>
+          <div className="w-[100svw] h-[10svh] border-b-slate-200 drop-shadow-lg  reverse-chat-background flex flex-row divide-x-2 ">
+            <div
+              className="basis-1/3 text-center text-black flex flex-row-2  "
+              id="top_info"
+            >
+              <div className="span-1/4  my-auto mr-[1svw]  ml-[1svw] rounded-md mt-[3svh]">
+                <Link href="/notespace">
+                  <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70" />
+                </Link>
+              </div>
+              <Textarea
+                className="overflow-y-hidden bg-gradient-to-r from-zinc-400/50 to-cyan-400/50 text-sky-100 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
+                defaultValue={notespace.title}
               />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-      </Suspense>
-    </div>
-  );
-}
-function setProgress(arg0: number): void {
-  throw new Error("Function not implemented.");
+            </div>
+
+            <div id="top_sources" className="basis-1/3  m-auto  ">
+              <div className={"ml-[13svw]"}></div>
+            </div>
+
+            <div
+              className="border-transparent border-l-2 basis-1/3 text-center flex flex-row-3 m-auto  rounded-xl mr-[2svw] pb-[1svh]"
+              id="top_sources"
+            >
+              <div className="ml-[20svw] span-1/3   text-cyan-800    ">
+                <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
+              </div>
+              <div className=" span-1/3  text-cyan-800">
+                <FaShare className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />{" "}
+              </div>
+
+              <div className="span-1/3 " id="top_dash text-cyan-800">
+                <FaUserAlt className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
+              </div>
+            </div>
+          </div>
+          <div className="w-[100svw] h-[90svh]">
+            <ResizablePanelGroup direction="horizontal">
+              <ResizablePanel>
+                
+                <ChatWindow
+                  messagesLoaded={undefined}
+                  title={undefined}
+                  blurb={notespace.sources_blurb}
+                  selected={selected}
+                >
+                  <SourcesDrawer
+                    slug={slug}
+                    sources={sources}
+                    isChild={isChild}
+                    setIsChild={setIsChild}
+                    options={options}
+                    dispatch={dispatch}
+                    selected={selected}
+                  />
+                </ChatWindow>
+              </ResizablePanel>
+
+              <ResizablePanel>
+                <OutputArea
+                  editorVisible={editorVisible}
+                  setEditorVisible={setEditorVisible}
+                />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
+        </Suspense>
+      </div>
+    );
+
+  return <div>Notespace doesn't exist</div>;
 }

@@ -9,7 +9,6 @@ import { Record } from "@prisma/client/runtime/library";
 
 export function HTMLtoText(text: string): string {
   text = text.replace(/<[^>]+>/g, "");
-
   return text;
 }
 /**

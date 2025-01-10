@@ -49,9 +49,9 @@ const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
   return (
     <div className="control-group   ">
       <CardTitle>
-      <div className="absolute left-[51svw] top-[9svh] text-sky-100 text-3xl  ">Output</div>
+      <div className="absolute left-[51svw] top-[12svh] text-sky-100 text-3xl  ">Output</div>
       </CardTitle>
-      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.5svh] mt-[4svh]   ">
+      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.5svh] mt-[4svh] ml-[7svw]   ">
     
         <NextButton
           variant="outline"

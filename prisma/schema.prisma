@@ -40,19 +40,19 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
+  id              String    @id @default(cuid())
+  name            String?
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
   notespace_theme String?
-  creation_theme String?
-  tracks_theme String?
-  premium_start String?
-  premium_end String?
-  accounts Account[]
-  sessions Session[]
-  notes    Notes[]
+  creation_theme  String?
+  tracks_theme    String?
+  premium_start   String?
+  premium_end     String?
+  accounts        Account[]
+  sessions        Session[]
+  notes           Notes[]
 }
 
 model VerificationToken {
@@ -65,15 +65,15 @@ model VerificationToken {
 }
 
 model Notes {
-  id       Int     @id @default(autoincrement())
-  title    String
-  content  String
-  author   User?   @relation(fields: [authorId], references: [id])
-  authorId String?
-  uri      String
-  createdBy String
-  prompt_type      String?
-  prompt    String?
+  id          Int     @id @default(autoincrement())
+  title       String
+  content     String
+  author      User?   @relation(fields: [authorId], references: [id])
+  authorId    String?
+  uri         String
+  createdBy   String
+  prompt_type String?
+  prompt      String?
 
   notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
@@ -81,7 +81,7 @@ model Notes {
 }
 
 model Message {
-  id    Int  @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   authorId String
   role     String
   content  String
@@ -95,26 +95,43 @@ model Message {
 
 model Shared {
   authorId String
-  uri String
-  level Int
-  
+  uri      String
+  level    Int
+
   notespace Notespace @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
-  @@unique([uri,authorId])
+  @@unique([uri, authorId])
 }
 
 model Notespace {
-  id    Int  @id @default(autoincrement())
-  authorId String
+  id         Int    @id @default(autoincrement())
+  authorId   String
   created_on String
-  uri String
-  title String
-  owner String
-  
+  uri        String
+  title      String
+  owner      String
+
   notes Notes[]
-  messages Message[]
+
   sources_count Int?
   sources_blurb String?
-  shared Shared[]
+  shared        Shared[]
+  messages      Message[]
+ 
+
   @@unique([uri])
+}
+
+model Upload {
+  id  Int    @id @default(autoincrement())
+  uri String
+  fileUrl String
+
+ 
+  originalFileName String
+  title         String
+  owner         String
+  filetype      String
+
+  @@unique([uri,title,originalFileName])
 }
