@@ -81,7 +81,7 @@ model Notes {
 }
 
 model Message {
-  id       Int    @id @default(autoincrement())
+  index       Int     
   authorId String
   role     String
   content  String
@@ -90,7 +90,7 @@ model Message {
 
   notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
-  @@unique([id, uri])
+  @@unique([index, uri])
 }
 
 model Shared {

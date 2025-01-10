@@ -18,7 +18,7 @@ import { Separator } from "@radix-ui/react-menubar";
 
 const Blog = () => {
  
-  const Trail: React.FC<{ open: boolean }> = ({ open, children }) => {
+  const Trail: React.FC<{ open: boolean,children:any}> = ({ open, children }) => {
     const items = React.Children.toArray(children);
     const trail = useTrail(items.length, {
       config: { mass: 20, tension: 2000, friction: 200 },

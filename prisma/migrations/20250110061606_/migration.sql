@@ -1,15 +1,4 @@
 -- CreateTable
-CREATE TABLE "Post" (
-    "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "content" TEXT,
-    "published" BOOLEAN NOT NULL DEFAULT false,
-    "authorId" TEXT,
-
-    CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Account" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
@@ -46,6 +35,11 @@ CREATE TABLE "User" (
     "email" TEXT,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
+    "notespace_theme" TEXT,
+    "creation_theme" TEXT,
+    "tracks_theme" TEXT,
+    "premium_start" TEXT,
+    "premium_end" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -66,6 +60,10 @@ CREATE TABLE "Notes" (
     "title" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "authorId" TEXT,
+    "uri" TEXT NOT NULL,
+    "createdBy" TEXT NOT NULL,
+    "prompt_type" TEXT,
+    "prompt" TEXT,
 
     CONSTRAINT "Notes_pkey" PRIMARY KEY ("id")
 );
@@ -76,40 +74,42 @@ CREATE TABLE "Message" (
     "authorId" TEXT NOT NULL,
     "role" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "title" TEXT NOT NULL
+    "title" TEXT NOT NULL,
+    "uri" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Shared" (
+    "authorId" TEXT NOT NULL,
+    "uri" TEXT NOT NULL,
+    "level" INTEGER NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Notespace" (
+    "id" SERIAL NOT NULL,
+    "authorId" TEXT NOT NULL,
+    "created_on" TEXT NOT NULL,
+    "uri" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "owner" TEXT NOT NULL,
+    "sources_count" INTEGER,
+    "sources_blurb" TEXT,
+
+    CONSTRAINT "Notespace_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Upload" (
-    "index" SERIAL NOT NULL,
-    "authorId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uri" TEXT NOT NULL,
+    "fileUrl" TEXT NOT NULL,
+    "originalFileName" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
+    "owner" TEXT NOT NULL,
+    "filetype" TEXT NOT NULL,
 
-    CONSTRAINT "Upload_pkey" PRIMARY KEY ("index")
-);
-
--- CreateTable
-CREATE TABLE "Card" (
-    "index" SERIAL NOT NULL,
-    "setTitle" TEXT NOT NULL,
-    "authorId" TEXT NOT NULL,
-    "term" TEXT NOT NULL,
-    "answer" TEXT NOT NULL,
-
-    CONSTRAINT "Card_pkey" PRIMARY KEY ("index")
-);
-
--- CreateTable
-CREATE TABLE "Flashcard" (
-    "index" SERIAL NOT NULL,
-    "authorId" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "rating" INTEGER NOT NULL,
-    "practiceCount" INTEGER,
-
-    CONSTRAINT "Flashcard_pkey" PRIMARY KEY ("index")
+    CONSTRAINT "Upload_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -128,22 +128,19 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Notes_title_authorId_key" ON "Notes"("title", "authorId");
+CREATE UNIQUE INDEX "Notes_uri_key" ON "Notes"("uri");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Message_index_authorId_title_key" ON "Message"("index", "authorId", "title");
+CREATE UNIQUE INDEX "Message_index_uri_key" ON "Message"("index", "uri");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Upload_title_authorId_key" ON "Upload"("title", "authorId");
+CREATE UNIQUE INDEX "Shared_uri_authorId_key" ON "Shared"("uri", "authorId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Card_term_answer_setTitle_key" ON "Card"("term", "answer", "setTitle");
+CREATE UNIQUE INDEX "Notespace_uri_key" ON "Notespace"("uri");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Flashcard_authorId_title_key" ON "Flashcard"("authorId", "title");
-
--- AddForeignKey
-ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+CREATE UNIQUE INDEX "Upload_uri_title_originalFileName_key" ON "Upload"("uri", "title", "originalFileName");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -155,4 +152,10 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_user_id_fkey" FOREIGN KEY ("user_i
 ALTER TABLE "Notes" ADD CONSTRAINT "Notes_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Card" ADD CONSTRAINT "Card_setTitle_authorId_fkey" FOREIGN KEY ("setTitle", "authorId") REFERENCES "Flashcard"("title", "authorId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Notes" ADD CONSTRAINT "Notes_uri_fkey" FOREIGN KEY ("uri") REFERENCES "Notespace"("uri") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_uri_fkey" FOREIGN KEY ("uri") REFERENCES "Notespace"("uri") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Shared" ADD CONSTRAINT "Shared_uri_fkey" FOREIGN KEY ("uri") REFERENCES "Notespace"("uri") ON DELETE CASCADE ON UPDATE CASCADE;

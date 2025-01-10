@@ -13,7 +13,6 @@ export default async function handler(req, res) {
 
   let convertedUploads = [] as any;
 
-  console.log('test-uploads',uploads);
   await uploads.map((upload) => {
     convertedUploads.push({ ...upload, owner: session?.user.email });
   });

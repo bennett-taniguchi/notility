@@ -65,7 +65,7 @@ function TableView({data,Router}) {
   if(!data) return (<div></div>)
     return (
       
-<Table className="w-[80svw] mx-auto">
+<Table className="w-[80svw] mx-auto ">
        
         <TableHeader    >
           
@@ -207,7 +207,7 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
  
   return (
    
-    <div style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }} className=" bg-white pt-[20svh] ">
+    <div style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }} className="h-[100svh] bg-white pt-[20svh] ">
       <Header/>
       <h1 className="font-roboto text-7xl  drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,1)]  text-white ml-[10svw] mb-[1.85svh]">Notespaces</h1>
       <Separator className="mx-auto w-[80svw] my-[1svh] py-[.2svh] bg-black" />

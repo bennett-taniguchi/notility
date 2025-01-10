@@ -10,6 +10,7 @@ import {
 } from "./ui/menubar";
 import { ReactElement } from "react-markdown/lib/react-markdown";
 import { Button, buttonVariants } from "./ui/button";
+import { cn } from "./lib/utils";
 
 export default function Header(): ReactElement {
   const router = useRouter();
@@ -20,11 +21,11 @@ export default function Header(): ReactElement {
   }
 
   return (
-    <Menubar className="top-1/2 ">
+    <Menubar className="top-1/2 w-[80px] mx-auto">
       <MenubarMenu>
-        <MenubarTrigger>
-        <Link href='/api/auth/signin' className={buttonVariants({ variant: "link",size:'sm' })}>Log In</Link>
-
+        <MenubarTrigger  >
+        <Link href='/api/auth/signin' className={buttonVariants({ variant: "link",size:'sm' ,})}>Log In</Link>
+       
          
        
         </MenubarTrigger>
