@@ -4,7 +4,7 @@ import prisma from "../../../../lib/prisma";
 
 export default async function handle(req, res) {
   const {uri} = req.query;
-  const session = await getServerSession(req, res, authOptions);
+  
 
   const result = await prisma.message.findMany({
     where: { uri: uri },

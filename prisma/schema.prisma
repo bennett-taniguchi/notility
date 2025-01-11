@@ -81,7 +81,7 @@ model Notes {
 }
 
 model Message {
-  index       Int     
+  index       Int    @id
   authorId String
   role     String
   content  String

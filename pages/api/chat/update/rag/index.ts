@@ -15,8 +15,12 @@ const pc = new Pinecone({
 // {"role": "system", "content": "You are a helpful assistant."},
 // {"role": "user", "content": "message 1 content."},
 export default async function handle(req, res) {
-  const { prompt, messages, title } = req.body;
 
+  ///
+  //TITLE PROBLEM NEED TO OPT TO DEFAULT QUERY BRANCH IF SELECTEDARR BLANK AS TITLE IS FOR THE NOTESPACE NOT RELATED TO THE SOURCES UPLOADED
+  ///
+  const { prompt, messages, uri, selectedArr, title } = req.body;
+console.log('rag 18', req.body)
   const session = await getServerSession(req, res, authOptions);
   /// for context query:
   // 1) embed query
@@ -27,19 +31,23 @@ export default async function handle(req, res) {
     dimensions: 1536,
   });
   const embedded = await response.data;
-
+console.log('30 rag',embedded)
   // 2) use embedded to query pinecone
-  let index = pc.index("notility");
-  let namespace = session.user.email;
+  let index = pc.index("notespace");
+  let namespace = uri
 
+  let titleArr = selectedArr.length != 0 ?  selectedArr : [title]
   const queryResponse = await index.namespace(namespace).query({
     vector: embedded[0].embedding,
     topK: 3,
     includeMetadata: true,
+    filter: {
+      "name": {"$in": titleArr}
+    }
   });
-
+ 
   const matches = queryResponse.matches; // we want metadata
-  console.log(matches);
+  console.log('matches from pinecone:',matches);
   let metadata = '';
   for (let i = 0; i < matches.length; i++) {
     metadata +=
@@ -138,21 +146,25 @@ export default async function handle(req, res) {
   // response (role = 'system') items
   let content_system = completion.choices[0].message.content as string;
 
+  let queriedTitles = selectedArr.length != 0 ? selectedArr.toString() : title
+
   const result = await prisma.message.createMany({
     data: [
       {
+        uri:uri,
         index: messages.length + 1,
         content: content_user,
         authorId: session.id,
         role: "user",
-        title: title,
+        title: queriedTitles,
       },
       {
+        uri:uri,
         index: messages.length + 2,
         content: content_system,
         authorId: session.id,
         role: "system",
-        title: title,
+        title: queriedTitles,
       },
     ],
   });

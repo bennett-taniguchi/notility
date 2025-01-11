@@ -11,48 +11,36 @@ import {
 export default async function handle(req, res) {
   const session = await getServerSession(req, res, authOptions);
 
-  const { notes_contents, notes_titles } = req.body;
+  const { plainText, name, uri } = req.body;   
+  if(plainText==''){res.json('empty');return;}
+  //const parsed = HTMLtoText(notes_contents); // remove html tags
 
-  const result = await prisma.upload.upsert({
-    where: {
-      title_authorId: { authorId: session.id, title: notes_titles },
-    },
-    update: {
-      content: notes_contents,
-      title: notes_titles,
-    },
-    create: {
-      authorId: session.id,
-      title: notes_titles,
-      content: notes_contents,
-    },
-  }); // works
+  
+  const chunks = chunkTextByMultiParagraphs(plainText); // split on max words
 
-  //   res.json(result);
-
-  const parsed = HTMLtoText(notes_contents); // remove html tags
-
-  const chunks = chunkTextByMultiParagraphs(parsed); // split on max words
-
+  
   const embeddedResult = await embedChunks(chunks); // to vecs
 
-  const upserted = await upsertVectors(embeddedResult, chunks, true); // our own upsertion to pinecone db, need to split on diff users namespace
+   
+  const upserted = await upsertVectors(embeddedResult, chunks, name, true); // our own upsertion to pinecone db, need to split on diff users namespace
 
+
+ 
   /// eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 
   if (upserted)
     for (let i = 0; i < upserted[0]?.length; i++) {
       const batch = upserted[0][i];
-      console.log(batch);
+      console.log('analyze 34',batch);
       const pc = new Pinecone({
         apiKey: process.env.PINECONE_API_KEY as string,
       });
 
-      let index = pc.index("notility");
-      let namespace = session.user.email;
+      let index = pc.index("notespace");
+      let namespace = uri;
 
       const result = await index.namespace(namespace).upsert([batch] as any);
-
+     
       res.json(result);
     }
 

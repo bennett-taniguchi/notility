@@ -6,6 +6,29 @@ import {
   RecordId,
 } from "@pinecone-database/pinecone";
 import { Record } from "@prisma/client/runtime/library";
+import * as pdfjsLib from "pdfjs-dist";
+ 
+import { jsx } from "react/jsx-runtime";
+
+
+export async function getPdfText(file: any) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = (window as any).location.origin + "/pdf.worker.min.mjs";
+  console.log(window.location.origin, window.location.origin + "/pdf.worker.min.mjs")
+  //const pdf1 = await fs.readFile((file.originalFile.file as File).arrayBuffer());
+  let actualFile: File = file.originalFile.file;
+  const pdf = await pdfjsLib.getDocument(await actualFile.arrayBuffer())
+    .promise;
+  let fullText = "";
+  console.log("14", pdf);
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const textContent = await page.getTextContent();
+
+    fullText += textContent.items.map((item: any) => item.str).join(" ");
+  }
+  console.log("21", fullText);
+  return fullText;
+}
 
 export function HTMLtoText(text: string): string {
   text = text.replace(/<[^>]+>/g, "");
@@ -148,6 +171,7 @@ type VectorRecord = {
 export async function upsertVectors(
   embeddings: embedding[],
   chunks: string[],
+  name: string,
   server?: boolean
 ) {
   // Get the Pinecone index
@@ -157,6 +181,7 @@ export async function upsertVectors(
     values: embeddings[idx].embedding,
     metadata: {
       text: chunk,
+      name: name,
     },
   }));
 
@@ -169,7 +194,7 @@ export async function upsertVectors(
     if (server) {
       batches = [...batches, batch];
     } else {
-      const res = await fetch("/api/pinecone/upsert/", {
+      await fetch("/api/pinecone/upsert/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

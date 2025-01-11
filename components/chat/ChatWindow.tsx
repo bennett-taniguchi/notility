@@ -10,11 +10,11 @@ import { useRouter } from "next/navigation";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { TrashIcon, Pencil2Icon } from "@radix-ui/react-icons";
+import { TrashIcon } from "@radix-ui/react-icons";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
 
-export default function ChatWindow({ messagesLoaded, title, children,blurb,selected }) {
+export default function ChatWindow({ messagesLoaded, title, children,blurb,selected, slug }) {
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // const [messages, setMessages] = useState<Message[]>(messagesLoaded); // potential future use for editing singular message
@@ -28,11 +28,11 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
     setLoading(true);
     scrollMsg();
     const prompt = input;
-
+    const uri = slug
     const messages = messagesLoaded;
 
-    if (title === "") {
-      const body = { prompt, messages };
+    if (selected.selectedArr.length === 0) {
+      const body = { prompt, messages, uri, title };
       const res = await fetch("/api/chat/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,9 +41,11 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
 
       setInput("");
       setLoading(false);
-      Router.push("/chat");
+      Router.push("/notespace/"+uri);
     } else {
-      const body = { prompt, messages, title };
+      let selectedArr = selected.selectedArr
+      console.log('47 chatwind',selected,selectedArr)
+      const body = { prompt, messages, selectedArr,uri, title };
       await fetch("/api/chat/update/rag/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,7 +53,7 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
       }).then(() => {
         setInput("");
         setLoading(false);
-        Router.push("/chat/" + title);
+        Router.push("/notespace/"+uri);
       });
     }
   }
@@ -71,7 +73,7 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }).then(() => {
-      Router.push("/chat");
+      Router.push("/notespace/");
     });
   }
 
@@ -82,8 +84,7 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
   const scrollMsg = (amt = 99999999) => {
     if (viewportRef !== null && viewportRef.current !== null) {
       // here scroll, Ex: to the right
-      console.log("view");
-      console.log(viewportRef.current);
+     
       viewportRef.current.scrollTo({
         top: amt,
         left: 0,
@@ -122,17 +123,13 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
                   <Card
                     className={
                       m.role === "user"
-                        ? "bg-cyan-200/50 drop-shadow-md border-cyan-400 shadow-inner"
-                        : "bg-white/50 drop-shadow-lg shadow-inner border-zinc-200"
+                        ? "bg-sky-200 drop-shadow-md border-sky-400 shadow-inner min-w-[10svw]"
+                        : "bg-indigo-200 drop-shadow-lg shadow-inner border-indigo-400 min-w-[10svw]"
                     }
                   >
                     <div key={m.id} className="whitespace-pre-wrap">
                       <CardHeader>
-                        {m.role === "user" ? (
-                          <Pencil2Icon className=" hover:bg-cyan-400 fixed right-5 scale-[1.3] hover:drop-shadow-2xl rounded" />
-                        ) : (
-                          <div />
-                        )}
+                      
                         <CardTitle className="font-bold font-mono">
                           {m.role === "user" ? "User: " : "AI: "}
                         </CardTitle>
