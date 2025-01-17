@@ -6,6 +6,7 @@ import {
   HTMLtoText,
   chunkTextByMultiParagraphs,
   embedChunks,
+  getSummary,
   upsertVectors,
 } from "../../../../utils/parse_text";
 export default async function handle(req, res) {
@@ -15,14 +16,15 @@ export default async function handle(req, res) {
   if(plainText==''){res.json('empty');return;}
   //const parsed = HTMLtoText(notes_contents); // remove html tags
 
-  
+
   const chunks = chunkTextByMultiParagraphs(plainText); // split on max words
 
-  
+  const summaries = getSummary(chunks) as any //  summaries: {summaries:summaries,overallSummary:data}
+
   const embeddedResult = await embedChunks(chunks); // to vecs
 
    
-  const upserted = await upsertVectors(embeddedResult, chunks, name, true); // our own upsertion to pinecone db, need to split on diff users namespace
+  const upserted = await upsertVectors(embeddedResult, chunks, summaries, name); // our own upsertion to pinecone db, need to split on diff users namespace
 
 
  
@@ -31,6 +33,7 @@ export default async function handle(req, res) {
   if (upserted)
     for (let i = 0; i < upserted[0]?.length; i++) {
       const batch = upserted[0][i];
+      
       console.log('analyze 34',batch);
       const pc = new Pinecone({
         apiKey: process.env.PINECONE_API_KEY as string,
@@ -39,11 +42,12 @@ export default async function handle(req, res) {
       let index = pc.index("notespace");
       let namespace = uri;
 
-      const result = await index.namespace(namespace).upsert([batch] as any);
+      await index.namespace(namespace).upsert([batch] as any);
      
-      res.json(result);
+    
     }
 
+    res.json(summaries);
   ///eeeeeeeeeeeeeeee
   // format:
   // 0: {embedding (1536) [.1232,...], index:0, object:"embedding"},

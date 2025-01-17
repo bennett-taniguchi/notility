@@ -76,7 +76,6 @@ import {
   TooltipTrigger,
 } from "../../components/ui/tooltip";
 import { getPdfText } from "../../utils/parse_text";
- 
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -249,34 +248,33 @@ async function addFileNamesToDB(files: any, uri: string, Router: any) {
     return { extension: fileExtension, name: name };
   }
   const reader = new FileReader();
-  files.map(async (file) => {
-    let { name, extension } = splitOnFileType(
-      file.originalFile.originalFileName
-    );
-    let upload = {
-      uri: uri,
-      fileUrl: file.fileUrl,
-      originalFileName: file.originalFile.originalFileName,
-      title: name,
-      filetype: extension,
-    };
-    uploads.push(upload);
+  files
+    .map(async (file) => {
+      let { name, extension } = splitOnFileType(
+        file.originalFile.originalFileName
+      );
+      let upload = {
+        uri: uri,
+        fileUrl: file.fileUrl,
+        originalFileName: file.originalFile.originalFileName,
+        title: name,
+        filetype: extension,
+      };
+      uploads.push(upload);
 
-    getPdfText(file)
-      .then(async (text) => {
+      getPdfText(file).then(async (text) => {
         const plainText = text;
         const body2 = { plainText, name, uri };
-        await fetch("/api/chat/analyze/", {
+        const res = await fetch("/api/chat/analyze/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body2),
         });
-      })
-      .catch((err) => console.error(err));
+      });
+    })
+    .catch((err) => console.error(err));
 
-    // file.file                name
-  });
-
+  // file.file                name
   const body = { uploads };
 
   await fetch("/api/upload/create/createMany/", {
@@ -290,8 +288,8 @@ async function addFileNamesToDB(files: any, uri: string, Router: any) {
 
 async function updateSources(selected: any, uri: string) {
   let count = selected.selectedArr.length;
-  const body = {count,uri}
- 
+  const body = { count, uri };
+
   await fetch("/api/notespace/update/sources_count", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -311,7 +309,6 @@ function SourcesDrawer({
   inputRef,
   Router,
 }) {
-  
   function FileIcon({ extension }) {
     switch (extension) {
       case ".pdf":
@@ -540,28 +537,32 @@ function SourcesDrawer({
 function selectedReducer(state, action) {
   switch (action.type) {
     case "init_sources":
-      let localMap = new Map<string,boolean>()
+      let localMap = new Map<string, boolean>();
       action.sources.forEach((item) => {
         localMap.set(item.title, false);
       });
 
-      let locallyStored = localStorage.getItem('savedSelectedSources')
-   
-      
-       let count = 0
-      let locallyStoredArr : Array<string> = []
-      let arr : Array<string> = []
-      if(locallyStored && locallyStored.length != 0) locallyStoredArr = locallyStored.split('*');
-      if(locallyStored)
-      for(let i = 0 ;i < locallyStoredArr.length; i++) {
+      let locallyStored = localStorage.getItem("savedSelectedSources");
 
-        if(localMap.get(locallyStoredArr[i])) continue
-        arr.push(locallyStoredArr[i])
-        count++;
-        localMap.set(locallyStoredArr[i],true)
-      }
-      let amtselectedstr = count == 1 ?  ' Source Selected' : ' Sources Selected'
-      return { map: localMap, selected: count + amtselectedstr, selectedArr: arr };
+      let count = 0;
+      let locallyStoredArr: Array<string> = [];
+      let arr: Array<string> = [];
+      if (locallyStored && locallyStored.length != 0)
+        locallyStoredArr = locallyStored.split("*");
+      if (locallyStored)
+        for (let i = 0; i < locallyStoredArr.length; i++) {
+          if (localMap.get(locallyStoredArr[i])) continue;
+          arr.push(locallyStoredArr[i]);
+          count++;
+          localMap.set(locallyStoredArr[i], true);
+        }
+      let amtselectedstr =
+        count == 1 ? " Source Selected" : " Sources Selected";
+      return {
+        map: localMap,
+        selected: count + amtselectedstr,
+        selectedArr: arr,
+      };
     case "toggle_source":
       state.map.set(action.title, !state.map.get(action.title));
 
@@ -570,12 +571,12 @@ function selectedReducer(state, action) {
       let strArr: Array<string> = []; //becomes selectedArr
       let str = ""; // becomes selected
       let c = 0; // track # of selected sources (used in selected)
-      let savedSelectedSources = ''
+      let savedSelectedSources = "";
       for (const key of keys) {
-        let value = state.map.get(key)
+        let value = state.map.get(key);
         if (value) {
           strArr.push(key + "");
-          savedSelectedSources += key+'*'
+          savedSelectedSources += key + "*";
 
           c++;
         }
@@ -587,9 +588,11 @@ function selectedReducer(state, action) {
       } else {
         str = c + " Sources Selected";
       }
-    
 
-      localStorage.setItem('savedSelectedSources',savedSelectedSources.slice(0,savedSelectedSources.length-1))
+      localStorage.setItem(
+        "savedSelectedSources",
+        savedSelectedSources.slice(0, savedSelectedSources.length - 1)
+      );
 
       return { map: state.map, selected: str, selectedArr: strArr };
   }
@@ -623,14 +626,16 @@ export default function NotespacesPage({
   const [isChild, setIsChild] = useState(false);
   const [selected, dispatch] = useReducer(selectedReducer, initialState);
   const { data: session } = useSession();
- 
-  const ref = useRef(null)
+
+  const ref = useRef(null);
   const [uploadOpened, setUploadOpened] = useState(false);
 
- 
   useEffect(() => {
-    
-    dispatch({ type: "init_sources", sources: sources, sourcesArr:localStorage.getItem('savedSelectedSources') });
+    dispatch({
+      type: "init_sources",
+      sources: sources,
+      sourcesArr: localStorage.getItem("savedSelectedSources"),
+    });
     return () => {
       setUploadOpened(false); // Cleanup upload state when component unmounts
     };

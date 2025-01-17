@@ -46,7 +46,14 @@ console.log('30 rag',embedded)
     }
   });
  
-  const matches = queryResponse.matches; // we want metadata
+  const preFiltered = queryResponse.matches;
+
+  const matches = preFiltered.length >= 5 ? preFiltered.filter(
+    match => match.score! >= 0.25  
+  ) : preFiltered
+  ;
+
+
   console.log('matches from pinecone:',matches);
   let metadata = '';
   for (let i = 0; i < matches.length; i++) {
@@ -116,20 +123,27 @@ console.log('30 rag',embedded)
 
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: "You are a helpful assistant." },
+      { role: "system", content: "Given a user query, expand it to be more specific and detailed while maintaining the original intent. Include relevant synonyms and related concepts." },
       ...truncated.map((m) => ({
         role: m.role,
         // content: m.content,
         content: `AI assistant is a brand new, powerful, human-like artificial intelligence.
           DO NOT SHARE REFERENCE URLS THAT ARE NOT INCLUDED IN THE CONTEXT BLOCK.
-          AI assistant will not apologize for previous responses, but instead will indicated new information was gained.
+          AI assistant will not apologize for previous responses, but instead will indicate new information was gained.
           If user asks about or refers to the current "workspace" AI will refer to the the content after START CONTEXT BLOCK and before END OF CONTEXT BLOCK as the CONTEXT BLOCK. 
           AI will not provide any reference to a page number or url related to where the relevant information was obtained.
           If AI is asked to give quotes, please bias towards providing reference links to the original source of the quote.
           AI assistant will take into account any CONTEXT BLOCK that is provided in a conversation. It will say that the prompt is not long enough if CONTEXT BLOCK is empty.
           AI assistant will not invent anything that is not drawn directly from the context.
           AI assistant will not answer questions that are not related to the context.
+          When answering:
+          - If the user's question is unclear, ask for clarification instead of saying the prompt is too short
+          - If you find partially relevant information, acknowledge it and explain how it relates to their question
+          - If you need to make reasonable inferences based on the context, explicitly state your assumptions
+          - If the context doesn't contain exact information, suggest related information that might be helpful
           START CONTEXT BLOCK
+          Topics: The query is related to topics regarding: ${selectedArr.toString()}
+          User Query:
           ${context}
           END OF CONTEXT BLOCK`,
       })),

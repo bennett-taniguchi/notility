@@ -8,13 +8,13 @@
 @layer utilities {
   @property --myColor1 {
     syntax: "<color>";
-    initial-value: theme('colors.sky.100');
+    initial-value: theme("colors.sky.100");
     inherits: false;
   }
 
   @property --myColor2 {
     syntax: "<color>";
-    initial-value: theme('colors.sky.100');
+    initial-value: theme("colors.sky.100");
     inherits: false;
   }
 
@@ -112,7 +112,6 @@
   }
 }
 
-
 @layer base {
   * {
     @apply border-border;
@@ -123,24 +122,41 @@
 }
 
 .chat-background {
-  background: rgb(103,232,249);
-  background: linear-gradient(180deg, rgba(103,232,249,1) 0%, rgba(165,180,252,1) 133%);
+  background: rgb(103, 232, 249);
+  background: linear-gradient(
+    180deg,
+    rgba(103, 232, 249, 1) 0%,
+    rgba(165, 180, 252, 1) 133%
+  );
 }
 .reverse-chat-background {
-  background: rgb(103,232,249);
-  background: linear-gradient(0deg, rgba(103,232,249,1) 0% 100%);
+  background: rgb(103, 232, 249);
+  background: linear-gradient(0deg, rgba(103, 232, 249, 1) 0% 100%);
 }
 .chat-inner-background {
-  background-image: linear-gradient(to right, #a5b4fc, #8fc0ff, #7bcaff, #6ad4ff, #63ddff, #63ddff, #63ddff, #63ddff, #6ad4ff, #7bcaff, #8fc0ff, #a5b4fc);
+  background-image: linear-gradient(
+    to right,
+    #a5b4fc,
+    #8fc0ff,
+    #7bcaff,
+    #6ad4ff,
+    #63ddff,
+    #63ddff,
+    #63ddff,
+    #63ddff,
+    #6ad4ff,
+    #7bcaff,
+    #8fc0ff,
+    #a5b4fc
+  );
 }
-
 
 .ProseMirror:focus {
   outline: none;
 }
 
 :global(.upload-widget__body) {
- pointer-events: auto;
+  pointer-events: auto;
 }
 :global(.upload-widget__modal) {
   z-index: 100;
@@ -333,4 +349,34 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+@keyframes animate-color-1 {
+  from {
+    background-color: rgb(161, 161, 161);
+  }
+  to {
+    background-color: rgb(72, 72, 72);
+  }
+}
+
+.pulsing-dot-1 {
+  animation-name: animate-color-1;
+  animation-duration: .9s;
+
+  animation-iteration-count: infinite;
+}
+
+.pulsing-dot-2 {
+  animation-name: animate-color-1;
+  animation-duration: .9s;
+  animation-delay: 0.3s;
+  animation-iteration-count: infinite;
+}
+
+.pulsing-dot-3 {
+  animation-name: animate-color-1;
+  animation-duration: .9s;
+  animation-delay: 0.6s;
+  animation-iteration-count: infinite;
 }

@@ -34,6 +34,54 @@ export function HTMLtoText(text: string): string {
   text = text.replace(/<[^>]+>/g, "");
   return text;
 }
+
+
+// we already have a bunch of split chunks and we need to summarize them
+// then we summarize those summaries
+export async function getSummary(chunks:string[]) {
+  let token = 75 // 75 words ~ token
+  let maxLength = token*4000;
+
+  let summaries  = ""
+  chunks.forEach(async (prompt) => {
+   const body = { prompt };
+    const res = await fetch("/api/openai/summarize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+   
+    });
+    const data = await res.json()  
+    summaries+=(data)
+  })
+
+  if(summaries.length <= maxLength) {
+    let prompt = summaries
+    const body = { prompt };
+    const res = await fetch("/api/openai/summarize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+   
+    });
+    const data = await res.json()  
+    return {summaries:summaries,overallSummary:data}
+  } else {
+    //
+    console.log('summaries is too long...')
+    let prompt = summaries.substring(0,maxLength)
+    const body = { prompt };
+    const res = await fetch("/api/openai/summarize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+   
+    });
+    const data = await res.json()  
+    return {summaries:summaries,overallSummary:data}
+  }
+  
+}
 /**
  * Splits a given text into chunks of 1 to many paragraphs.
  *
@@ -42,7 +90,6 @@ export function HTMLtoText(text: string): string {
  * @param minChunkSize - The minimum size (in characters) required for each chunk. Default is 100.
  * @returns An array of chunked text, where each chunk contains 1 or multiple "paragraphs"
  */
-
 // Expect our non html text
 // Return array of strings aka chunks
 export function chunkTextByMultiParagraphs(
@@ -167,12 +214,16 @@ type VectorRecord = {
   metadata?: string;
 };
 
+type SummaryRecord = {
+  summaries: string[];
+  overallSummary: string
+}
 // batches appropriate vectors and upserts using api path into the namespace matching users email
 export async function upsertVectors(
   embeddings: embedding[],
   chunks: string[],
+  summaries: SummaryRecord,
   name: string,
-  server?: boolean
 ) {
   // Get the Pinecone index
   //   let index = pc.index("notility");
@@ -182,6 +233,7 @@ export async function upsertVectors(
     metadata: {
       text: chunk,
       name: name,
+      summary: summaries.summaries[idx]
     },
   }));
 
@@ -191,19 +243,18 @@ export async function upsertVectors(
   for (let i = 0; i < vectors.length; i += batchSize) {
     const batch = vectors.slice(i, i + batchSize) as VectorRecord[]; // {id: "vec1", values: [1536]}
     const body = { batch };
-    if (server) {
-      batches = [...batches, batch];
-    } else {
-      await fetch("/api/pinecone/upsert/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    }
-  }
+  
+    batches = [...batches, batch];
+    // } else {
+    //   await fetch("/api/pinecone/upsert/", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify(body),
+    //   });
+     }
+  
 
-  if (server) {
-    console.log(batches);
+  
     return batches;
-  }
+  
 }

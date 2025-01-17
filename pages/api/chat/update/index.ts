@@ -17,7 +17,7 @@ export default async function handle(req, res) {
 
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: "You are a helpful assistant." },
+      { role: "system", content: "Given a user query, expand it to be more specific and detailed while maintaining the original intent. Include relevant synonyms and related concepts." },
       ...messages.map((m) => ({
         role: m.role,
         content: m.content,

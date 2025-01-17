@@ -38,7 +38,7 @@ import { ResizablePanel } from "../../ui/resizable";
 import { cn } from "../../lib/utils";
 import { CardTitle } from "../../ui/card";
 import bg from '../../../public/pic/complex-bg.png'
- 
+ import Image from 'next/image'
 const MenuBar = ({ editor,editorVisible,setEditorVisible }) => {
   if (!editor) {
     return null;
@@ -319,9 +319,10 @@ const Tiptap = ({
         </div>
       </ResizablePanel>
 
-      <ResizablePanel    style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }} >
-        
-
+      <ResizablePanel    
+       style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }}
+       >
+ 
         <ScrollArea viewportRef={null} >
         <Textarea
             placeholder="Write a Title"
