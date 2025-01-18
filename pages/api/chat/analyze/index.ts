@@ -4,27 +4,80 @@ import prisma from "../../../../lib/prisma";
 import { Pinecone } from "@pinecone-database/pinecone";
 import {
   HTMLtoText,
+  SummaryRecord,
   chunkTextByMultiParagraphs,
   embedChunks,
-  getSummary,
+ 
   upsertVectors,
 } from "../../../../utils/parse_text";
+import OpenAI from "openai";
+ 
+
+async function getOverallSummary(chunks: string[]) {
+  const openai = new OpenAI({
+    apiKey: process.env["OPENAI_API_KEY"],
+  });
+
+  // Process all chunks in parallel
+  const summaries = await Promise.all(
+    chunks.map(async (chunk) => {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a succinct analyzer who reads chunks of information and gives a concise summary that includes broad topic keywords offering context",
+          },
+          {
+            role: "user",
+            content: chunk,
+          },
+        ],
+      });
+      
+      return completion.choices[0].message.content;
+    })
+  );
+
+  // If there's only one chunk, return its summary
+  if (summaries.length === 1) {
+    return summaries[0];
+  }
+
+  // If there are multiple chunks, create a final summary of summaries
+  const combinedSummary = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: "You are a succinct analyzer who combines multiple summaries into one coherent overview",
+      },
+      {
+        role: "user",
+        content: `Please combine these summaries into one coherent overview: ${summaries.join(" | ")}`,
+      },
+    ],
+  });
+
+  return combinedSummary.choices[0].message.content;
+}
+ 
+
 export default async function handle(req, res) {
   const session = await getServerSession(req, res, authOptions);
-
+console.log('analyze is somehow being called')
   const { plainText, name, uri } = req.body;   
   if(plainText==''){res.json('empty');return;}
   //const parsed = HTMLtoText(notes_contents); // remove html tags
 
 
   const chunks = chunkTextByMultiParagraphs(plainText); // split on max words
-
-  const summaries = getSummary(chunks) as any //  summaries: {summaries:summaries,overallSummary:data}
-
+ 
   const embeddedResult = await embedChunks(chunks); // to vecs
 
-   
-  const upserted = await upsertVectors(embeddedResult, chunks, summaries, name); // our own upsertion to pinecone db, need to split on diff users namespace
+ 
+  const overallSummary = await getOverallSummary(chunks)
+  const upserted = await upsertVectors(embeddedResult, chunks, overallSummary!, name); // our own upsertion to pinecone db, need to split on diff users namespace
 
 
  
@@ -34,7 +87,7 @@ export default async function handle(req, res) {
     for (let i = 0; i < upserted[0]?.length; i++) {
       const batch = upserted[0][i];
       
-      console.log('analyze 34',batch);
+      //console.log('analyze 34',batch);
       const pc = new Pinecone({
         apiKey: process.env.PINECONE_API_KEY as string,
       });
@@ -47,7 +100,7 @@ export default async function handle(req, res) {
     
     }
 
-    res.json(summaries);
+    
   ///eeeeeeeeeeeeeeee
   // format:
   // 0: {embedding (1536) [.1232,...], index:0, object:"embedding"},

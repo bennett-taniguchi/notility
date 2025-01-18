@@ -262,19 +262,20 @@ async function addFileNamesToDB(files: any, uri: string, Router: any) {
       };
       uploads.push(upload);
 
-      getPdfText(file).then(async (text) => {
+      getPdfText(file)
+      .then(async (text) => {
         const plainText = text;
         const body2 = { plainText, name, uri };
-        const res = await fetch("/api/chat/analyze/", {
+        await fetch("/api/chat/analyze/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body2),
         });
-      });
-    })
-    .catch((err) => console.error(err));
+      })
+      .catch((err) => console.error(err));
 
   // file.file                name
+});
   const body = { uploads };
 
   await fetch("/api/upload/create/createMany/", {
@@ -536,7 +537,10 @@ function SourcesDrawer({
 }
 function selectedReducer(state, action) {
   switch (action.type) {
+
+
     case "init_sources":
+      
       let localMap = new Map<string, boolean>();
       action.sources.forEach((item) => {
         localMap.set(item.title, false);
@@ -550,7 +554,7 @@ function selectedReducer(state, action) {
       if (locallyStored && locallyStored.length != 0)
         locallyStoredArr = locallyStored.split("*");
       if (locallyStored)
-        for (let i = 0; i < locallyStoredArr.length; i++) {
+        for (let i = 0; i < Math.min(locallyStoredArr.length,action.sources.length); i++) {
           if (localMap.get(locallyStoredArr[i])) continue;
           arr.push(locallyStoredArr[i]);
           count++;
@@ -558,6 +562,8 @@ function selectedReducer(state, action) {
         }
       let amtselectedstr =
         count == 1 ? " Source Selected" : " Sources Selected";
+
+        console.log(count + amtselectedstr)
       return {
         map: localMap,
         selected: count + amtselectedstr,

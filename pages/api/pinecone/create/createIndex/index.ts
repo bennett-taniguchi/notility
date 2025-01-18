@@ -15,9 +15,18 @@ export default async function handle(req, res) {
     apiKey: process.env.PINECONE_API_KEY as string,
   });
 
-   await pc.deleteIndex('notespace');
-
  
-  
- 
+  let result = await pc.createIndex({
+    name: 'notespace',
+    dimension: 1536,
+    metric: 'cosine',
+    spec: {
+      serverless: {
+        cloud: 'aws',
+        region: 'us-east-1'
+      }
+    },
+    deletionProtection: 'disabled',
+  });
+  console.log(result)
 }

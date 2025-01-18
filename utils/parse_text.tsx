@@ -13,20 +13,20 @@ import { jsx } from "react/jsx-runtime";
 
 export async function getPdfText(file: any) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = (window as any).location.origin + "/pdf.worker.min.mjs";
-  console.log(window.location.origin, window.location.origin + "/pdf.worker.min.mjs")
+ 
   //const pdf1 = await fs.readFile((file.originalFile.file as File).arrayBuffer());
   let actualFile: File = file.originalFile.file;
   const pdf = await pdfjsLib.getDocument(await actualFile.arrayBuffer())
     .promise;
   let fullText = "";
-  console.log("14", pdf);
+  
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
     const page = await pdf.getPage(pageNum);
     const textContent = await page.getTextContent();
 
     fullText += textContent.items.map((item: any) => item.str).join(" ");
   }
-  console.log("21", fullText);
+ 
   return fullText;
 }
 
@@ -36,52 +36,7 @@ export function HTMLtoText(text: string): string {
 }
 
 
-// we already have a bunch of split chunks and we need to summarize them
-// then we summarize those summaries
-export async function getSummary(chunks:string[]) {
-  let token = 75 // 75 words ~ token
-  let maxLength = token*4000;
 
-  let summaries  = ""
-  chunks.forEach(async (prompt) => {
-   const body = { prompt };
-    const res = await fetch("/api/openai/summarize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-   
-    });
-    const data = await res.json()  
-    summaries+=(data)
-  })
-
-  if(summaries.length <= maxLength) {
-    let prompt = summaries
-    const body = { prompt };
-    const res = await fetch("/api/openai/summarize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-   
-    });
-    const data = await res.json()  
-    return {summaries:summaries,overallSummary:data}
-  } else {
-    //
-    console.log('summaries is too long...')
-    let prompt = summaries.substring(0,maxLength)
-    const body = { prompt };
-    const res = await fetch("/api/openai/summarize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-   
-    });
-    const data = await res.json()  
-    return {summaries:summaries,overallSummary:data}
-  }
-  
-}
 /**
  * Splits a given text into chunks of 1 to many paragraphs.
  *
@@ -214,7 +169,7 @@ type VectorRecord = {
   metadata?: string;
 };
 
-type SummaryRecord = {
+export type SummaryRecord = {
   summaries: string[];
   overallSummary: string
 }
@@ -222,9 +177,10 @@ type SummaryRecord = {
 export async function upsertVectors(
   embeddings: embedding[],
   chunks: string[],
-  summaries: SummaryRecord,
+  summaries: string,
   name: string,
 ) {
+  
   // Get the Pinecone index
   //   let index = pc.index("notility");
   const vectors: any[] = chunks.map((chunk, idx) => ({
@@ -233,7 +189,7 @@ export async function upsertVectors(
     metadata: {
       text: chunk,
       name: name,
-      summary: summaries.summaries[idx]
+      summary: summaries
     },
   }));
 

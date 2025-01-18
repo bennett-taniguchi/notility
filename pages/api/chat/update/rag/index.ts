@@ -31,11 +31,28 @@ console.log('rag 18', req.body)
     dimensions: 1536,
   });
   const embedded = await response.data;
-console.log('30 rag',embedded)
+ 
   // 2) use embedded to query pinecone
   let index = pc.index("notespace");
   let namespace = uri
 
+//   hybrid_params = {
+//     "vector": query_vector,
+//     "alpha": alpha,
+//     "top_k": top_k,
+//     "include_metadata": True,
+//     "sparse_vector": self._generate_sparse_vector(query),
+// }
+
+// # Add text match conditions for both full text and summary
+// hybrid_params["filter"] = {
+//     "$or": [
+//         # Search in full text with higher weight
+//         {"text_content": {"$contains": {"text": query, "weight": 1 - summary_weight}}},
+//         # Search in summary with lower weight
+//         {"summary": {"$contains": {"text": query, "weight": summary_weight}}}
+//     ]
+// }
   let titleArr = selectedArr.length != 0 ?  selectedArr : [title]
   const queryResponse = await index.namespace(namespace).query({
     vector: embedded[0].embedding,

@@ -12,7 +12,7 @@ const openai = new OpenAI({
 export default async function handle(req, res) {
   const { prompt } = req.body;
  
-
+    console.log('before summarizing')
   const completion = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: [
@@ -23,6 +23,7 @@ export default async function handle(req, res) {
         },
     ],
   });
-console.log(completion.choices[0].message)
-  res.json(completion.choices[0].message);
+  
+ 
+  res.json(completion.choices[0].message).content;
 }
