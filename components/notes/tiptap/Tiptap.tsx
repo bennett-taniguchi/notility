@@ -320,10 +320,17 @@ const Tiptap = ({
       </ResizablePanel>
 
       <ResizablePanel    
-       style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }}
+       style={{ backgroundSize:'100svw 100svh',overflow:'hidden' }}
        >
+             <Image   
+              width='0'
+              height='0'
+              sizes="100vw"
+              style={{width:"50%", height:"80%", position:'absolute',zIndex:-100,overflow:'hidden'} }
+              src='/pic/complex-bg.png'
+              alt="Picture of the author" />
  
-        <ScrollArea viewportRef={null} >
+       
         <Textarea
             placeholder="Write a Title"
          
@@ -331,11 +338,11 @@ const Tiptap = ({
           />    
        
 
- 
+       <ScrollArea viewportRef={null} >
           <EditorContent
             editor={editor}
            
-            className=" pl-5 shadow-inner   focus-visible:ring-0 border-0  h-[85svh]  bg-transparent"
+            className=" pl-5 shadow-inner   focus-visible:ring-0 border-0  h-[70svh]  bg-transparent"
           />
         </ScrollArea>
       </ResizablePanel>

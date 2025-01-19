@@ -32,7 +32,7 @@ import { v4 } from "uuid";
 import { empty } from "@prisma/client/runtime/library";
 import Header from "../../components/Header";
 import { ScrollArea } from "../../components/ui/scroll-area";
- 
+ import Image from 'next/image'
  
 
 // retrieve notes and messages with chatbot, don't need to fetch both if only one is needed...
@@ -207,7 +207,18 @@ const [view,dispatch] = useReducer(viewReducer, initialView)
  
   return (
    
-    <div style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }} className="h-[100svh] bg-white pt-[20svh] ">
+    <div 
+    // style={{ backgroundImage: `url(${'/pic/complex-bg.png'})`, backgroundSize:'100svw 200svh' }} 
+    className="h-[100svh] bg-transparent  ">
+      <Image   
+      width='0'
+      height='0'
+      sizes="100vw"
+      style={{width:"100%", height:"100%", position:'absolute',zIndex:-100} }
+      src='/pic/complex-bg.png'
+      alt="Picture of the author" />
+
+      
       <Header/>
       <h1 className="font-roboto text-7xl  drop-shadow-[0_1.2px_1.2px_rgba(99,102,241,1)]  text-white ml-[10svw] mb-[1.85svh]">Notespaces</h1>
       <Separator className="mx-auto w-[80svw] my-[1svh] py-[.2svh] bg-black" />

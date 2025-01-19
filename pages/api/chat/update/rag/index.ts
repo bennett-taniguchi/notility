@@ -19,14 +19,14 @@ export default async function handle(req, res) {
   ///
   //TITLE PROBLEM NEED TO OPT TO DEFAULT QUERY BRANCH IF SELECTEDARR BLANK AS TITLE IS FOR THE NOTESPACE NOT RELATED TO THE SOURCES UPLOADED
   ///
-  const { prompt, messages, uri, selectedArr, title } = req.body;
+  const { prompt, messages, uri, selectedArr, title,topics_str } = req.body;
 console.log('rag 18', req.body)
   const session = await getServerSession(req, res, authOptions);
   /// for context query:
   // 1) embed query
   const response = await openai.embeddings.create({
     model: "text-embedding-3-small",
-    input: prompt,
+    input: prompt+" from sources including: "+topics_str,
     encoding_format: "float",
     dimensions: 1536,
   });
@@ -59,7 +59,7 @@ console.log('rag 18', req.body)
     topK: 3,
     includeMetadata: true,
     filter: {
-      "name": {"$in": titleArr}
+     "name": {"$in": titleArr}
     }
   });
  
@@ -160,6 +160,7 @@ console.log('rag 18', req.body)
           - If the context doesn't contain exact information, suggest related information that might be helpful
           START CONTEXT BLOCK
           Topics: The query is related to topics regarding: ${selectedArr.toString()}
+
           User Query:
           ${context}
           END OF CONTEXT BLOCK`,

@@ -233,13 +233,14 @@ function OutputArea({ editorVisible, setEditorVisible }: any) {
   );
 }
 
+
 // Need to add:
 // add files to pinecone
 // variable chunk based on file
-
-async function addFileNamesToDB(files: any, uri: string, Router: any) {
-  if (!files || files.length == 0) return;
+async function addFileNamesToDB(files: any, uri: string, Router: any)  {
+  if (!files || files.length == 0) return [];
   let uploads: any[] = [];
+  let res_arr: any[]= []
   function splitOnFileType(filename: string) {
     let lastDotI = filename.lastIndexOf(".");
     let fileExtension = filename.substring(lastDotI, filename.length);
@@ -249,7 +250,7 @@ async function addFileNamesToDB(files: any, uri: string, Router: any) {
   }
   const reader = new FileReader();
   files
-    .map(async (file) => {
+    .map(async (file: { originalFile: { originalFileName: string; }; fileUrl: any; },idx:number) => {
       let { name, extension } = splitOnFileType(
         file.originalFile.originalFileName
       );
@@ -265,28 +266,44 @@ async function addFileNamesToDB(files: any, uri: string, Router: any) {
       getPdfText(file)
       .then(async (text) => {
         const plainText = text;
-        const body2 = { plainText, name, uri };
+        let file = upload
+        const body2 = { plainText, name, uri,file };
         await fetch("/api/chat/analyze/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body2),
         });
+
+ 
+        // console.log('276:',summary)
+        // await fetch("/api/upload/update/summary/", {
+        //   method: "PATCH",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({uri:uri, name:name,overallSummary: summary}),
+        // });
+    
+
+        
       })
       .catch((err) => console.error(err));
 
   // file.file                name
 });
-  const body = { uploads };
+  // const body = { uploads };
 
-  await fetch("/api/upload/create/createMany/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  // await fetch("/api/upload/create/createMany/", {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify(body),
+  // });
 
+  // return res_arr
   Router.push("/notespace/" + uri);
 }
-
+ function getKeywords(summary:string) {
+  return summary.split('.')[0]
+   
+}
 async function updateSources(selected: any, uri: string) {
   let count = selected.selectedArr.length;
   const body = { count, uri };
@@ -343,6 +360,7 @@ function SourcesDrawer({
     );
   }
 
+
   if (selected.length != 0 && sources)
     return (
       <Drawer open={isChild}>
@@ -398,12 +416,20 @@ function SourcesDrawer({
                           })
                         }
                       />
-                      <label
+                           <TooltipProvider>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                        <label
                         htmlFor={source.title}
                         className="text-slate-700 font-roboto text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  "
                       >
                         {source.title}
                       </label>
+                        </TooltipTrigger>
+                        <TooltipContent className="multiline w-[40svw] overflow-y-auto font-bold">{source.summary ? getKeywords(source.summary) : 'No Summary Yet, Please Wait'}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
                     </div>
 
                     <BsThreeDotsVertical className="right-0 absolute mr-[2svw] h-[1.5svw] w-[1.5svw] mt-[.9svh]  fill-slate-700" />
@@ -427,8 +453,8 @@ function SourcesDrawer({
 
               <UploadButton
                 options={options(slug)}
-                onComplete={(files) => {
-                  addFileNamesToDB(files, slug, Router);
+                onComplete={ (files) => {
+                   addFileNamesToDB(files, slug, Router);
                   setUploadOpened(false);
                   updateSources(selected, slug);
                   setIsChild(true);
@@ -541,6 +567,13 @@ function selectedReducer(state, action) {
 
     case "init_sources":
       
+    if(!action.sources || action.sources.length==1) {
+      return {
+        map: new Map<string, boolean>(),
+        selected: '0 Sources Selected',
+        selectedArr: [],
+      };
+    }
       let localMap = new Map<string, boolean>();
       action.sources.forEach((item) => {
         localMap.set(item.title, false);
@@ -628,9 +661,12 @@ export default function NotespacesPage({
     selected: "",
     selectedArr: [],
   };
+ 
   const [editorVisible, setEditorVisible] = useState(true);
   const [isChild, setIsChild] = useState(false);
   const [selected, dispatch] = useReducer(selectedReducer, initialState);
+  
+
   const { data: session } = useSession();
 
   const ref = useRef(null);
@@ -733,6 +769,7 @@ export default function NotespacesPage({
                 blurb={notespace.sources_blurb}
                 selected={selected}
                 slug={slug}
+                sources={sources}
               >
                 <SourcesDrawer
                   slug={slug}

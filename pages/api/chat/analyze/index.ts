@@ -6,13 +6,30 @@ import {
   HTMLtoText,
   SummaryRecord,
   chunkTextByMultiParagraphs,
-  embedChunks,
+
+  embedChunksDense,
  
   upsertVectors,
 } from "../../../../utils/parse_text";
 import OpenAI from "openai";
- 
+import { Upload } from "@prisma/client";
+import { options } from "../../auth/[...nextauth]";
+async function updateUploadSummary(name,uri,overallSummary) {
+  await prisma.upload.update ({
 
+    where: {
+        uri_title_originalFileName: {
+            uri:uri,
+            title:name,
+            originalFileName:name
+        }
+        
+    },
+    data: {
+        summary:overallSummary
+    }
+} )
+}
 async function getOverallSummary(chunks: string[]) {
   const openai = new OpenAI({
     apiKey: process.env["OPENAI_API_KEY"],
@@ -22,7 +39,7 @@ async function getOverallSummary(chunks: string[]) {
   const summaries = await Promise.all(
     chunks.map(async (chunk) => {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -54,7 +71,7 @@ async function getOverallSummary(chunks: string[]) {
       },
       {
         role: "user",
-        content: `Please combine these summaries into one coherent overview: ${summaries.join(" | ")}`,
+        content: `Please combine these summaries into one coherent overview, ensure the first sentence is comprised entirely of most relevant keywords in a comma-separated format and begin it as 'Topics Covered:': ${summaries.join(" | ")}`,
       },
     ],
   });
@@ -64,20 +81,22 @@ async function getOverallSummary(chunks: string[]) {
  
 
 export default async function handle(req, res) {
-  const session = await getServerSession(req, res, authOptions);
-console.log('analyze is somehow being called')
-  const { plainText, name, uri } = req.body;   
-  if(plainText==''){res.json('empty');return;}
+  
+  const session = await getServerSession(req, res,options);
+   
+  const { plainText, name, uri,file} = req.body;   
+  if(plainText=='') {res.json('empty'); return;}
   //const parsed = HTMLtoText(notes_contents); // remove html tags
 
-
-  const chunks = chunkTextByMultiParagraphs(plainText); // split on max words
+  const chunks = chunkTextByMultiParagraphs(plainText); // Chunk on max words
  
-  const embeddedResult = await embedChunks(chunks); // to vecs
 
- 
   const overallSummary = await getOverallSummary(chunks)
-  const upserted = await upsertVectors(embeddedResult, chunks, overallSummary!, name); // our own upsertion to pinecone db, need to split on diff users namespace
+ 
+  const denseEmbeddings = await embedChunksDense(chunks); // Chunks -> Dense Vectors
+ 
+  
+  const upserted = await upsertVectors(denseEmbeddings, chunks, overallSummary!, name); // our own upsertion to pinecone db, need to split on diff users namespace
 
 
  
@@ -100,7 +119,19 @@ console.log('analyze is somehow being called')
     
     }
 
-    
+ 
+   let convertedUpload={ ...file as  Upload, owner: session?.user.email };
+ 
+  try {
+    let result = await prisma.upload.create({
+      data: {...convertedUpload, summary:overallSummary },
+    });
+
+    res.json({ result });
+  } catch (e) {
+    console.log(e);
+  }
+  
   ///eeeeeeeeeeeeeeee
   // format:
   // 0: {embedding (1536) [.1232,...], index:0, object:"embedding"},

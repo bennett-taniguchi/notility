@@ -14,8 +14,10 @@ import { TrashIcon } from "@radix-ui/react-icons";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
+import Latex from "react-latex-next";
 
-export default function ChatWindow({ messagesLoaded, title, children,blurb,selected, slug }) {
+
+export default function ChatWindow({ messagesLoaded, title, children,blurb,selected, slug, sources }) {
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // const [messages, setMessages] = useState<Message[]>(messagesLoaded); // potential future use for editing singular message
@@ -23,6 +25,18 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
   const Router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  function getKeywords(summary:string) {
+    return summary.split('.')[0]
+  }
+  function getKeywordsFromSources(titles:string[]) {
+    let keywords = ''
+    for(let i = 0; i < sources.length; i++) {
+      if(titles.includes(sources[i].title)) {
+        keywords += getKeywords(sources[i].summary).replace('Topics','')
+      }
+    }
+    return keywords
+  }
   // for submitting current chat message and updating state reflecting back and forth
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -31,6 +45,8 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
     const prompt = input;
     const uri = slug
     const messages = messagesLoaded;
+
+    let topics_str = getKeywordsFromSources(selected.selectedArr)
 
     if (selected.selectedArr.length === 0) {
       const body = { prompt, messages, uri, title };
@@ -46,7 +62,7 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
     } else {
       let selectedArr = selected.selectedArr
       console.log('47 chatwind',selected,selectedArr)
-      const body = { prompt, messages, selectedArr,uri, title };
+      const body = { prompt, messages, selectedArr,uri, title, topics_str };
       await fetch("/api/chat/update/rag/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,14 +83,14 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
 
   // delete all chat logs
   async function handleDeleteChat(e: React.SyntheticEvent) {
-    console.log("chat title", title);
-    const body = { title };
+ 
+    const body = { slug };
     await fetch("/api/chat/delete", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }).then(() => {
-      Router.push("/notespace/");
+      Router.push("/notespace/"+slug);
     });
   }
 
@@ -101,9 +117,9 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
     });
 
   }
-  async function dropUploads() {
+  async function dropUploads(slug:string) {
   
-    const res1 = await fetch("/api/pinecone/delete/dropall", {
+    await fetch("/api/pinecone/delete/dropall", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
@@ -115,7 +131,7 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
     });
 
 
-    console.log(res1,)
+     Router.push('/notespace/'+slug)
   }
   async function testChunking() {
     // let prompt = "Seven hundred years before the story's start, humankind colonized Luna, where the Society—a rigid social hierarchy of 14 Colors with specialized roles—was developed for efficiency and order. The Society, harshly ruled by certain families of mentally and physically superior Golds, conquered Earth and colonized moons and small planets. Reds are the Society's lowest-status laborers. Mars's underground Red mining colonies compete in rigged contests that sow discord and are lied to that Mars is not yet terraformed.At the story's outset, 16-year-old Darrow is a rash, intelligent, dexterous, newly-wed Red helium-3 miner. Darrow and his wife Eo are publicly whipped for visiting a restricted underground forest. With Mars ArchGovernor Nero present and the event being filmed, Eo sings a song protesting the Reds' enslavement. Nero has Eo publicly hanged. A grieving Darrow illegally buries Eo and is hanged too, but survives due to his uncle Narol drugging him.Narol then delivers Darrow to the Sons of Ares, who aim to overturn the Society's hierarchy. The Sons used footage of Eo's song and execution as propaganda. Dancer, a Red, wants Darrow to infiltrate the Society as a Gold. Darrow is physically transformed by Mickey (a Violet), physically trained by Harmony (a Red), and taught Gold customs by Matteo (a Pink).Using a fabricated Gold identity, Darrow excels in testing and is accepted into Mars's Institute. He is drafted into SchoolHouse Mars, where he befriends Cassius. The Institute begins with the Passage: Within each of the 12 SchoolHouses, students are beaten, then paired off (a high test scorer with a low test scorer) to fight to the death barehanded. Darrow kills Cassius's brother, Julian, and lies about it. Sevro kills high-status Priam."
@@ -172,12 +188,12 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
                       </CardHeader>
 
                       <CardContent>
-                        <Markdown
-                          className="text-gray-600"
-                          remarkPlugins={[remarkGfm]}
-                        >
-                          {m.content}
-                        </Markdown>
+                    
+                       
+                              <Latex>
+                          {m.content}</Latex>
+                        
+                       
                       </CardContent>
                     </div>
                   </Card>
@@ -227,7 +243,7 @@ export default function ChatWindow({ messagesLoaded, title, children,blurb,selec
             </div>
 
             <Button onClick={()=>testChunking()}>Test Chunking</Button>
-            <Button onClick={()=>dropUploads()}>Drop Pinecone and Supabase</Button>
+            <Button onClick={()=>dropUploads(slug)}>Drop Pinecone and Supabase</Button>
             <Button onClick={()=>createPinecone()}>Create Pinecone Index</Button>
           </div>
        

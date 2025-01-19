@@ -6,10 +6,18 @@ import { Notespace, Upload } from "@prisma/client";
 import { options } from "../../../auth/[...nextauth]";
 
 export default async function handler(req, res) {
-  if (req.method !== "DELETE") return res.status(405).end();
+  if (req.method !== "POST") return res.status(405).end();
+  const { upload } = req.body;
 
+  const session = await getServerSession(req, res, options);
+
+ 
+   let convertedUpload=({ ...upload, owner: session?.user.email });
+ 
   try {
-    let result = await prisma.upload.deleteMany({});
+    let result = await prisma.upload.create({
+      data: {...convertedUpload as Upload},
+    });
 
     res.json({ result });
   } catch (e) {

@@ -9,7 +9,7 @@ import { Pinecone } from "@pinecone-database/pinecone";
 export default async function handle(req, res) {
  
 
-  const session = await getServerSession(req, res, authOptions);
+ 
 
   const pc = new Pinecone({
     apiKey: process.env.PINECONE_API_KEY as string,

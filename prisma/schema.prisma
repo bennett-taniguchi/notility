@@ -132,6 +132,6 @@ model Upload {
   title         String
   owner         String
   filetype      String
-
+  summary       String?
   @@unique([uri,title,originalFileName])
 }

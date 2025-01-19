@@ -9,7 +9,7 @@ import { Record } from "@prisma/client/runtime/library";
 import * as pdfjsLib from "pdfjs-dist";
  
 import { jsx } from "react/jsx-runtime";
-
+ 
 
 export async function getPdfText(file: any) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = (window as any).location.origin + "/pdf.worker.min.mjs";
@@ -90,6 +90,7 @@ export function chunkTextByMultiParagraphs(
   return chunks;
 }
 
+
 /**
  * Embed a piece of text using an embedding model or service.
  * This is a placeholder and needs to be implemented based on your embedding solution.
@@ -100,7 +101,7 @@ export function chunkTextByMultiParagraphs(
 
 // expects chunks, on all chunks
 // return res from open ai call
-export async function embedChunks(chunks: string[]): Promise<any> {
+export async function embedChunksDense(chunks: string[]): Promise<any> {
   // You can use any embedding model or service here.
   // In this example, we use OpenAI's text-embedding-3-small model.
   const openai = new OpenAI({
