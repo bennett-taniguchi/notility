@@ -88,6 +88,9 @@ model Message {
   title    String
   uri      String
 
+  match    String?
+  matchScore String?
+
   notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
   @@unique([index, uri])

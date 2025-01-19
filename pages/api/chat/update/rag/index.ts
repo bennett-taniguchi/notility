@@ -70,13 +70,24 @@ console.log('rag 18', req.body)
   ) : preFiltered
   ;
 
-
+  let top_matches : any[] = [] //
+  let top_score : number = 0.0
   console.log('matches from pinecone:',matches);
   let metadata = '';
   for (let i = 0; i < matches.length; i++) {
+    if(i==0) top_score = matches[i].score as number
+
+    if(top_matches.length <= 2 && (matches[i].score as number) - top_score <= .2) {
+      top_matches.push({text: matches[i]!.metadata!.text! as any, 
+       
+        relevance:  Math.round((matches[i].score! + Number.EPSILON) * 100) / 100})
+    }
+
     metadata +=
-      "From " + matches[0].id + (matches[0].metadata as RecordMetadata).text;
+      "Source " + matches[0].id + (matches[0].metadata as RecordMetadata).text;
   }
+
+
   // Returns:
   // {
   //   matches: [
@@ -153,6 +164,7 @@ console.log('rag 18', req.body)
           AI assistant will take into account any CONTEXT BLOCK that is provided in a conversation. It will say that the prompt is not long enough if CONTEXT BLOCK is empty.
           AI assistant will not invent anything that is not drawn directly from the context.
           AI assistant will not answer questions that are not related to the context.
+          AI assistant is very precise with outtputed text and ensure their format is LaTeX , NEVER markdown formatting
           When answering:
           - If the user's question is unclear, ask for clarification instead of saying the prompt is too short
           - If you find partially relevant information, acknowledge it and explain how it relates to their question
@@ -197,6 +209,8 @@ console.log('rag 18', req.body)
         authorId: session.id,
         role: "system",
         title: queriedTitles,
+        match: top_matches && top_matches.length > 1 ? top_matches[0].text : 'No Matches',
+        matchScore: top_matches && top_matches.length > 1 ? top_matches[0].relevance+"" : 0.+""
       },
     ],
   });

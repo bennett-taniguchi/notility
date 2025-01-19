@@ -304,7 +304,7 @@ async function addFileNamesToDB(files: any, uri: string, Router: any)  {
   return summary.split('.')[0]
    
 }
-async function updateSources(selected: any, uri: string) {
+async function updateSources(selected: any, uri: string,Router:any) {
   let count = selected.selectedArr.length;
   const body = { count, uri };
 
@@ -313,6 +313,10 @@ async function updateSources(selected: any, uri: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+
+  setTimeout(() => {
+    Router.push("/notespace/"+uri); // Replace with your target route
+  }, 2000); // 2000ms = 2 seconds
 }
 function SourcesDrawer({
   selected,
@@ -456,7 +460,7 @@ function SourcesDrawer({
                 onComplete={ (files) => {
                    addFileNamesToDB(files, slug, Router);
                   setUploadOpened(false);
-                  updateSources(selected, slug);
+                  updateSources(selected, slug,Router);
                   setIsChild(true);
                 }}
               >

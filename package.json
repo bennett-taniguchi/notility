@@ -41,6 +41,7 @@
         "@react-spring/web": "^9.7.5",
         "@react-three/drei": "^9.120.5",
         "@react-three/fiber": "^8.17.10",
+        "@tailwindcss/line-clamp": "^0.4.4",
         "@tanstack/react-table": "^8.20.1",
         "@tiptap/extension-bullet-list": "^2.5.8",
         "@tiptap/extension-highlight": "^2.5.7",
