@@ -49,7 +49,7 @@ export function HTMLtoText(text: string): string {
 // Return array of strings aka chunks
 export function chunkTextByMultiParagraphs(
   text: string,
-  maxChunkSize = 1500,
+  maxChunkSize = 500,
   minChunkSize = 500
 ): string[] {
   const chunks: string[] = [];

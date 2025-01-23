@@ -1,41 +1,55 @@
 import OpenAI from "openai";
 import { getServerSession } from "next-auth/next";
-import { options  } from "../../auth/[...nextauth]";
+import { options } from "../../auth/[...nextauth]";
 import "neo4j-driver";
 import { LLMGraphTransformer } from "@langchain/community/experimental/graph_transformers/llm";
 import { ChatOpenAI } from "@langchain/openai";
 import { Document } from "@langchain/core/documents";
+
+import "neo4j-driver";
+import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
+import { string } from "zod";
+
 const model = new ChatOpenAI({
-    temperature: 0,
-    model: "gpt-4-turbo-preview",
-  });
- 
-  let text = `
-  Marie Curie, was a Polish and naturalised-French physicist and chemist who conducted pioneering research on radioactivity.
-  She was the first woman to win a Nobel Prize, the first person to win a Nobel Prize twice, and the only person to win a Nobel Prize in two scientific fields.
-  Her husband, Pierre Curie, was a co-winner of her first Nobel Prize, making them the first-ever married couple to win the Nobel Prize and launching the Curie family legacy of five Nobel Prizes.
-  She was, in 1906, the first woman to become a professor at the University of Paris.
-  `;
+  temperature: 0,
+  model: "gpt-4-turbo-preview",
+});
+
 const llmGraphTransformer = new LLMGraphTransformer({
-    llm: model,
-  });
-  
-export default async function handle(req,res) {
-    const session = await getServerSession(req, res, options);
-    const {upload} = req.body 
+  llm: model,
+  allowedNodes: ["PERSON", "ORGANIZATION"],
+  allowedRelationships: [
+    "PARENT",
+    "SIBLING",
+    "COLLEAGUE",
+    "KNOWS",
+    "KILLED",
+    "ENEMY_OF",
+    "ALLY_OF",
+  ],
+  nodeProperties: ["good_or_evil", "job"],
+  strictMode: false,
+});
 
+export default async function handle(req, res) {
+  const session = await getServerSession(req, res, options);
+  const { chunk } = req.body;
+  console.log("neo4j", chunk);
+  const url = process.env.NEO4J_URI;
+  const username = process.env.NEO4J_USER;
+  const password = process.env.NEO4J_PASSWORD;
+  const database = process.env.NEO4J_AURA;
+  const graph = await Neo4jGraph.initialize({ url, username, password } as any);
+
+  try {
     const result = await llmGraphTransformer.convertToGraphDocuments([
-        new Document({ pageContent: text }),
-      ]);
-      
-    try {
-      
+      new Document({ pageContent: chunk }),
+    ]);
 
-         
-    } catch(e) {
+    await graph.addGraphDocuments(result);
 
-        console.log(e)
-    }
-
-
+    res.json({ success: true, message: "Graph documents added successfully" });
+  } catch (e) {
+    console.log(e);
+  }
 }

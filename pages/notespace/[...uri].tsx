@@ -61,7 +61,6 @@ import {
   MenubarTrigger,
 } from "../../components/ui/menubar";
 import { Separator } from "../../components/ui/separator";
-import { UploadWidgetReactConfig } from "@bytescale/upload-widget-react/dist/UploadWidgetReactConfig";
 import { getSession, useSession } from "next-auth/react";
 import { Message, Notespace, Upload } from "@prisma/client";
 
@@ -325,7 +324,7 @@ function SourcesDrawer({
   sources,
   isChild,
   setIsChild,
-  options,
+ 
   dispatch,
   uploadOpened,
   setUploadOpened,
@@ -713,26 +712,26 @@ const[fileContent,setFileContent]=useState(null)
       }
     return false;
   }
-  const options = (uri) => {
-    return {
-      apiKey: "public_W142iw5A2CjLkNdU7G6px7mYYKZH", // This is your API key.
-      maxFileCount: 1,
-      maxFileSizeBytes: 2000000,
-      path: {
-        folderPath: "/uploads/" + uri,
-      },
-      onPreUpload(file: File) {
-        if (validateFile(file.name))
-          return {
-            errorMessage:
-              "Duplicate Filename: Please rename file on your device",
-            transformedObject: file,
-          };
-        return;
-      },
-      mimeTypes: ["application/pdf", "text/plain"],
-    } as UploadWidgetReactConfig;
-  };
+  // const options = (uri) => {
+  //   return {
+  //     apiKey: "public_W142iw5A2CjLkNdU7G6px7mYYKZH", // This is your API key.
+  //     maxFileCount: 1,
+  //     maxFileSizeBytes: 2000000,
+  //     path: {
+  //       folderPath: "/uploads/" + uri,
+  //     },
+  //     onPreUpload(file: File) {
+  //       if (validateFile(file.name))
+  //         return {
+  //           errorMessage:
+  //             "Duplicate Filename: Please rename file on your device",
+  //           transformedObject: file,
+  //         };
+  //       return;
+  //     },
+  //     mimeTypes: ["application/pdf", "text/plain"],
+  //   } as UploadWidgetReactConfig;
+  // };
 
   if (!session) return <div>Login to see page</div>;
   if (!Router.isReady && session) {
@@ -798,7 +797,7 @@ const[fileContent,setFileContent]=useState(null)
                   sources={JSON.parse(JSON.stringify(sources))}
                   isChild={isChild}
                   setIsChild={setIsChild}
-                  options={options}
+               
                   dispatch={dispatch}
                   selected={selected}
                   uploadOpened={uploadOpened}
