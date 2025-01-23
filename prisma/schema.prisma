@@ -77,7 +77,7 @@ model Notes {
 
   notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
-  @@unique([uri])
+  @@unique([title,uri])
 }
 
 model Message {

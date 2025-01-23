@@ -15,7 +15,7 @@ export async function getPdfText(file: any) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = (window as any).location.origin + "/pdf.worker.min.mjs";
  
   //const pdf1 = await fs.readFile((file.originalFile.file as File).arrayBuffer());
-  let actualFile: File = file.originalFile.file;
+  let actualFile: File = file
   const pdf = await pdfjsLib.getDocument(await actualFile.arrayBuffer())
     .promise;
   let fullText = "";

@@ -96,12 +96,9 @@ export default function Note(props) {
         <ResizablePanel>
           <ResizablePanelGroup direction="vertical">
             <Tiptap
-              setTitle={setTitle}
-              title={title}
-              setContent={setContent}
-              content={content}
-              saveNotes={saveNotes}
-              deleteNotes={deleteNotes}
+            
+              editorVisible={false}
+              setEditorVisible={null}
             />
            
           </ResizablePanelGroup>

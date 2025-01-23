@@ -184,8 +184,8 @@ export default function ChatWindow({
                     ? selected.selected
                     : "No Sources Selected, select from above"}
                 </span>
-                {selected.selectedArr.map((title) => (
-                  <div>
+                {selected.selectedArr.map((title,idx) => (
+                  <div id={idx}>
                     <span className="font-semibold font-roboto">{title}:</span>{" "}
                     <span className="text-xs">{lookupKeywords(title)}</span>
                   </div>
@@ -193,8 +193,9 @@ export default function ChatWindow({
               </CardContent>
             </Card>
             {messagesLoaded && messagesLoaded.length != 0 ? (
-              messagesLoaded.map((m: any) => (
+              messagesLoaded.map((m: any,idx) => (
                 <div
+                id={idx}
                   className={
                     m.role === "user"
                       ? "flex justify-end"

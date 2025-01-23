@@ -50,7 +50,7 @@ import { SiLatex } from "react-icons/si";
 import { BsFiletypeCsv } from "react-icons/bs";
 import { TbJson } from "react-icons/tb";
 import { TbTxt } from "react-icons/tb";
-import { UploadButton, UploadDropzone } from "@bytescale/upload-widget-react";
+ 
 import {
   Menubar,
   MenubarContent,
@@ -76,6 +76,7 @@ import {
   TooltipTrigger,
 } from "../../components/ui/tooltip";
 import { getPdfText } from "../../utils/parse_text";
+import UploadButton from "../../components/upload/UploadButton";
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -330,6 +331,7 @@ function SourcesDrawer({
   setUploadOpened,
   inputRef,
   Router,
+  fileContent,setFileContent
 }) {
   function FileIcon({ extension }) {
     switch (extension) {
@@ -365,7 +367,6 @@ function SourcesDrawer({
   }
 
 
-  if (selected.length != 0 && sources)
     return (
       <Drawer open={isChild}>
         <DrawerTrigger asChild>
@@ -402,9 +403,9 @@ function SourcesDrawer({
             </DrawerHeader>
             <div className="p-4 pb-0 mt-[3svw]">
               <div className="flex items-center justify-center space-x-2 flex-col group">
-                {sources.map((source: Upload, idx) => (
+                { (sources).map((source: Upload, idx) => (
                   <div
-                    key={idx}
+                    key={source.title}
                     className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5  animated-button px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
                   >
                     <div className="my-auto  ">
@@ -447,7 +448,9 @@ function SourcesDrawer({
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                ))}
+                ))
+          
+              }
               </div>
               <div className="mt-3 h-[40svh]"></div>
             </div>{" "}
@@ -455,7 +458,7 @@ function SourcesDrawer({
             <DrawerFooter className="flex flex-row  ml-[2svw] mb-[20svh]   absolute">
               <Button>Add a link</Button>
 
-              <UploadButton
+              {/* <UploadButton
                 options={options(slug)}
                 onComplete={ (files) => {
                    addFileNamesToDB(files, slug, Router);
@@ -494,7 +497,8 @@ function SourcesDrawer({
                     Upload a file...
                   </Button>
                 )}
-              </UploadButton>
+              </UploadButton> */}
+              <UploadButton  fileContent={fileContent} setFileContent={setFileContent}/>
               <Button className="w-[10svh] ">Submit</Button>
               <DrawerClose asChild>
                 <Button
@@ -513,57 +517,57 @@ function SourcesDrawer({
       </Drawer>
     );
 
-  {
-    return (
-      <Drawer>
-        <DrawerTrigger asChild>
-          <div className="ml-[-7svw] flex flex-row py-[1svw]">
-            <Button
-              variant="outline"
-              className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]"
-            >
-              <svg
-                className="mr-1"
-                width="15"
-                height="15"
-                viewBox="0 0 15 15"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M3 3H12V12H3L3 3ZM2 3C2 2.44771 2.44772 2 3 2H12C12.5523 2 13 2.44772 13 3V12C13 12.5523 12.5523 13 12 13H3C2.44771 13 2 12.5523 2 12V3ZM10.3498 5.51105C10.506 5.28337 10.4481 4.97212 10.2204 4.81587C9.99275 4.65961 9.6815 4.71751 9.52525 4.94519L6.64048 9.14857L5.19733 7.40889C5.02102 7.19635 4.7058 7.16699 4.49327 7.34329C4.28073 7.5196 4.25137 7.83482 4.42767 8.04735L6.2934 10.2964C6.39348 10.4171 6.54437 10.4838 6.70097 10.4767C6.85757 10.4695 7.00177 10.3894 7.09047 10.2601L10.3498 5.51105Z"
-                  fill="currentColor"
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-              Select Sources
-            </Button>
-          </div>
-        </DrawerTrigger>
-        <DrawerContent>
-          <div className="mx-auto w-full max-w-sm h-[80svh]">
-            <DrawerHeader className="absolute left-[1.5svw]">
-              <DrawerTitle>Selected Sources:</DrawerTitle>
-              <DrawerDescription>Upload or Enter Link</DrawerDescription>
-            </DrawerHeader>
-            <div className="p-4 pb-0 mt-[3svw]">
-              <div className="flex items-center justify-center space-x-2 flex-col group"></div>
-              <div className="mt-3 h-[40svh]"></div>
-            </div>
-            <DrawerFooter className="flex flex-row absolute ml-[4.5svw]">
-              <Button className="w-[10svh] ">Submit</Button>
-              <DrawerClose asChild>
-                <Button className="w-[10svh]  " variant="outline">
-                  Cancel
-                </Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </div>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
+  // {
+  //   return (
+  //     <Drawer>
+  //       <DrawerTrigger asChild>
+  //         <div className="ml-[-7svw] flex flex-row py-[1svw]">
+  //           <Button
+  //             variant="outline"
+  //             className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]"
+  //           >
+  //             <svg
+  //               className="mr-1"
+  //               width="15"
+  //               height="15"
+  //               viewBox="0 0 15 15"
+  //               fill="none"
+  //               xmlns="http://www.w3.org/2000/svg"
+  //             >
+  //               <path
+  //                 d="M3 3H12V12H3L3 3ZM2 3C2 2.44771 2.44772 2 3 2H12C12.5523 2 13 2.44772 13 3V12C13 12.5523 12.5523 13 12 13H3C2.44771 13 2 12.5523 2 12V3ZM10.3498 5.51105C10.506 5.28337 10.4481 4.97212 10.2204 4.81587C9.99275 4.65961 9.6815 4.71751 9.52525 4.94519L6.64048 9.14857L5.19733 7.40889C5.02102 7.19635 4.7058 7.16699 4.49327 7.34329C4.28073 7.5196 4.25137 7.83482 4.42767 8.04735L6.2934 10.2964C6.39348 10.4171 6.54437 10.4838 6.70097 10.4767C6.85757 10.4695 7.00177 10.3894 7.09047 10.2601L10.3498 5.51105Z"
+  //                 fill="currentColor"
+  //                 fill-rule="evenodd"
+  //                 clip-rule="evenodd"
+  //               ></path>
+  //             </svg>
+  //             Select Sources
+  //           </Button>
+  //         </div>
+  //       </DrawerTrigger>
+  //       <DrawerContent>
+  //         <div className="mx-auto w-full max-w-sm h-[80svh]">
+  //           <DrawerHeader className="absolute left-[1.5svw]">
+  //             <DrawerTitle>Selected Sources:</DrawerTitle>
+  //             <DrawerDescription>Upload or Enter Link</DrawerDescription>
+  //           </DrawerHeader>
+  //           <div className="p-4 pb-0 mt-[3svw]">
+  //             <div className="flex items-center justify-center space-x-2 flex-col group"></div>
+  //             <div className="mt-3 h-[40svh]"></div>
+  //           </div>
+  //           <DrawerFooter className="flex flex-row absolute ml-[4.5svw]">
+  //             <Button className="w-[10svh] ">Submit</Button>
+  //             <DrawerClose asChild>
+  //               <Button className="w-[10svh]  " variant="outline">
+  //                 Cancel
+  //               </Button>
+  //             </DrawerClose>
+  //           </DrawerFooter>
+  //         </div>
+  //       </DrawerContent>
+  //     </Drawer>
+  //   );
+  // }
 }
 function selectedReducer(state, action) {
   switch (action.type) {
@@ -571,7 +575,7 @@ function selectedReducer(state, action) {
 
     case "init_sources":
       
-    if(!action.sources || action.sources.length==1) {
+    if(!action.sources  ) {
       return {
         map: new Map<string, boolean>(),
         selected: '0 Sources Selected',
@@ -579,12 +583,16 @@ function selectedReducer(state, action) {
       };
     }
       let localMap = new Map<string, boolean>();
-      action.sources.forEach((item) => {
-        localMap.set(item.title, false);
-      });
+
+      for(let i = 0; i < action.sources.length; i++) {
+
+        localMap.set(action.sources[i].title,false)
+      }
+     
+      console.log('after',action.sources)
 
       let locallyStored = localStorage.getItem("savedSelectedSources");
-
+      console.log('localstorage',locallyStored,localStorage)
       let count = 0;
       let locallyStoredArr: Array<string> = [];
       let arr: Array<string> = [];
@@ -601,29 +609,37 @@ function selectedReducer(state, action) {
         count == 1 ? " Source Selected" : " Sources Selected";
 
         console.log(count + amtselectedstr)
+
+      console.log('result of init',localMap,count+amtselectedstr,arr)
       return {
         map: localMap,
         selected: count + amtselectedstr,
         selectedArr: arr,
       };
     case "toggle_source":
-      state.map.set(action.title, !state.map.get(action.title));
+      let newMap = new Map(state.map)
 
-      const keys = state.map.keys();
+     newMap.set(action.title, !state.map.get(action.title));
+
+
+      const keys = newMap.keys();
 
       let strArr: Array<string> = []; //becomes selectedArr
       let str = ""; // becomes selected
       let c = 0; // track # of selected sources (used in selected)
       let savedSelectedSources = "";
+
       for (const key of keys) {
-        let value = state.map.get(key);
+        let value = newMap.get(key);
         if (value) {
-          strArr.push(key + "");
+          let modifiedKey = key+""
+          strArr.push(modifiedKey);
           savedSelectedSources += key + "*";
 
           c++;
         }
       }
+     
       if (c == 0) {
         str = "No Sources Selected, select from above!";
       } else if (c == 1) {
@@ -632,12 +648,13 @@ function selectedReducer(state, action) {
         str = c + " Sources Selected";
       }
 
+      if(savedSelectedSources.length==0) savedSelectedSources+='*'
       localStorage.setItem(
         "savedSelectedSources",
         savedSelectedSources.slice(0, savedSelectedSources.length - 1)
       );
-
-      return { map: state.map, selected: str, selectedArr: strArr };
+console.log('result of toggle',newMap,str,strArr)
+      return { map: newMap, selected: str, selectedArr: strArr };
   }
 }
 export async function updateTitle(e: any, slug: string) {
@@ -670,23 +687,24 @@ export default function NotespacesPage({
   const [isChild, setIsChild] = useState(false);
   const [selected, dispatch] = useReducer(selectedReducer, initialState);
   
-
+const[fileContent,setFileContent]=useState(null)
   const { data: session } = useSession();
 
   const ref = useRef(null);
   const [uploadOpened, setUploadOpened] = useState(false);
 
+   
   useEffect(() => {
     dispatch({
       type: "init_sources",
-      sources: sources,
+      sources: (JSON.parse(JSON.stringify(sources))),
       sourcesArr: localStorage.getItem("savedSelectedSources"),
     });
     return () => {
       setUploadOpened(false); // Cleanup upload state when component unmounts
     };
   }, []);
-  useEffect(() => {}, [selected]);
+  useEffect(() => {}, [selected,sources]);
   function validateFile(originalFilename: string) {
     if (!sources) return false;
     if (sources.length >= 25)
@@ -773,11 +791,11 @@ export default function NotespacesPage({
                 blurb={notespace.sources_blurb}
                 selected={selected}
                 slug={slug}
-                sources={sources}
+                sources={JSON.parse(JSON.stringify(sources))}
               >
                 <SourcesDrawer
                   slug={slug}
-                  sources={sources}
+                  sources={JSON.parse(JSON.stringify(sources))}
                   isChild={isChild}
                   setIsChild={setIsChild}
                   options={options}
@@ -787,6 +805,8 @@ export default function NotespacesPage({
                   setUploadOpened={setUploadOpened}
                   inputRef={inputRef}
                   Router={Router}
+                  fileContent={fileContent}
+                  setFileContent={setFileContent}
                 />
               </ChatWindow>
             </ResizablePanel>

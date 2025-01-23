@@ -6,7 +6,7 @@ import prisma from "../../../../lib/prisma";
 // Required fields in body: title
 // Optional fields in body: content
 export default async function handle(req, res) {
-  const { title, content } = req.body;
+  const { title, content,uri } = req.body;
 
   const session = await getServerSession(req, res, authOptions);
   const result = await prisma.notes.upsert({
@@ -15,6 +15,7 @@ export default async function handle(req, res) {
       content: content,
 
       author: { connect: { email: session?.user?.email } },
+      createdBy: 'User'
     },
     update: {
       title: title,
@@ -22,10 +23,7 @@ export default async function handle(req, res) {
       author: { connect: { email: session?.user?.email } },
     },
     where: {
-      title_authorId: {
-        title: title,
-        authorId: session.id,
-      },
+     title_uri:{title:title,uri:uri}
     },
   });
   res.json(result);
