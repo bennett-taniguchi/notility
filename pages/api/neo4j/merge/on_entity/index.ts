@@ -17,7 +17,7 @@ export default async function handle(req, res) {
 
   try {
     const { records, summary, keys } = await graph.executeQuery(
-      `MATCH (a1:Person{id:${nameA}}), (a2:Person {id:${nameB}})
+      `MATCH (a1:Person{id: '${nameA}'}), (a2:Person {id:'${nameB}'})
 WITH head(collect([a1,a2])) as nodes
 CALL apoc.refactor.mergeNodes(nodes,{
     properties:"combine",
