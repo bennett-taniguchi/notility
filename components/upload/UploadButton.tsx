@@ -1,7 +1,7 @@
 // Filename - App.js
 
 import axios from "axios";
-import React, { Component } from "react";
+import React, { Component, useContext } from "react";
 import { Button } from "../ui/button";
 import {
   chunkTextByMultiParagraphs,
@@ -10,6 +10,8 @@ import {
 } from "../../utils/parse_text";
 import { cva, VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
+import { Upload } from "@prisma/client";
+import { SlugContext } from "../context/context";
 type FileType = {
   name: string;
   lastModifiedDate: Date;
@@ -56,6 +58,8 @@ export interface ButtonProps
 
 const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ asChild = false, ...props }) => {
+
+    const slug = useContext(SlugContext)
     let state = {
       // Initially, no file is selected
       selectedFile: null as null | FileType,
@@ -90,6 +94,10 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       axios.post("api/uploadfile", formData);
     };
 
+    // Returning  nodes from neo4j, currently includes document type nodes
+    // need to specifically return person type?
+    // good to cache results instead of querying becavuse this whole operation is slow
+    // merges on names on f-name l-name rule
     const onClickQuery = async (e: any) => {
       e.preventDefault();
       let res = await fetch("/api/neo4j/get/", {
@@ -162,6 +170,9 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
        })
     };
 
+    // Take uploaded file (if it exists) and converts then inserts -> neo4j
+    // need to also update supabase
+    //
     const onClickSubmit = async (e: any) => {
       e.preventDefault();
 
@@ -188,13 +199,28 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             body: JSON.stringify(body),
           });
 
-          return;
+          const upload = { uri: slug.slug, originalFileName: filename, title: filename, filetype: extensionType, summary:null } 
+          await fetch('/api/supabase/upload/create/',{
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({upload})
+          })
+        
         } else {
           console.log(state.selectedFile);
           let txt = await (state.selectedFile as any).text();
 
           let chunked = chunkTextByMultiParagraphs(txt);
             console.log(txt)
+
+            const upload = { uri: slug.slug, originalFileName: filename, title: filename, filetype: extensionType, summary:null } 
+            await fetch('/api/supabase/upload/create/',{
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({upload})
+            })
+
+            // add to   localstorage via function
             const body = { chunked,filename };
          
             await fetch("/api/neo4j/insert", {
@@ -203,6 +229,7 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
               body: JSON.stringify(body),
             });
      
+           
         //   chunked.forEach(async (chunk) => {
         //     const body = { chunk };
         //     console.log("txt", chunk);
@@ -213,7 +240,7 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         //     });
         //   });
 
-          return;
+     
         }
       } else {
         console.log("please select a file to upload");

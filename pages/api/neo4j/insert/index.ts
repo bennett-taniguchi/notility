@@ -54,11 +54,12 @@ export default async function handle(req, res) {
     const embeddings = await(embedChunksDense(chunked));
     console.log('52',embeddings)
  
+    console.log('57',session.user,session.id,session.user.email)
     // here modify all nodes to have an attribute based on user's id
     results.forEach((resultant,idx) => {
-        console.log(resultant)
-       
-        resultant.source.metadata = {...embeddings[idx],title:filename}
+      
+       resultant.source.id =   session.id
+        resultant.source.metadata = {...embeddings[idx],title:filename, userEmail:session.user.email}
     })
 
     console.log('61',results)

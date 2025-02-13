@@ -74,10 +74,11 @@ model Notes {
   createdBy   String
   prompt_type String?
   prompt      String?
-
+  createdOn String
+  sources   Int
   notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
-  @@unique([title,uri])
+  @@unique([title,uri], name:"title_uri")
 }
 
 model Message {
@@ -123,12 +124,13 @@ model Notespace {
  
 
   @@unique([uri])
+ 
 }
 
 model Upload {
   id  Int    @id @default(autoincrement())
   uri String
-  fileUrl String
+ 
 
  
   originalFileName String

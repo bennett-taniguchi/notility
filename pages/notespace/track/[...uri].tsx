@@ -10,9 +10,9 @@ import { IoReturnUpBack } from "react-icons/io5";
 import { RiHome2Fill } from "react-icons/ri";
 import { TbJson } from "react-icons/tb";
 
-import ChatWindow from "../../../components/chat/ChatWindow";
+import ChatWindow from "../../../components/notespace/chat/ChatWindow";
 import Loading from "../../../components/loading";
-import Tiptap from "../../../components/notes/tiptap/Tiptap";
+import Tiptap from "../../../components/notespace/tiptap/Tiptap";
 import { Button } from "../../../components/ui/button";
 import {
   Drawer,

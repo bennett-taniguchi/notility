@@ -7,7 +7,6 @@ import React, {
   useState,
 } from "react";
 import {
-  ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "../../components/ui/resizable";
@@ -16,66 +15,31 @@ import { RiHome2Fill } from "react-icons/ri";
 import Link from "next/link";
 import { FaGear, FaShare } from "react-icons/fa6";
 import { FaUserAlt } from "react-icons/fa";
-import { Button } from "../../components/ui/button";
-import ChatWindow from "../../components/chat/ChatWindow";
-import Tiptap from "../../components/notes/tiptap/Tiptap";
-import { Skeleton } from "../../components/ui/skeleton";
-import { Loading } from "../../components/loading/Loading";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "../../components/ui/drawer";
-import { FaMinus, FaPlus } from "react-icons/fa";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import {
-  Table,
-  TableCaption,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "../../components/ui/table";
-import { IoReturnUpBack } from "react-icons/io5";
-import { Checkbox } from "../../components/ui/checkbox";
-import { FaFilePdf } from "react-icons/fa";
-import { FaMarkdown } from "react-icons/fa";
-import { SiLatex } from "react-icons/si";
-import { BsFiletypeCsv } from "react-icons/bs";
-import { TbJson } from "react-icons/tb";
-import { TbTxt } from "react-icons/tb";
- 
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarTrigger,
-} from "../../components/ui/menubar";
-import { Separator } from "../../components/ui/separator";
+
+import dynamic from "next/dynamic";
+
 import { getSession, useSession } from "next-auth/react";
-import { Message, Notespace, Upload } from "@prisma/client";
+import { Message, Notes, Notespace, Upload } from "@prisma/client";
 
 import prisma from "../../lib/prisma";
 import { GetServerSideProps } from "next";
 import Header from "../../components/Header";
-import { ScrollArea } from "../../components/ui/scroll-area";
+
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../components/ui/tooltip";
-import { getPdfText } from "../../utils/parse_text";
-import UploadButton from "../../components/upload/UploadButton";
+  NotesContext,
+  SlugContext,
+  UpdateUploadsContext,
+} from "../../components/context/context";
+
+const DynamicChatWindow = dynamic(
+  () => import("../../components/notespace/chat/ChatWindow")
+);
+const DynamicOutputArea = dynamic(
+  () => import("../../components/notespace/tiptap/OutputArea")
+);
+const DynamicSourcesDrawer = dynamic(
+  () => import("../../components/notespace/upload/SourcesDrawer")
+);
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -111,11 +75,19 @@ export const getServerSideProps: GetServerSideProps = async ({
   const messages = await prisma.message.findMany({
     where: {
       uri: uuid,
-    },
+    }
   });
 
+  
+  const notes = await prisma.notes.findMany({
+    where: {
+      uri: uuid,
+    }, 
+  });
+
+
   return {
-    props: { notespace, sources, messages },
+    props: { notespace, sources, messages, notes },
   };
 };
 
@@ -123,482 +95,42 @@ type Props = {
   notespace: Notespace;
   sources: Upload[];
   messages: Message[];
+  notes: string[];
 };
 
-function OutputTable({ editorVisible, setEditorVisible }) {
-  const data = [
-    {
-      title: "Math Equations",
-      sources: 3,
-      createdOn: "1/6/2025",
-      ownedBy: "Me",
-    },
-  ];
-  return (
-    <div>
-      <div className="w-[50svw] h-[9.8svh] chat-background" />
-      <Table className="w-[49svw] mx-auto mt-[10svh]">
-        <TableCaption>Your recent Notespaces</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Title</TableHead>
-            <TableHead>Amount of Sources</TableHead>
-            <TableHead>Created On</TableHead>
-            <TableHead className="text-right">Owner</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((datum) => (
-            <TableRow
-              key={datum.title}
-              className="w-max h-max hover:bg-zinc-200  "
-            >
-              <TableCell
-                onClick={() => setEditorVisible(!editorVisible)}
-                className="font-medium cursor-pointer "
-              >
-                {datum.title}
-              </TableCell>
-              <TableCell
-                onClick={() => setEditorVisible(!editorVisible)}
-                className={"cursor-pointer"}
-              >
-                {datum.sources}
-              </TableCell>
-              <TableCell
-                onClick={() => setEditorVisible(!editorVisible)}
-                className={"cursor-pointer"}
-              >
-                {datum.createdOn}
-              </TableCell>
-              <TableCell
-                onClick={() => setEditorVisible(!editorVisible)}
-                className="text-right cursor-pointer"
-              >
-                {datum.ownedBy}
-              </TableCell>
-              <TableCell className="w-[2svw] h-[5svh] hover:bg-white">
-                {" "}
-                <BsThreeDotsVertical className="cursor-pointer w-5 h-5" />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <div className="ml-[4svw] mt-[5svw]">
-        <Button variant={"outline"} className="ml-[2svw]">
-          Create new Note
-        </Button>
-        <Button variant={"outline"} className="ml-[2svw]">
-          Create new Guide
-        </Button>
-        <Button variant={"outline"} className="ml-[2svw]">
-          Create new Note
-        </Button>
-        <Button variant={"outline"} className="ml-[2svw]">
-          Create new Test
-        </Button>
-      </div>
-    </div>
-  );
-}
-function OutputArea({ editorVisible, setEditorVisible }: any) {
-  return (
-    <div>
-      {editorVisible ? (
-        <div>
-          <div
-            className="  hover:bg-sky-100  ml-[8svw] mt-[.7svh] fixed   border-none  text-sm font-bold text-zinc-700 cursor-pointer bg-white/80 rounded px-2"
-            onClick={() => setEditorVisible(!editorVisible)}
-          >
-            <div className="flex flex-row  ">
-              <IoReturnUpBack className="mr-1 mt-1" />
-              Go back
-            </div>
-          </div>
-
-          <Tiptap
-            setEditorVisible={setEditorVisible}
-            editorVisible={editorVisible}
-          />
-        </div>
-      ) : (
-        <OutputTable
-          editorVisible={editorVisible}
-          setEditorVisible={setEditorVisible}
-        />
-      )}
-    </div>
-  );
-}
-
-
-// Need to add:
-// add files to pinecone
-// variable chunk based on file
-async function addFileNamesToDB(files: any, uri: string, Router: any)  {
-  if (!files || files.length == 0) return [];
-  let uploads: any[] = [];
-  let res_arr: any[]= []
-  function splitOnFileType(filename: string) {
-    let lastDotI = filename.lastIndexOf(".");
-    let fileExtension = filename.substring(lastDotI, filename.length);
-    let name = filename.substring(0, lastDotI);
-
-    return { extension: fileExtension, name: name };
-  }
-  const reader = new FileReader();
-  files
-    .map(async (file: { originalFile: { originalFileName: string; }; fileUrl: any; },idx:number) => {
-      let { name, extension } = splitOnFileType(
-        file.originalFile.originalFileName
-      );
-      let upload = {
-        uri: uri,
-        fileUrl: file.fileUrl,
-        originalFileName: file.originalFile.originalFileName,
-        title: name,
-        filetype: extension,
-      };
-      uploads.push(upload);
-
-      getPdfText(file)
-      .then(async (text) => {
-        const plainText = text;
-        let file = upload
-        const body2 = { plainText, name, uri,file };
-        await fetch("/api/chat/analyze/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body2),
-        });
-
- 
-        // console.log('276:',summary)
-        // await fetch("/api/upload/update/summary/", {
-        //   method: "PATCH",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({uri:uri, name:name,overallSummary: summary}),
-        // });
-    
-
-        
-      })
-      .catch((err) => console.error(err));
-
-  // file.file                name
-});
-  // const body = { uploads };
-
-  // await fetch("/api/upload/create/createMany/", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(body),
-  // });
-
-  // return res_arr
-  Router.push("/notespace/" + uri);
-}
- function getKeywords(summary:string) {
-  return summary.split('.')[0]
-   
-}
-async function updateSources(selected: any, uri: string,Router:any) {
-  let count = selected.selectedArr.length;
-  const body = { count, uri };
-
-  await fetch("/api/notespace/update/sources_count", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  setTimeout(() => {
-    Router.push("/notespace/"+uri); // Replace with your target route
-  }, 2000); // 2000ms = 2 seconds
-}
-function SourcesDrawer({
-  selected,
-  slug,
-  sources,
-  isChild,
-  setIsChild,
- 
-  dispatch,
-  uploadOpened,
-  setUploadOpened,
-  inputRef,
-  Router,
-  fileContent,setFileContent
-}) {
-  function FileIcon({ extension }) {
-    switch (extension) {
-      case ".pdf":
-        return (
-          <FaFilePdf className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-rose-800 fill-rose-800" />
-        );
-      case ".md":
-        return (
-          <FaMarkdown className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-blue-800 fill-blue-800" />
-        );
-      case ".csv":
-        return (
-          <BsFiletypeCsv className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-green-800 fill-green-800" />
-        );
-      case ".tex":
-        return (
-          <SiLatex className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-green-400 fill-green-400" />
-        );
-      case ".json":
-        return (
-          <TbJson className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-yellow-600" />
-        );
-
-      case ".txt":
-        return (
-          <TbTxt className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-zinc-600" />
-        );
-    }
-    return (
-      <TbTxt className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-zinc-600" />
-    );
-  }
-
-
-    return (
-      <Drawer open={isChild}>
-        <DrawerTrigger asChild>
-          <div className="ml-[-7svw] flex flex-row py-[1svw]">
-            <Button
-              onClick={() => setIsChild(true)}
-              variant="outline"
-              className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]"
-            >
-              <svg
-                className="mr-1"
-                width="15"
-                height="15"
-                viewBox="0 0 15 15"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M3 3H12V12H3L3 3ZM2 3C2 2.44771 2.44772 2 3 2H12C12.5523 2 13 2.44772 13 3V12C13 12.5523 12.5523 13 12 13H3C2.44771 13 2 12.5523 2 12V3ZM10.3498 5.51105C10.506 5.28337 10.4481 4.97212 10.2204 4.81587C9.99275 4.65961 9.6815 4.71751 9.52525 4.94519L6.64048 9.14857L5.19733 7.40889C5.02102 7.19635 4.7058 7.16699 4.49327 7.34329C4.28073 7.5196 4.25137 7.83482 4.42767 8.04735L6.2934 10.2964C6.39348 10.4171 6.54437 10.4838 6.70097 10.4767C6.85757 10.4695 7.00177 10.3894 7.09047 10.2601L10.3498 5.51105Z"
-                  fill="currentColor"
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-              Select Sources
-            </Button>
-          </div>
-        </DrawerTrigger>
-        <DrawerContent>
-          <div className="mx-auto w-full max-w-sm h-[80svh]">
-            <DrawerHeader className="absolute left-[1.5svw]">
-              <DrawerTitle>Selected Sources:</DrawerTitle>
-              <DrawerDescription>Upload or Enter Link</DrawerDescription>
-            </DrawerHeader>
-            <div className="p-4 pb-0 mt-[3svw]">
-              <div className="flex items-center justify-center space-x-2 flex-col group">
-                { (sources).map((source: Upload, idx) => (
-                  <div
-                    key={source.title}
-                    className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5  animated-button px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
-                  >
-                    <div className="my-auto  ">
-                      <Checkbox
-                        id={source.title}
-                        className="mr-3 hover:bg-cyan-100/30"
-                        defaultChecked={selected.map.get(source.title)}
-                        value={selected.map.get(source.title)}
-                        onClick={(e) =>
-                          dispatch({
-                            type: "toggle_source",
-                            title: source.title,
-                          })
-                        }
-                      />
-                           <TooltipProvider>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                        <label
-                        htmlFor={source.title}
-                        className="text-slate-700 font-roboto text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  "
-                      >
-                        {source.title}
-                      </label>
-                        </TooltipTrigger>
-                        <TooltipContent className="multiline w-[40svw] overflow-y-auto font-bold">{source.summary ? getKeywords(source.summary) : 'No Summary Yet, Please Wait'}</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    </div>
-
-                    <BsThreeDotsVertical className="right-0 absolute mr-[2svw] h-[1.5svw] w-[1.5svw] mt-[.9svh]  fill-slate-700" />
-                    <FileIcon extension={source.filetype as any} />
-                    <TooltipProvider>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <div className="w-[2svw] h-[5svh]   right-0 absolute" />
-                        </TooltipTrigger>
-                        <TooltipContent>{source.filetype}</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                ))
-          
-              }
-              </div>
-              <div className="mt-3 h-[40svh]"></div>
-            </div>{" "}
-            <div className="text-md">{selected.selected}</div>
-            <DrawerFooter className="flex flex-row  ml-[2svw] mb-[20svh]   absolute">
-              <Button>Add a link</Button>
-
-              {/* <UploadButton
-                options={options(slug)}
-                onComplete={ (files) => {
-                   addFileNamesToDB(files, slug, Router);
-                  setUploadOpened(false);
-                  updateSources(selected, slug,Router);
-                  setIsChild(true);
-                }}
-              >
-                {({ onClick }) => (
-                  <Button
-                    ref={inputRef}
-                    disabled={uploadOpened}
-                    variant="outline"
-                    onClick={(e) => {
-                      setUploadOpened(true);
-                      onClick(e);
-                      setIsChild(false);
-                    }}
-                    className="z-0 hover:drop-shadow-sm border-sky-400/50 animated-button text-sm mr-[1svw] w-[8svw] h-[5svh]"
-                  >
-                    <svg
-                      className="mr-1"
-                      width="15"
-                      height="15"
-                      viewBox="0 0 15 15"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M3.5 2C3.22386 2 3 2.22386 3 2.5V12.5C3 12.7761 3.22386 13 3.5 13H11.5C11.7761 13 12 12.7761 12 12.5V6H8.5C8.22386 6 8 5.77614 8 5.5V2H3.5ZM9 2.70711L11.2929 5H9V2.70711ZM2 2.5C2 1.67157 2.67157 1 3.5 1H8.5C8.63261 1 8.75979 1.05268 8.85355 1.14645L12.8536 5.14645C12.9473 5.24021 13 5.36739 13 5.5V12.5C13 13.3284 12.3284 14 11.5 14H3.5C2.67157 14 2 13.3284 2 12.5V2.5Z"
-                        fill="currentColor"
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
-                    Upload a file...
-                  </Button>
-                )}
-              </UploadButton> */}
-              <UploadButton  fileContent={fileContent} setFileContent={setFileContent}/>
-              <Button className="w-[10svh] ">Submit</Button>
-              <DrawerClose asChild>
-                <Button
-                  className="w-[10svh]  "
-                  variant="outline"
-                  onClick={() => {
-                    setIsChild(false);
-                  }}
-                >
-                  Cancel
-                </Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </div>
-        </DrawerContent>
-      </Drawer>
-    );
-
-  // {
-  //   return (
-  //     <Drawer>
-  //       <DrawerTrigger asChild>
-  //         <div className="ml-[-7svw] flex flex-row py-[1svw]">
-  //           <Button
-  //             variant="outline"
-  //             className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]"
-  //           >
-  //             <svg
-  //               className="mr-1"
-  //               width="15"
-  //               height="15"
-  //               viewBox="0 0 15 15"
-  //               fill="none"
-  //               xmlns="http://www.w3.org/2000/svg"
-  //             >
-  //               <path
-  //                 d="M3 3H12V12H3L3 3ZM2 3C2 2.44771 2.44772 2 3 2H12C12.5523 2 13 2.44772 13 3V12C13 12.5523 12.5523 13 12 13H3C2.44771 13 2 12.5523 2 12V3ZM10.3498 5.51105C10.506 5.28337 10.4481 4.97212 10.2204 4.81587C9.99275 4.65961 9.6815 4.71751 9.52525 4.94519L6.64048 9.14857L5.19733 7.40889C5.02102 7.19635 4.7058 7.16699 4.49327 7.34329C4.28073 7.5196 4.25137 7.83482 4.42767 8.04735L6.2934 10.2964C6.39348 10.4171 6.54437 10.4838 6.70097 10.4767C6.85757 10.4695 7.00177 10.3894 7.09047 10.2601L10.3498 5.51105Z"
-  //                 fill="currentColor"
-  //                 fill-rule="evenodd"
-  //                 clip-rule="evenodd"
-  //               ></path>
-  //             </svg>
-  //             Select Sources
-  //           </Button>
-  //         </div>
-  //       </DrawerTrigger>
-  //       <DrawerContent>
-  //         <div className="mx-auto w-full max-w-sm h-[80svh]">
-  //           <DrawerHeader className="absolute left-[1.5svw]">
-  //             <DrawerTitle>Selected Sources:</DrawerTitle>
-  //             <DrawerDescription>Upload or Enter Link</DrawerDescription>
-  //           </DrawerHeader>
-  //           <div className="p-4 pb-0 mt-[3svw]">
-  //             <div className="flex items-center justify-center space-x-2 flex-col group"></div>
-  //             <div className="mt-3 h-[40svh]"></div>
-  //           </div>
-  //           <DrawerFooter className="flex flex-row absolute ml-[4.5svw]">
-  //             <Button className="w-[10svh] ">Submit</Button>
-  //             <DrawerClose asChild>
-  //               <Button className="w-[10svh]  " variant="outline">
-  //                 Cancel
-  //               </Button>
-  //             </DrawerClose>
-  //           </DrawerFooter>
-  //         </div>
-  //       </DrawerContent>
-  //     </Drawer>
-  //   );
-  // }
-}
 function selectedReducer(state, action) {
   switch (action.type) {
-
+    case "add_source": {
+    }
 
     case "init_sources":
-      
-    if(!action.sources  ) {
-      return {
-        map: new Map<string, boolean>(),
-        selected: '0 Sources Selected',
-        selectedArr: [],
-      };
-    }
+      if (!action.sources) {
+        return {
+          map: new Map<string, boolean>(),
+          selected: "0 Sources Selected",
+          selectedArr: [],
+        };
+      }
       let localMap = new Map<string, boolean>();
 
-      for(let i = 0; i < action.sources.length; i++) {
-
-        localMap.set(action.sources[i].title,false)
+      for (let i = 0; i < action.sources.length; i++) {
+        localMap.set(action.sources[i].title, false);
       }
-     
-      console.log('after',action.sources)
+ 
 
       let locallyStored = localStorage.getItem("savedSelectedSources");
-      console.log('localstorage',locallyStored,localStorage)
+      
       let count = 0;
       let locallyStoredArr: Array<string> = [];
       let arr: Array<string> = [];
       if (locallyStored && locallyStored.length != 0)
         locallyStoredArr = locallyStored.split("*");
       if (locallyStored)
-        for (let i = 0; i < Math.min(locallyStoredArr.length,action.sources.length); i++) {
+        for (
+          let i = 0;
+          i < Math.min(locallyStoredArr.length, action.sources.length);
+          i++
+        ) {
           if (localMap.get(locallyStoredArr[i])) continue;
           arr.push(locallyStoredArr[i]);
           count++;
@@ -607,19 +139,15 @@ function selectedReducer(state, action) {
       let amtselectedstr =
         count == 1 ? " Source Selected" : " Sources Selected";
 
-        console.log(count + amtselectedstr)
-
-      console.log('result of init',localMap,count+amtselectedstr,arr)
       return {
         map: localMap,
         selected: count + amtselectedstr,
         selectedArr: arr,
       };
     case "toggle_source":
-      let newMap = new Map(state.map)
+      let newMap = new Map(state.map);
 
-     newMap.set(action.title, !state.map.get(action.title));
-
+      newMap.set(action.title, !state.map.get(action.title));
 
       const keys = newMap.keys();
 
@@ -631,14 +159,14 @@ function selectedReducer(state, action) {
       for (const key of keys) {
         let value = newMap.get(key);
         if (value) {
-          let modifiedKey = key+""
+          let modifiedKey = key + "";
           strArr.push(modifiedKey);
           savedSelectedSources += key + "*";
 
           c++;
         }
       }
-     
+
       if (c == 0) {
         str = "No Sources Selected, select from above!";
       } else if (c == 1) {
@@ -647,12 +175,12 @@ function selectedReducer(state, action) {
         str = c + " Sources Selected";
       }
 
-      if(savedSelectedSources.length==0) savedSelectedSources+='*'
+      if (savedSelectedSources.length == 0) savedSelectedSources += "*";
       localStorage.setItem(
         "savedSelectedSources",
         savedSelectedSources.slice(0, savedSelectedSources.length - 1)
       );
-console.log('result of toggle',newMap,str,strArr)
+      
       return { map: newMap, selected: str, selectedArr: strArr };
   }
 }
@@ -672,6 +200,7 @@ export default function NotespacesPage({
   notespace,
   sources,
   messages,
+  notes,
 }: Props) {
   const inputRef = useRef(null);
   const Router = useRouter();
@@ -681,29 +210,28 @@ export default function NotespacesPage({
     selected: "",
     selectedArr: [],
   };
- 
-  const [editorVisible, setEditorVisible] = useState(true);
+
+  const [editorVisible, setEditorVisible] = useState(false);
   const [isChild, setIsChild] = useState(false);
   const [selected, dispatch] = useReducer(selectedReducer, initialState);
-  
-const[fileContent,setFileContent]=useState(null)
+
+  const [fileContent, setFileContent] = useState(null);
   const { data: session } = useSession();
 
   const ref = useRef(null);
   const [uploadOpened, setUploadOpened] = useState(false);
 
-   
   useEffect(() => {
     dispatch({
       type: "init_sources",
-      sources: (JSON.parse(JSON.stringify(sources))),
+      sources: JSON.parse(JSON.stringify(sources)),
       sourcesArr: localStorage.getItem("savedSelectedSources"),
     });
     return () => {
       setUploadOpened(false); // Cleanup upload state when component unmounts
     };
   }, []);
-  useEffect(() => {}, [selected,sources]);
+  useEffect(() => {}, [selected, sources]);
   function validateFile(originalFilename: string) {
     if (!sources) return false;
     if (sources.length >= 25)
@@ -735,90 +263,116 @@ const[fileContent,setFileContent]=useState(null)
 
   if (!session) return <div>Login to see page</div>;
   if (!Router.isReady && session) {
-    return <div>Loading...</div>;
+    return <div>Page is Loading...</div>;
   }
-
+  // add single upload to localstorage via dispatch
+  function updateUploads(
+    uri: string,
+    originalFileName: string,
+    title: string,
+    filetype: string,
+    summary: null | string,
+    owner: string
+  ) {
+    dispatch({
+      type: "update_uploads",
+      uri: uri,
+      originalFileName: originalFileName,
+      title: title,
+      filetype: filetype,
+      summary: summary,
+    });
+  }
   if (notespace)
     return (
-      <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
-        <Header />
+  <NotesContext.Provider value={{notes:notes as any}}>
+      <UpdateUploadsContext.Provider value={{ updateFunction: updateUploads }}>
+        <SlugContext.Provider value={{ slug: slug }}>
+          <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
+            <Header />
 
-        <div className="w-[100svw] h-[10svh] border-b-slate-200 drop-shadow-lg  reverse-chat-background flex flex-row divide-x-2 ">
-          <div
-            className="basis-1/3 text-center text-black flex flex-row-2  "
-            id="top_info"
-          >
-            <div className="span-1/4  my-auto mr-[1svw]  ml-[1svw] rounded-md mt-[3svh]">
-              <Link href="/notespace">
-                <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70" />
-              </Link>
-            </div>
-            <Textarea
-              spellCheck={false}
-              onBlur={(e) => updateTitle(e, slug)}
-              className="overflow-y-hidden bg-gradient-to-r from-zinc-400/50 to-cyan-400/50 text-sky-100 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
-              defaultValue={notespace.title}
-            />
-          </div>
-
-          <div id="top_sources" className="basis-1/3  m-auto  ">
-            <div className={"ml-[13svw]"}></div>
-          </div>
-
-          <div
-            className="border-transparent border-l-2 basis-1/3 text-center flex flex-row-3 m-auto  rounded-xl mr-[2svw] pb-[1svh]"
-            id="top_sources"
-          >
-            <div className="ml-[20svw] span-1/3   text-cyan-800    ">
-              <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
-            </div>
-            <div className=" span-1/3  text-cyan-800">
-              <FaShare className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />{" "}
-            </div>
-
-            <div className="span-1/3 " id="top_dash text-cyan-800">
-              <FaUserAlt className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
-            </div>
-          </div>
-        </div>
-        <div className="w-[100svw] h-[90svh]">
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel>
-              <ChatWindow
-                messagesLoaded={messages}
-                title={notespace.title}
-                blurb={notespace.sources_blurb}
-                selected={selected}
-                slug={slug}
-                sources={JSON.parse(JSON.stringify(sources))}
+            <div className="w-[100svw] h-[10svh] border-b-slate-200 drop-shadow-lg  reverse-chat-background flex flex-row divide-x-2 ">
+              <div
+                className="basis-1/3 text-center text-black flex flex-row-2  "
+                id="top_info"
               >
-                <SourcesDrawer
-                  slug={slug}
-                  sources={JSON.parse(JSON.stringify(sources))}
-                  isChild={isChild}
-                  setIsChild={setIsChild}
-               
-                  dispatch={dispatch}
-                  selected={selected}
-                  uploadOpened={uploadOpened}
-                  setUploadOpened={setUploadOpened}
-                  inputRef={inputRef}
-                  Router={Router}
-                  fileContent={fileContent}
-                  setFileContent={setFileContent}
+                <div className="span-1/4  my-auto mr-[1svw]  ml-[1svw] rounded-md mt-[3svh]">
+                  <Link href="/notespace">
+                    <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70" />
+                  </Link>
+                </div>
+                <Textarea
+                  spellCheck={false}
+                  onBlur={(e) => updateTitle(e, slug)}
+                  className="overflow-y-hidden bg-gradient-to-r from-zinc-400/50 to-cyan-400/50 text-sky-100 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
+                  defaultValue={notespace.title}
                 />
-              </ChatWindow>
-            </ResizablePanel>
+              </div>
 
-            <ResizablePanel>
-              <OutputArea
-                editorVisible={editorVisible}
-                setEditorVisible={setEditorVisible}
-              />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-      </div>
+              <div id="top_sources" className="basis-1/3  m-auto  ">
+                <div className={"ml-[13svw]"}></div>
+              </div>
+
+              <div
+                className="border-transparent border-l-2 basis-1/3 text-center flex flex-row-3 m-auto  rounded-xl mr-[2svw] pb-[1svh]"
+                id="top_sources"
+              >
+                <div className="ml-[20svw] span-1/3   text-cyan-800    ">
+                  <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
+                </div>
+                <div className=" span-1/3  text-cyan-800">
+                  <FaShare className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />{" "}
+                </div>
+
+                <div className="span-1/3 " id="top_dash text-cyan-800">
+                  <FaUserAlt className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
+                </div>
+              </div>
+            </div>
+            <div className="w-[100svw] h-[90svh]">
+              <ResizablePanelGroup direction="horizontal">
+                <ResizablePanel>
+                  <Suspense fallback={<div>loading...</div>}>
+                    <DynamicChatWindow
+                      messagesLoaded={messages}
+                      title={notespace.title}
+                      blurb={notespace.sources_blurb}
+                      selected={selected}
+                      slug={slug}
+                      sources={JSON.parse(JSON.stringify(sources))}
+                    >
+                      <DynamicSourcesDrawer
+                        slug={slug}
+                        sources={JSON.parse(JSON.stringify(sources))}
+                        isChild={isChild}
+                        setIsChild={setIsChild}
+                        dispatch={dispatch}
+                        selected={selected}
+                        uploadOpened={uploadOpened}
+                        setUploadOpened={setUploadOpened}
+                        inputRef={inputRef}
+                        Router={Router}
+                        fileContent={fileContent}
+                        setFileContent={setFileContent}
+                      />
+                    </DynamicChatWindow>
+                  </Suspense>
+                </ResizablePanel>
+
+                <ResizablePanel>
+                  <Suspense>
+                  <DynamicOutputArea
+                    editorVisible={editorVisible}
+                    setEditorVisible={setEditorVisible}
+                  />
+                  </Suspense>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </div>
+          </div>
+        </SlugContext.Provider>
+      </UpdateUploadsContext.Provider>
+      </NotesContext.Provider>
     );
 
   return <div>Notespace doesn't exist</div>;

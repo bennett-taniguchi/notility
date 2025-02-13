@@ -19,40 +19,41 @@ export default async function handle(req, res) {
   ///
   //TITLE PROBLEM NEED TO OPT TO DEFAULT QUERY BRANCH IF SELECTEDARR BLANK AS TITLE IS FOR THE NOTESPACE NOT RELATED TO THE SOURCES UPLOADED
   ///
-  const { prompt, messages, uri, selectedArr, title,topics_str } = req.body;
-console.log('rag 18', req.body)
+  const { prompt, messages, uri, selectedArr, title } = req.body;
+  console.log('rag 18', req.body)
   const session = await getServerSession(req, res, authOptions);
+
   /// for context query:
   // 1) embed query
   const response = await openai.embeddings.create({
     model: "text-embedding-3-small",
-    input: prompt+" from sources including: "+topics_str,
+    input: prompt+" from sources including: ",
     encoding_format: "float",
     dimensions: 1536,
   });
-  const embedded = await response.data;
+  const embedded =  response.data;
  
+  // create vec index if not exists for neo4j
+  // CREATE VECTOR INDEX vecs IF NOT EXISTS
+// FOR (d:Document)
+// ON d.embedding
+// OPTIONS { indexConfig: {
+//  `vector.dimensions`: 1536,
+//  `vector.similarity_function`: 'cosine'
+// }}
+
+  // query on nodes
+//   MATCH (d:Document {title: 'hungergames'})
+// CALL db.index.vector.queryNodes('vecs', 5, d.embedding)
+// YIELD node AS doc, score
+// RETURN doc.title AS title, doc.text AS text
+  //
+
+
   // 2) use embedded to query pinecone
   let index = pc.index("notespace");
   let namespace = uri
 
-//   hybrid_params = {
-//     "vector": query_vector,
-//     "alpha": alpha,
-//     "top_k": top_k,
-//     "include_metadata": True,
-//     "sparse_vector": self._generate_sparse_vector(query),
-// }
-
-// # Add text match conditions for both full text and summary
-// hybrid_params["filter"] = {
-//     "$or": [
-//         # Search in full text with higher weight
-//         {"text_content": {"$contains": {"text": query, "weight": 1 - summary_weight}}},
-//         # Search in summary with lower weight
-//         {"summary": {"$contains": {"text": query, "weight": summary_weight}}}
-//     ]
-// }
   let titleArr = selectedArr.length != 0 ?  selectedArr : [title]
   const queryResponse = await index.namespace(namespace).query({
     vector: embedded[0].embedding,

@@ -4,15 +4,14 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 
-import { Editor, EditorContent, useEditor } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
 import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 // import { Indent } from "./tiptap/indent";
-import React from "react";
+import React, { useContext } from "react";
 import { Button as NextButton } from "../../ui/button";
-import { Separator } from "../../ui/separator";
 import { LuBookUp } from "react-icons/lu";
 //  import SVG1 from '../../../public/svg/svg-1.svg'
 import {
@@ -20,8 +19,6 @@ import {
   FontItalicIcon,
   StrikethroughIcon,
   PilcrowIcon,
-  PaperPlaneIcon,
-  Cross1Icon,
 } from "@radix-ui/react-icons";
 import {
   TextAlignLeftIcon,
@@ -38,8 +35,8 @@ import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
 import { cn } from "../../lib/utils";
 import { CardTitle } from "../../ui/card";
-import bg from "../../../public/pic/complex-bg.png";
-import Image from "next/image";
+import { SlugContext } from "../../context/context";
+import { useRouter } from "next/router";
 const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
   if (!editor) {
     return null;
@@ -220,12 +217,18 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
   );
 };
 
-const Tiptap = ({ setEditorVisible, editorVisible }) => {
+const Tiptap = ({ setEditorVisible, editorVisible,givenTitle,givenContent }) => {
+ 
   const [initial, setInitial] = useState(true);
-
+  const [title,setTitle] = useState(givenTitle)
+  const [content,setContent] = useState(givenContent)
+  const {slug} = useContext(SlugContext)
+  const Router = useRouter()
   const editor = useEditor({
     immediatelyRender: false,
+    content:givenContent,
     extensions: [
+    
       BulletList.configure({
         HTMLAttributes: {
           class: "list-disc",
@@ -242,7 +245,7 @@ const Tiptap = ({ setEditorVisible, editorVisible }) => {
       Highlight,
     ],
 
-    content: ``,
+   
   });
 
   useEffect(() => {
@@ -255,7 +258,7 @@ const Tiptap = ({ setEditorVisible, editorVisible }) => {
         handleDOMEvents: {
           keydown: (view, event) => {
             if (editor) {
-              console.log(event.key);
+            
               if (event.key === " ") {
                 editor.commands.insertContentAt(
                   editor.state.selection.anchor,
@@ -264,7 +267,7 @@ const Tiptap = ({ setEditorVisible, editorVisible }) => {
               }
             }
             if (editor) {
-              console.log(event.key);
+           
               if (event.key === "Tab") {
                 event.preventDefault();
                 editor.commands.insertContentAt(
@@ -277,20 +280,47 @@ const Tiptap = ({ setEditorVisible, editorVisible }) => {
           },
         },
       },
+   
     });
-  }, [editor]);
+   setContent(editor?.getHTML()!)
+  }, [editor?.getHTML()]);
 
-  function saveNotes() {
-    console.log()
+  async function saveNotes(uri,router) {
+
+    const body = { title, content,uri };
+    
+    await fetch("/api/notes/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    
+      
+      Router.push('/notespace/'+uri)
+    
   }
   // updates on changed prop, 1st and third to maintain previous cursor positionining
-  // useEffect(() => {
-  //   if (!editor) return;
-  //   const { from, to } = editor.state.selection;
-  //   editor?.commands.setContent(content, false);
-  //   editor.commands.setTextSelection({ from, to });
-  // }, [content]);
+  useEffect(() => {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    editor?.commands.setContent(content, false);
+    editor.commands.setTextSelection({ from, to });
+  }, [content]);
 
+  useEffect(()=> {
+    if(!givenTitle){
+      setTitle('')
+    }
+
+    if(!givenContent){
+      setContent('')
+    
+    } else {
+      
+      editor?.commands.setContent(givenContent, true);
+    }
+    console.log(title,content)
+  },[])
   return (
     <>
       <ResizablePanel
@@ -354,20 +384,24 @@ const Tiptap = ({ setEditorVisible, editorVisible }) => {
         /> */}
 
         <Textarea
+         onChange={(e) => setTitle(e.target.value)}
+         value={title}
           placeholder="Write a Title"
           className="bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0   "
         />
 
         <ScrollArea viewportRef={null}>
           <NextButton 
-          onClick={()=>saveNotes()}
+          onClick={()=>saveNotes(slug,Router)}
           className="z-auto absolute ml-[45svw] mt-[62svh] rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400">
             <div className="">Save</div>
             <LuBookUp className="w-5 h-5" />
           </NextButton>
           <EditorContent
             editor={editor}
-            
+            onChange={()=>setContent(editor?.getHTML()!)}
+            value={content}
+            content={content}
             className=" pl-5 shadow-inner   focus-visible:ring-0 border-0  h-[70svh]  bg-transparent"
           />
         </ScrollArea>

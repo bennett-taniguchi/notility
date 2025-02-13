@@ -1,19 +1,12 @@
-import { ResizablePanel } from "../ui/resizable";
-import { Separator } from "../ui/separator";
-import { ScrollArea } from "../ui/scroll-area";
+import { ResizablePanel } from "../../ui/resizable";
+import { ScrollArea } from "../../ui/scroll-area";
 import { useEffect, useRef, useState } from "react";
-import { getSession, useSession } from "next-auth/react";
-import { options as authOptions } from "../../pages/api/auth/[...nextauth]";
-import { getServerSession } from "next-auth";
 import { useRouter } from "next/navigation";
 
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { TrashIcon } from "@radix-ui/react-icons";
-import { Skeleton } from "../ui/skeleton";
-import { Label } from "../ui/label";
-import { Button } from "../ui/button";
+import { Skeleton } from "../../ui/skeleton";
+import { Button } from "../../ui/button";
 import Latex from "react-latex-next";
 
 export default function ChatWindow({
@@ -53,6 +46,7 @@ export default function ChatWindow({
     }
     return keywords;
   }
+
   // for submitting current chat message and updating state reflecting back and forth
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -62,7 +56,6 @@ export default function ChatWindow({
     const uri = slug;
     const messages = messagesLoaded;
 
-    let topics_str = getKeywordsFromSources(selected.selectedArr);
 
     if (selected.selectedArr.length === 0) {
       const body = { prompt, messages, uri, title };
@@ -77,8 +70,8 @@ export default function ChatWindow({
       Router.push("/notespace/" + uri);
     } else {
       let selectedArr = selected.selectedArr;
-      console.log("47 chatwind", selected, selectedArr);
-      const body = { prompt, messages, selectedArr, uri, title, topics_str };
+      console.log("47 chat, RAG:", selected, selectedArr);
+      const body = { prompt, messages, selectedArr, uri, title, };
       await fetch("/api/chat/update/rag/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -125,36 +118,22 @@ export default function ChatWindow({
     }
   };
 
-  async function createPinecone() {
-    await fetch("/api/pinecone/create/createIndex", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-  async function dropUploads(slug: string) {
-    await fetch("/api/pinecone/delete/dropall", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-    });
 
+  async function dropUploads(slug: string) {
+    // delete local storage
+    localStorage.setItem(
+      "savedSelectedSources",
+      ""
+    );
+    // delte upload content info in supabase
     await fetch("/api/upload/delete/dropall", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
-
+    // refresh
     Router.push("/notespace/" + slug);
   }
-  async function testChunking() {
-    // let prompt = "Seven hundred years before the story's start, humankind colonized Luna, where the Society—a rigid social hierarchy of 14 Colors with specialized roles—was developed for efficiency and order. The Society, harshly ruled by certain families of mentally and physically superior Golds, conquered Earth and colonized moons and small planets. Reds are the Society's lowest-status laborers. Mars's underground Red mining colonies compete in rigged contests that sow discord and are lied to that Mars is not yet terraformed.At the story's outset, 16-year-old Darrow is a rash, intelligent, dexterous, newly-wed Red helium-3 miner. Darrow and his wife Eo are publicly whipped for visiting a restricted underground forest. With Mars ArchGovernor Nero present and the event being filmed, Eo sings a song protesting the Reds' enslavement. Nero has Eo publicly hanged. A grieving Darrow illegally buries Eo and is hanged too, but survives due to his uncle Narol drugging him.Narol then delivers Darrow to the Sons of Ares, who aim to overturn the Society's hierarchy. The Sons used footage of Eo's song and execution as propaganda. Dancer, a Red, wants Darrow to infiltrate the Society as a Gold. Darrow is physically transformed by Mickey (a Violet), physically trained by Harmony (a Red), and taught Gold customs by Matteo (a Pink).Using a fabricated Gold identity, Darrow excels in testing and is accepted into Mars's Institute. He is drafted into SchoolHouse Mars, where he befriends Cassius. The Institute begins with the Passage: Within each of the 12 SchoolHouses, students are beaten, then paired off (a high test scorer with a low test scorer) to fight to the death barehanded. Darrow kills Cassius's brother, Julian, and lies about it. Sevro kills high-status Priam."
-    // const body = { prompt };
-    // const res = await fetch("/api/openai/summarize", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(body)
-    // });
-    // const data = await res.json()
-    // console.log(data)
-  }
+ 
   return (
     <div>
       <ResizablePanel defaultSize={1} className={"chat-background  "}>
@@ -290,13 +269,13 @@ export default function ChatWindow({
               />
             </div>
 
-            <Button onClick={() => testChunking()}>Test Chunking</Button>
+            
             <Button onClick={() => dropUploads(slug)}>
-              Drop Pinecone and Supabase
+              Drop Pinecone and Supabase and Local Storage
             </Button>
-            <Button onClick={() => createPinecone()}>
-              Create Pinecone Index
-            </Button>
+
+          
+           
           </div>
         </ScrollArea>
       </ResizablePanel>

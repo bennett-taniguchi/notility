@@ -17,11 +17,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../../components/ui/table";
+} from "../../../ui/table";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
-import { Button } from "../../ui/button";
+import { Button } from "../../../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +29,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
+} from "../../../ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,11 +40,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../../ui/alert-dialog";
+} from "../../../ui/alert-dialog";
 import Router from "next/router";
 import Link from "next/link";
-import { SelectedRowsContext } from "../../context/context";
-import { cn } from "../../lib/utils";
+import { SelectedRowsContext } from "../../../context/context";
+import { cn } from "../../../lib/utils";
 
 import {
   Dialog,
@@ -54,9 +54,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../../ui/dialog";
-import { Input } from "../../ui/input";
-import { Label } from "../../ui/label";
+} from "../../../ui/dialog";
+import { Input } from "../../../ui/input";
+import { Label } from "../../../ui/label";
 import {
   Select,
   SelectContent,
@@ -65,7 +65,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../../ui/select";
+} from "../../../ui/select";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

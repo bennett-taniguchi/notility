@@ -7,23 +7,20 @@ import { options } from "../../../auth/[...nextauth]";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
-  const { uploads } = req.body;
+  const { upload } = req.body;
 
   const session = await getServerSession(req, res, options);
 
-  let convertedUploads = [] as any;
-
-  await uploads.map((upload) => {
-    convertedUploads.push({ ...upload, owner: session?.user.email });
-  });
-
+ 
+   let convertedUpload=({ ...upload, owner: session?.user.email });
+ console.log('converted',convertedUpload)
   try {
-    let result = await prisma.upload.createMany({
-      data: [...(convertedUploads as Upload[])],
+    let result = await prisma.upload.create({
+      data: {...convertedUpload as Upload},
     });
 
     res.json({ result });
   } catch (e) {
-    console.log(e);
+   res.json({e})
   }
 }

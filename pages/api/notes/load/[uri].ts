@@ -6,11 +6,11 @@ import prisma from "../../../../lib/prisma";
 // Required fields in body: title
 // Optional fields in body: content
 export default async function handle(req, res) {
-  const query = req.query.title;
+  const query = req.query.uri;
   const session = await getServerSession(req, res, authOptions);
-  const result = await prisma.notes.findFirst({
+  const result = await prisma.notes.findMany({
     where: {
-      title: query,
+      uri: query,
       author: session!.user!,
     },
   });

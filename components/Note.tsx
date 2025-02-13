@@ -7,7 +7,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "./ui/resizable";
-import Tiptap from "./notes/tiptap/Tiptap";
+import Tiptap from "./notespace/tiptap/Tiptap";
 import Sidebar from "./sidebar/Sidebar";
 import Layout from "./Layout";
 import { useToast } from "../hooks/use-toast";
