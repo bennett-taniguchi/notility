@@ -253,14 +253,14 @@ export default function SourcesDrawer({
           </div>{" "}
           <div className="text-md">{selected.selected}</div>
           <DrawerFooter className="flex flex-row  ml-[2svw] mb-[20svh]   absolute">
-            <Button>Add a link</Button>
+          
 
          
             <UploadButton
               fileContent={fileContent}
               setFileContent={setFileContent}
             />
-            <Button className="w-[10svh] ">Submit</Button>
+          
             <DrawerClose asChild>
               <Button
                 className="w-[10svh]  "

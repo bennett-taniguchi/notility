@@ -1,7 +1,7 @@
 // Filename - App.js
 
 import axios from "axios";
-import React, { Component, useContext } from "react";
+import React, { Component, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import {
   chunkTextByMultiParagraphs,
@@ -12,10 +12,12 @@ import { cva, VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
 import { Upload } from "@prisma/client";
 import { SlugContext } from "../context/context";
+import { stat } from "fs";
 type FileType = {
   name: string;
   lastModifiedDate: Date;
   type: string;
+  size: number;
 };
 
 const buttonVariants = cva(
@@ -58,7 +60,8 @@ export interface ButtonProps
 
 const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ asChild = false, ...props }) => {
-
+    const [fileName,setFileName] = useState("")
+    const allowedFiletypes = ['.csv','.pdf','.md','.tex','.json','.txt']
     const slug = useContext(SlugContext)
     let state = {
       // Initially, no file is selected
@@ -68,31 +71,49 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // On file select (from the pop up)
     const onFileChange = (event) => {
       // Update the state
+      let extension = '.'+event.target.files[0].name.split('.').slice(-1) 
+      if(!allowedFiletypes.includes(extension)) {
+        setFileName(`Error file extension not allowed: ${extension} is not one of:`+allowedFiletypes.join())
+          event.target.value=""
+        return "";
+      }
+      if(event.target.files[0].size > 5242880) {//26214400
+     
+    // event.target.value="Error filesize is too large max size is 5242880 Bytes / 25 Mb"
+        setFileName(`Error file is too large: ${event.target.files[0].size} Bytes, max size is: 5242880 Bytes or 5Mb`)
+          event.target.value=""
+        return "";
+      } else {
+        state.selectedFile = event.target.files[0];
+        setFileName(event.target.files[0].name)
+      }
 
-      state.selectedFile = event.target.files[0];
+    
+
 
       //console.log(this.setFileContent,this.fileContent )
     };
 
     // On file upload (click the upload button)
-    const onFileUpload = () => {
-      // Create an object of formData
-      const formData = new FormData();
+    // const onFileUpload = () => {
+    //   // Create an object of formData
+    //   const formData = new FormData();
+  
+     
+    //   // Update the formData object
+    //   formData.append(
+    //     "myFile",
+    //     state.selectedFile as any,
+    //     state.selectedFile!.name
+    //   );
 
-      // Update the formData object
-      formData.append(
-        "myFile",
-        state.selectedFile as any,
-        state.selectedFile!.name
-      );
+    //   // Details of the uploaded file
+    //   console.log(state.selectedFile);
 
-      // Details of the uploaded file
-      console.log(state.selectedFile);
-
-      // Request made to the backend api
-      // Send formData object
-      axios.post("api/uploadfile", formData);
-    };
+    //   // Request made to the backend api
+    //   // Send formData object
+    //   axios.post("api/uploadfile", formData);
+    // };
 
     // Returning  nodes from neo4j, currently includes document type nodes
     // need to specifically return person type?
@@ -250,6 +271,7 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // File content to be displayed after
     // file upload is complete
     const fileData = () => {
+     
       if (state.selectedFile) {
         return (
           <div>
@@ -276,135 +298,24 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <div>
-        <h1>GeeksforGeeks</h1>
-        <h3>File Upload using React!</h3>
+        <h1>Upload for Neo4j and Querying Testing</h1>
+      
         <div>
-          <input type="file" onChange={onFileChange} />
+          <input type="file" onChange={onFileChange}   />
           {/* <Button onClick={onFileUpload}>Upload!</Button> */}
 
           <Button onClick={onClickSubmit}>Submit into Neo4j</Button>
           
           <Button onClick={onClickQuery}>Query25</Button>
         </div>
-        {fileData()}
+        
+        <i>{fileName}</i>
       </div>
     );
 
-    //     const Comp = asChild ? Slot : "button";
-    //   return (
-    //     < Comp
-
-    //       {...props}
-    //     />
-    //   );
+ 
   }
 );
-// const UploadButton= React.forwardRef<HTMLButtonElement, ButtonProps>(
-//     ({ className, variant, size, asChild = false, ...props }, ref) =>   {
 
-//     setFileContent    =  ((this).props as any ).setFileContent;
-//     fileContent    =  ((this).props as any).fileContent;
-
-//     state = {
-//         // Initially, no file is selected
-//         selectedFile: null  as null | FileType
-//     };
-
-//     // On file select (from the pop up)
-//     onFileChange = (event) => {
-//         // Update the state
-//         this.setState({
-//             selectedFile: event.target.files[0]
-//         });
-
-//     console.log(this.setFileContent,this.fileContent )
-//     };
-
-//     // On file upload (click the upload button)
-//     onFileUpload = () => {
-//         // Create an object of formData
-//         const formData = new FormData();
-
-//         // Update the formData object
-//         formData.append(
-//             "myFile",
-//             this.state.selectedFile as any,
-//             (this.state.selectedFile!).name
-//         );
-
-//         // Details of the uploaded file
-//         console.log(this.state.selectedFile);
-
-//         // Request made to the backend api
-//         // Send formData object
-//         axios.post("api/uploadfile", formData);
-//     };
-
-//     onClickSubmit = async(e:any) => {
-
-//         e.preventDefault();
-
-//         if(this.state.selectedFile) {
-//             let filename = this.state.selectedFile.name.slice(this.state.selectedFile.name.length-3,this.state.selectedFile.name.length)
-//             console.log(filename)
-
-//             //console.log(filename.slice(filename.length-3,filename.length))
-//             if(filename == 'pdf'){
-//                 console.log(await getPdfText(this.state.selectedFile))
-
-//                 return
-//             } else {
-//                 console.log( this.state.selectedFile)
-//                 console.log(await (this.state.selectedFile as any).text())
-
-//                 return
-//             }
-
-//         }
-
-//     }
-
-//     // File content to be displayed after
-//     // file upload is complete
-//     fileData = () => {
-//         if (this.state.selectedFile) {
-//             return (
-//                 <div>
-//                     <h2>File Details:</h2>
-//                     <p>File Name: {this.state.selectedFile.name}</p>
-
-//                     <p>File Type: {this.state.selectedFile.type}</p>
-
-//                     <p>
-//                         Last Modified:
-//                         {this.state.selectedFile.lastModifiedDate.toDateString()}
-//                     </p>
-//                 </div>
-//             );
-//         } else {
-//             return (
-//                 <div>
-//                     <br />
-//                     <h4>Choose before Pressing the Upload button</h4>
-//                 </div>
-//             );
-//         }
-//     };
-
-//         return (
-//             <div>
-//                 <h1>GeeksforGeeks</h1>
-//                 <h3>File Upload using React!</h3>
-//                 <div>
-//                     <input type="file" onChange={this.onFileChange} />
-//                     <Button onClick={this.onFileUpload}>Upload!</Button>
-//                     <Button onClick={this.onClickSubmit}>Submit!</Button>
-//                 </div>
-//                 {this.fileData()}
-//             </div>
-//         );
-
-// }
-// )
 
 export default UploadButton;

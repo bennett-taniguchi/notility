@@ -126,7 +126,7 @@ export default function ChatWindow({
       ""
     );
     // delte upload content info in supabase
-    await fetch("/api/upload/delete/dropall", {
+    await fetch("/api/supabase/upload/dropall", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
@@ -271,7 +271,7 @@ export default function ChatWindow({
 
             
             <Button onClick={() => dropUploads(slug)}>
-              Drop Pinecone and Supabase and Local Storage
+              Drop Supabase and Local Storage
             </Button>
 
           

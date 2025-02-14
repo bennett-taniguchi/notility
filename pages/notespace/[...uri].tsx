@@ -35,7 +35,7 @@ const DynamicChatWindow = dynamic(
   () => import("../../components/notespace/chat/ChatWindow")
 );
 const DynamicOutputArea = dynamic(
-  () => import("../../components/notespace/tiptap/OutputArea")
+  () => import("../../components/notespace/tiptap/output/OutputArea")
 );
 const DynamicSourcesDrawer = dynamic(
   () => import("../../components/notespace/upload/SourcesDrawer")
@@ -222,6 +222,7 @@ export default function NotespacesPage({
   const [uploadOpened, setUploadOpened] = useState(false);
 
   useEffect(() => {
+    if(sources)
     dispatch({
       type: "init_sources",
       sources: JSON.parse(JSON.stringify(sources)),
