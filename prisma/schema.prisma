@@ -124,9 +124,23 @@ model Notespace {
   shared        Shared[]
   messages      Message[]
  
+  permissions Permissions[]
 
   @@unique([uri])
  
+}
+
+// shared id is new users authorId
+// [0,1] -> read,write
+model Permissions{
+  id         Int    @id @default(autoincrement())
+  notespace      Notespace?   @relation(fields: [uri], references: [uri])
+  uri         String
+  authorId    String
+  email    String
+  level       Int
+
+  @@unique([uri,email])
 }
 
 model Upload {

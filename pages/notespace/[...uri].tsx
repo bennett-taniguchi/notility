@@ -30,6 +30,7 @@ import {
   SlugContext,
   UpdateUploadsContext,
 } from "../../components/context/context";
+import Headbar from "../../components/heading/Headbar";
 
 const DynamicChatWindow = dynamic(
   () => import("../../components/notespace/chat/ChatWindow")
@@ -85,9 +86,14 @@ export const getServerSideProps: GetServerSideProps = async ({
     }, 
   });
 
-
+  const permission = await prisma.permissions.findMany({
+    where: {
+      uri:uuid,
+      email: session.user.email
+    }
+  })
   return {
-    props: { notespace, sources, messages, notes },
+    props: { notespace, sources, messages, notes,permission },
   };
 };
 
@@ -96,6 +102,7 @@ type Props = {
   sources: Upload[];
   messages: Message[];
   notes: string[];
+  permission: string | null;
 };
 
 function selectedReducer(state, action) {
@@ -184,23 +191,13 @@ function selectedReducer(state, action) {
       return { map: newMap, selected: str, selectedArr: strArr };
   }
 }
-export async function updateTitle(e: any, slug: string) {
-  const newTitle = e.target.value;
-  const uri = slug;
 
-  const body = { newTitle, uri };
-
-  await fetch("/api/notespace/update/title", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-}
 export default function NotespacesPage({
   notespace,
   sources,
   messages,
   notes,
+  permission
 }: Props) {
   const inputRef = useRef(null);
   const Router = useRouter();
@@ -241,28 +238,9 @@ export default function NotespacesPage({
       }
     return false;
   }
-  // const options = (uri) => {
-  //   return {
-  //     apiKey: "public_W142iw5A2CjLkNdU7G6px7mYYKZH", // This is your API key.
-  //     maxFileCount: 1,
-  //     maxFileSizeBytes: 2000000,
-  //     path: {
-  //       folderPath: "/uploads/" + uri,
-  //     },
-  //     onPreUpload(file: File) {
-  //       if (validateFile(file.name))
-  //         return {
-  //           errorMessage:
-  //             "Duplicate Filename: Please rename file on your device",
-  //           transformedObject: file,
-  //         };
-  //       return;
-  //     },
-  //     mimeTypes: ["application/pdf", "text/plain"],
-  //   } as UploadWidgetReactConfig;
-  // };
+ 
 
-  if (!session) return <div>Login to see page</div>;
+  if (!session || !permission && session.user.id != notespace.authorId ) return <div>Login to see page</div>;
   if (!Router.isReady && session) {
     return <div>Page is Loading...</div>;
   }
@@ -292,44 +270,7 @@ export default function NotespacesPage({
           <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
             <Header />
 
-            <div className="w-[100svw] h-[10svh] border-b-slate-200 drop-shadow-lg  reverse-chat-background flex flex-row divide-x-2 ">
-              <div
-                className="basis-1/3 text-center text-black flex flex-row-2  "
-                id="top_info"
-              >
-                <div className="span-1/4  my-auto mr-[1svw]  ml-[1svw] rounded-md mt-[3svh]">
-                  <Link href="/notespace">
-                    <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70" />
-                  </Link>
-                </div>
-                <Textarea
-                  spellCheck={false}
-                  onBlur={(e) => updateTitle(e, slug)}
-                  className="overflow-y-hidden bg-gradient-to-r from-zinc-400/50 to-cyan-400/50 text-sky-100 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
-                  defaultValue={notespace.title}
-                />
-              </div>
-
-              <div id="top_sources" className="basis-1/3  m-auto  ">
-                <div className={"ml-[13svw]"}></div>
-              </div>
-
-              <div
-                className="border-transparent border-l-2 basis-1/3 text-center flex flex-row-3 m-auto  rounded-xl mr-[2svw] pb-[1svh]"
-                id="top_sources"
-              >
-                <div className="ml-[20svw] span-1/3   text-cyan-800    ">
-                  <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
-                </div>
-                <div className=" span-1/3  text-cyan-800">
-                  <FaShare className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />{" "}
-                </div>
-
-                <div className="span-1/3 " id="top_dash text-cyan-800">
-                  <FaUserAlt className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
-                </div>
-              </div>
-            </div>
+           <Headbar notespace={notespace} slug={slug}/>
             <div className="w-[100svw] h-[90svh]">
               <ResizablePanelGroup direction="horizontal">
                 <ResizablePanel>

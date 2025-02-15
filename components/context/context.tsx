@@ -18,3 +18,6 @@ export const UpdateUploadsContext = createContext({
 export const NotesContext = createContext({
     notes: [] as string[]
 })
+
+ 
+ 

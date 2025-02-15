@@ -8,9 +8,9 @@ import { Input } from "../../../ui/input";
  
 import { DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogContent, Dialog } from "../../../ui/dialog";
 import { Label } from "../../../ui/label";
-import QuizDialog from "./OutputQuiz";
-import GuideDialog from "./OutputGuide";
-import TestDialog from "./OutputTest";
+import QuizDialog from "./QuizDialog";
+import GuideDialog from "./GuideDialog";
+import TestDialog from "./TestDialog";
 
 function NoteOptions({
     title,
