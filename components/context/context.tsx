@@ -19,5 +19,8 @@ export const NotesContext = createContext({
     notes: [] as string[]
 })
 
- 
+ export const UserContext = createContext({
+    url: '',
+    email: '',
+ })
  

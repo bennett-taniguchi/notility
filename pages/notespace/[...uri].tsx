@@ -27,10 +27,12 @@ import Header from "../../components/Header";
 
 import {
   NotesContext,
+  UserContext,
   SlugContext,
   UpdateUploadsContext,
 } from "../../components/context/context";
 import Headbar from "../../components/heading/Headbar";
+import { buttonVariants } from "../../components/ui/button";
 
 const DynamicChatWindow = dynamic(
   () => import("../../components/notespace/chat/ChatWindow")
@@ -90,8 +92,11 @@ export const getServerSideProps: GetServerSideProps = async ({
     where: {
       uri:uuid,
       email: session.user.email
+    },select:{
+      email:true
     }
   })
+   
   return {
     props: { notespace, sources, messages, notes,permission },
   };
@@ -239,8 +244,30 @@ export default function NotespacesPage({
     return false;
   }
  
-
-  if (!session || !permission && session.user.id != notespace.authorId ) return <div>Login to see page</div>;
+ 
+if(!session) {
+  return (
+    <div className="text-center">
+    Login to see page
+ <div className=" mx-auto text-center">   <Link
+ style={{backgroundColor:'cyan'}}
+            href="/api/auth/signin"
+            className={buttonVariants({ variant: "link", size: "sm" })}
+          >
+            Log In
+          </Link></div>
+    </div>);
+}
+  console.log(session.user.email,notespace.owner)
+  if (!permission || session.user.email != notespace.owner ) 
+  {
+    return (
+    <div className="text-center">
+    You are signed in however the owner of this notespace hasn't given you permission to access it
+    </div>);
+  }
+  
+ 
   if (!Router.isReady && session) {
     return <div>Page is Loading...</div>;
   }
@@ -262,8 +289,13 @@ export default function NotespacesPage({
       summary: summary,
     });
   }
+
+ 
   if (notespace)
     return (
+      <UserContext.Provider
+      value={{ url: session!.user.image, email: session!.user.email }}
+    >
   <NotesContext.Provider value={{notes:notes as any}}>
       <UpdateUploadsContext.Provider value={{ updateFunction: updateUploads }}>
         <SlugContext.Provider value={{ slug: slug }}>
@@ -315,6 +347,7 @@ export default function NotespacesPage({
         </SlugContext.Provider>
       </UpdateUploadsContext.Provider>
       </NotesContext.Provider>
+      </UserContext.Provider>
     );
 
   return <div>Notespace doesn't exist</div>;

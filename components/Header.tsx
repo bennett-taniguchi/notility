@@ -21,13 +21,17 @@ export default function Header(): ReactElement {
   }
 
   return (
-    <Menubar className="top-1/2 w-[80px] mx-auto">
+    <Menubar className="top-1/2 w-[80px] ml-auto mr-[20px]  ">
       <MenubarMenu>
-        <MenubarTrigger  >
-        <Link href='/api/auth/signin' className={buttonVariants({ variant: "link",size:'sm' ,})}>Log In</Link>
-       
+        <MenubarTrigger>
          
-       
+          <Link
+            href="/api/auth/signin"
+            className={cn(buttonVariants({ variant: "link", size: "sm" }),  )}
+          >
+            Log In
+          </Link>
+        
         </MenubarTrigger>
       </MenubarMenu>
 
@@ -42,5 +46,3 @@ export default function Header(): ReactElement {
     </Menubar>
   );
 }
-
- 

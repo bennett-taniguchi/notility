@@ -1,7 +1,26 @@
 const webpack = require("webpack");
 const path = require('path');
  
+ 
 module.exports = {
+  images:{
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        pathname: "/**",
+        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        port: "",
+        pathname: "/**",
+       
+      }
+    ],
+  },
   webpack: (config, options) => {
     // config.resolve.fallback = {
     //   ...config.resolve.fallback, // if you miss it, all the other options in fallback, specified
