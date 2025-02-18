@@ -124,11 +124,21 @@
 .chat-background {
   background: rgb(103, 232, 249);
   background: linear-gradient(
-    180deg,
+    200deg,
     rgba(103, 232, 249, 1) 0%,
-    rgba(165, 180, 252, 1) 133%
+    rgba(165, 180, 252, 1) 103%
   );
 }
+
+.chat-background-2 {
+  background: rgb(165, 180, 252,);
+  background: linear-gradient(
+    200deg,
+    rgba(165, 180, 252, 1) 0%,
+    rgba(103, 232, 249, 1) 103%
+  );
+}
+
 .reverse-chat-background {
   background: rgb(103, 232, 249);
   background: linear-gradient(0deg, rgba(103, 232, 249, 1) 0% 100%);

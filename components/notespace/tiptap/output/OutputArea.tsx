@@ -48,19 +48,11 @@ export default function OutputArea({ editorVisible, setEditorVisible }: any) {
     content: "",
   }) as any;
   return (
-    <div >
+    <div className="  w-[48svw] h-[46svw] bg-sky-100   border-cyan-400/50 border-2 rounded-2xl" >
       {editorVisible ? (
         <Suspense fallback={<div>loading...</div>}>
           <div >
-            <div
-              className="  hover:bg-sky-100  ml-[8svw] mt-[.7svh] fixed   border-none  text-sm font-bold text-zinc-700 cursor-pointer bg-white/80 rounded px-2"
-              onClick={() => setEditorVisible(!editorVisible)}
-            >
-              <div className="flex flex-row  ">
-                <IoReturnUpBack className="mr-1 mt-1" />
-                Go back
-              </div>
-            </div>
+           
 
             <Tiptap
               setEditorVisible={setEditorVisible}

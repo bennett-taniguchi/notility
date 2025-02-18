@@ -8,6 +8,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import BubbledInput from "../ui/personal/BubbledInput";
+import { RiPencilFill } from "react-icons/ri";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Dialog,
@@ -40,8 +41,8 @@ export function UserPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="span-1/3 ml-[10px] " id="top_dash text-cyan-800">
-        <Image src={url} alt='User Profile Picture' height={42} width={42} className="rounded-full border-2 border-cyan-800"/>
+        <div className="span-1/3 ml-[10px] cursor-pointer drop-shadow-xl" id="top_dash text-cyan-800">
+        <Image src={url} alt='User Profile Picture' height={42} width={42} className="rounded-full border-2 border-cyan-500"/>
           
         </div>
       </PopoverTrigger>
@@ -306,7 +307,7 @@ export default function Headbar({ notespace, slug }) {
   }
 
   return (
-    <div className="w-[100svw] h-[10svh] border-b-slate-200 drop-shadow-lg  reverse-chat-background flex flex-row divide-x-2 ">
+    <div className="w-[100svw] h-[10svh] border-b-slate-200   flex flex-row divide-x-2 ">
       <div
         className="basis-1/3 text-center text-black flex flex-row-2  "
         id="top_info"
@@ -319,17 +320,19 @@ export default function Headbar({ notespace, slug }) {
         <Textarea
           spellCheck={false}
           onBlur={(e) => updateTitle(e, slug)}
-          className="overflow-y-hidden bg-gradient-to-r from-zinc-400/50 to-cyan-400/50 text-sky-100 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none"
+          className="whitespace-nowrap overflow-hidden bg-gradient-to-r  shadow-none    text-cyan-500/80 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none "
           defaultValue={notespace.title}
         />
+      
       </div>
-
+      
+     
       <div id="top_sources" className="basis-1/3  m-auto  ">
         <div className={"ml-[13svw]"}></div>
       </div>
 
       <div
-        className="border-transparent border-l-2 basis-1/3 text-center flex flex-row-3 m-auto  rounded-xl mr-[2svw] pb-[1svh]"
+        className="mt-[3.5svh] border-transparent border-l-2 basis-1/3 text-center flex flex-row-3 m-auto  rounded-xl mr-[2svw] pb-[1svh]"
         id="top_sources"
       >
         <OptionsPopover />

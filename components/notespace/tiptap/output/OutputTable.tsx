@@ -26,6 +26,7 @@ function NoteOptions({
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
+      Router.push('/notespace/'+uri)
     }
   
     async function updateTitle(str) {
@@ -149,10 +150,12 @@ export default function OutputTable({
     useEffect(() => {}, [notes]);
   
     return (
-      <div className="bg-sky-100 ">
-        <div className="w-[50svw] h-[9.8svh] chat-background " />
-        <Table className="w-[49svw] mx-auto mt-[10svh] bg-sky-100">
-          <TableCaption>Your recent Notespaces</TableCaption>
+      <div className="bg-sky-100 rounded-xl">
+        <div className="chat-background-2 py-[21.5px] font-roboto rounded-t-xl text-3xl text-white text-left pl-[10px] ">
+          Output
+        </div>
+        <Table className="w-[46svw] mx-auto mt-[10svh] bg-sky-100">
+          {notes.length == 0 ?<TableCaption>Your recent Notes</TableCaption> : <div></div>}
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px] ">Title</TableHead>

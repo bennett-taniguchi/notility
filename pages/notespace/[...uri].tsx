@@ -33,6 +33,7 @@ import {
 } from "../../components/context/context";
 import Headbar from "../../components/heading/Headbar";
 import { buttonVariants } from "../../components/ui/button";
+import ChatWindow from "../../components/notespace/chat/ChatWindow";
 
 const DynamicChatWindow = dynamic(
   () => import("../../components/notespace/chat/ChatWindow")
@@ -49,7 +50,6 @@ export const getServerSideProps: GetServerSideProps = async ({
   res,
   resolvedUrl,
 }) => {
-
   res.setHeader(
     "Cache-Control",
     "public, s-maxage=10, stale-while-revalidate=59"
@@ -79,27 +79,27 @@ export const getServerSideProps: GetServerSideProps = async ({
   const messages = await prisma.message.findMany({
     where: {
       uri: uuid,
-    }
+    },
   });
 
-  
   const notes = await prisma.notes.findMany({
     where: {
       uri: uuid,
-    }, 
+    },
   });
 
   const permission = await prisma.permissions.findMany({
     where: {
-      uri:uuid,
-      email: session.user.email
-    },select:{
-      email:true
-    }
-  })
- 
+      uri: uuid,
+      email: session.user.email,
+    },
+    select: {
+      email: true,
+    },
+  });
+
   return {
-    props: { notespace, sources, messages, notes,permission },
+    props: { notespace, sources, messages, notes, permission },
   };
 };
 
@@ -129,10 +129,9 @@ function selectedReducer(state, action) {
       for (let i = 0; i < action.sources.length; i++) {
         localMap.set(action.sources[i].title, false);
       }
- 
 
       let locallyStored = localStorage.getItem("savedSelectedSources");
-      
+
       let count = 0;
       let locallyStoredArr: Array<string> = [];
       let arr: Array<string> = [];
@@ -193,17 +192,16 @@ function selectedReducer(state, action) {
         "savedSelectedSources",
         savedSelectedSources.slice(0, savedSelectedSources.length - 1)
       );
-      
+
       return { map: newMap, selected: str, selectedArr: strArr };
   }
 }
-
 export default function NotespacesPage({
   notespace,
   sources,
   messages,
   notes,
-  permission
+  permission,
 }: Props) {
   const inputRef = useRef(null);
   const Router = useRouter();
@@ -225,12 +223,12 @@ export default function NotespacesPage({
   const [uploadOpened, setUploadOpened] = useState(false);
 
   useEffect(() => {
-    if(sources)
-    dispatch({
-      type: "init_sources",
-      sources: JSON.parse(JSON.stringify(sources)),
-      sourcesArr: localStorage.getItem("savedSelectedSources"),
-    });
+    if (sources)
+      dispatch({
+        type: "init_sources",
+        sources: JSON.parse(JSON.stringify(sources)),
+        sourcesArr: localStorage.getItem("savedSelectedSources"),
+      });
     return () => {
       setUploadOpened(false); // Cleanup upload state when component unmounts
     };
@@ -244,31 +242,35 @@ export default function NotespacesPage({
       }
     return false;
   }
- 
- 
-if(!session) {
-  return (
-    <div className="text-center">
-    Login to see page
- <div className=" mx-auto text-center">   <Link
- style={{backgroundColor:'cyan'}}
+
+  if (!session) {
+    return (
+      <div className="text-center">
+        Login to see page
+        <div className=" mx-auto text-center">
+          {" "}
+          <Link
+            style={{ backgroundColor: "cyan" }}
             href="/api/auth/signin"
             className={buttonVariants({ variant: "link", size: "sm" })}
           >
             Log In
-          </Link></div>
-    </div>);
-}
-
-  if (  permission!.length == 0  && session.user.email != notespace.owner ) // permissions dne or current user isnt the same as creator
-  {
-    return (
-    <div className="text-center">
-    You are signed in however the owner of this notespace hasn't given you permission to access it
-    </div>);
+          </Link>
+        </div>
+      </div>
+    );
   }
-  
- 
+
+  if (permission!.length == 0 && session.user.email != notespace.owner) {
+    // permissions dne or current user isnt the same as creator
+    return (
+      <div className="text-center">
+        You are signed in however the owner of this notespace hasn't given you
+        permission to access it
+      </div>
+    );
+  }
+
   if (!Router.isReady && session) {
     return <div>Page is Loading...</div>;
   }
@@ -291,65 +293,260 @@ if(!session) {
     });
   }
 
- 
   if (notespace)
     return (
       <UserContext.Provider
-      value={{ url: session!.user.image, email: session!.user.email }}
-    >
-  <NotesContext.Provider value={{notes:notes as any}}>
-      <UpdateUploadsContext.Provider value={{ updateFunction: updateUploads }}>
-        <SlugContext.Provider value={{ slug: slug }}>
-          <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
-            <Header />
+        value={{ url: session!.user.image, email: session!.user.email }}
+      >
+        <NotesContext.Provider value={{ notes: notes as any }}>
+          <UpdateUploadsContext.Provider
+            value={{ updateFunction: updateUploads }}
+          >
+            <SlugContext.Provider value={{ slug: slug }}>
+              <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
+                <Header />
 
-           <Headbar notespace={notespace} slug={slug}/>
-            <div className="w-[100svw] h-[90svh]">
-              <ResizablePanelGroup direction="horizontal">
-                <ResizablePanel>
-                  <Suspense fallback={<div>loading...</div>}>
-                    <DynamicChatWindow
-                      messagesLoaded={messages}
-                      title={notespace.title}
-                      blurb={notespace.sources_blurb}
-                      selected={selected}
-                      slug={slug}
-                      sources={JSON.parse(JSON.stringify(sources))}
-                    >
-                      <DynamicSourcesDrawer
+                <Headbar notespace={notespace} slug={slug} />
+                <div className=" w-[100svw] h-[90svh] flex flex-row gap-6 py-[2svh] mx-auto  content-center justify-center">
+
+
+                  <div  >
+                    <Suspense fallback={<div>loading...</div>}>
+                      <DynamicChatWindow
+                        messagesLoaded={messages}
+                        title={notespace.title}
+                        blurb={notespace.sources_blurb}
+                        selected={selected}
                         slug={slug}
                         sources={JSON.parse(JSON.stringify(sources))}
-                        isChild={isChild}
-                        setIsChild={setIsChild}
-                        dispatch={dispatch}
-                        selected={selected}
-                        uploadOpened={uploadOpened}
-                        setUploadOpened={setUploadOpened}
-                        inputRef={inputRef}
-                        Router={Router}
-                        fileContent={fileContent}
-                        setFileContent={setFileContent}
-                      />
-                    </DynamicChatWindow>
-                  </Suspense>
-                </ResizablePanel>
-
-                <ResizablePanel className="bg-sky-100 ">
-                  <Suspense >
+                      >
+                        <DynamicSourcesDrawer
+                          slug={slug}
+                          sources={JSON.parse(JSON.stringify(sources))}
+                          isChild={isChild}
+                          setIsChild={setIsChild}
+                          dispatch={dispatch}
+                          selected={selected}
+                          uploadOpened={uploadOpened}
+                          setUploadOpened={setUploadOpened}
+                          inputRef={inputRef}
+                          Router={Router}
+                          fileContent={fileContent}
+                          setFileContent={setFileContent}
+                        />
+                      </DynamicChatWindow>
+                    </Suspense>
+                  </div>
+                 
+<div  > 
+                  <Suspense fallback={<div>loading...</div>}>
                   <DynamicOutputArea
-                    editorVisible={editorVisible}
-                    setEditorVisible={setEditorVisible}
-                  />
+                          editorVisible={editorVisible}
+                          setEditorVisible={setEditorVisible}
+                        />
                   </Suspense>
-                </ResizablePanel>
-              </ResizablePanelGroup>
-            </div>
-          </div>
-        </SlugContext.Provider>
-      </UpdateUploadsContext.Provider>
-      </NotesContext.Provider>
+
+                  </div>
+                </div>
+                {/* <div className="w-[100svw] h-[90svh]">
+                  <ResizablePanelGroup direction="horizontal">
+                    <ResizablePanel>
+                      <Suspense fallback={<div>loading...</div>}>
+                        <DynamicChatWindow
+                          messagesLoaded={messages}
+                          title={notespace.title}
+                          blurb={notespace.sources_blurb}
+                          selected={selected}
+                          slug={slug}
+                          sources={JSON.parse(JSON.stringify(sources))}
+                        >
+                          <DynamicSourcesDrawer
+                            slug={slug}
+                            sources={JSON.parse(JSON.stringify(sources))}
+                            isChild={isChild}
+                            setIsChild={setIsChild}
+                            dispatch={dispatch}
+                            selected={selected}
+                            uploadOpened={uploadOpened}
+                            setUploadOpened={setUploadOpened}
+                            inputRef={inputRef}
+                            Router={Router}
+                            fileContent={fileContent}
+                            setFileContent={setFileContent}
+                          />
+                        </DynamicChatWindow>
+                      </Suspense>
+                    </ResizablePanel>
+
+                    <ResizablePanel className="bg-sky-100 ">
+                      <Suspense>
+                        <DynamicOutputArea
+                          editorVisible={editorVisible}
+                          setEditorVisible={setEditorVisible}
+                        />
+                      </Suspense>
+                    </ResizablePanel>
+                  </ResizablePanelGroup>
+                </div> */}
+              </div>
+            </SlugContext.Provider>
+          </UpdateUploadsContext.Provider>
+        </NotesContext.Provider>
       </UserContext.Provider>
     );
 
   return <div>Notespace doesn't exist</div>;
 }
+
+// export default function NotespacesPage({
+//   notespace,
+//   sources,
+//   messages,
+//   notes,
+//   permission
+// }: Props) {
+//   const inputRef = useRef(null);
+//   const Router = useRouter();
+//   const slug = Router.asPath.split("/")[2];
+//   const initialState = {
+//     map: new Map<string, boolean>(),
+//     selected: "",
+//     selectedArr: [],
+//   };
+
+//   const [editorVisible, setEditorVisible] = useState(false);
+//   const [isChild, setIsChild] = useState(false);
+//   const [selected, dispatch] = useReducer(selectedReducer, initialState);
+
+//   const [fileContent, setFileContent] = useState(null);
+//   const { data: session } = useSession();
+
+//   const ref = useRef(null);
+//   const [uploadOpened, setUploadOpened] = useState(false);
+
+//   useEffect(() => {
+//     if(sources)
+//     dispatch({
+//       type: "init_sources",
+//       sources: JSON.parse(JSON.stringify(sources)),
+//       sourcesArr: localStorage.getItem("savedSelectedSources"),
+//     });
+//     return () => {
+//       setUploadOpened(false); // Cleanup upload state when component unmounts
+//     };
+//   }, []);
+//   useEffect(() => {}, [selected, sources]);
+//   function validateFile(originalFilename: string) {
+//     if (!sources) return false;
+//     if (sources.length >= 25)
+//       for (let i = 0; i < sources.length; i++) {
+//         if (sources[i].originalFileName == originalFilename) return true;
+//       }
+//     return false;
+//   }
+
+// if(!session) {
+//   return (
+//     <div className="text-center">
+//     Login to see page
+//  <div className=" mx-auto text-center">   <Link
+//  style={{backgroundColor:'cyan'}}
+//             href="/api/auth/signin"
+//             className={buttonVariants({ variant: "link", size: "sm" })}
+//           >
+//             Log In
+//           </Link></div>
+//     </div>);
+// }
+
+//   if (  permission!.length == 0  && session.user.email != notespace.owner ) // permissions dne or current user isnt the same as creator
+//   {
+//     return (
+//     <div className="text-center">
+//     You are signed in however the owner of this notespace hasn't given you permission to access it
+//     </div>);
+//   }
+
+//   if (!Router.isReady && session) {
+//     return <div>Page is Loading...</div>;
+//   }
+//   // add single upload to localstorage via dispatch
+//   function updateUploads(
+//     uri: string,
+//     originalFileName: string,
+//     title: string,
+//     filetype: string,
+//     summary: null | string,
+//     owner: string
+//   ) {
+//     dispatch({
+//       type: "update_uploads",
+//       uri: uri,
+//       originalFileName: originalFileName,
+//       title: title,
+//       filetype: filetype,
+//       summary: summary,
+//     });
+//   }
+
+//   if (notespace)
+//     return (
+//       <UserContext.Provider
+//       value={{ url: session!.user.image, email: session!.user.email }}
+//     >
+//   <NotesContext.Provider value={{notes:notes as any}}>
+//       <UpdateUploadsContext.Provider value={{ updateFunction: updateUploads }}>
+//         <SlugContext.Provider value={{ slug: slug }}>
+//           <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
+//             <Header />
+
+//            <Headbar notespace={notespace} slug={slug}/>
+//             <div className="w-[100svw] h-[90svh]">
+//               <ResizablePanelGroup direction="horizontal">
+//                 <ResizablePanel>
+//                   <Suspense fallback={<div>loading...</div>}>
+//                     <DynamicChatWindow
+//                       messagesLoaded={messages}
+//                       title={notespace.title}
+//                       blurb={notespace.sources_blurb}
+//                       selected={selected}
+//                       slug={slug}
+//                       sources={JSON.parse(JSON.stringify(sources))}
+//                     >
+//                       <DynamicSourcesDrawer
+//                         slug={slug}
+//                         sources={JSON.parse(JSON.stringify(sources))}
+//                         isChild={isChild}
+//                         setIsChild={setIsChild}
+//                         dispatch={dispatch}
+//                         selected={selected}
+//                         uploadOpened={uploadOpened}
+//                         setUploadOpened={setUploadOpened}
+//                         inputRef={inputRef}
+//                         Router={Router}
+//                         fileContent={fileContent}
+//                         setFileContent={setFileContent}
+//                       />
+//                     </DynamicChatWindow>
+//                   </Suspense>
+//                 </ResizablePanel>
+
+//                 <ResizablePanel className="bg-sky-100 ">
+//                   <Suspense >
+//                   <DynamicOutputArea
+//                     editorVisible={editorVisible}
+//                     setEditorVisible={setEditorVisible}
+//                   />
+//                   </Suspense>
+//                 </ResizablePanel>
+//               </ResizablePanelGroup>
+//             </div>
+//           </div>
+//         </SlugContext.Provider>
+//       </UpdateUploadsContext.Provider>
+//       </NotesContext.Provider>
+//       </UserContext.Provider>
+//     );
+
+//   return <div>Notespace doesn't exist</div>;
+// }

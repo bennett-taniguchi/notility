@@ -166,10 +166,13 @@ export default function SourcesDrawer({
   return (
     <Drawer open={isChild}>
       <DrawerTrigger asChild>
-        <div className="ml-[-7svw] flex flex-row py-[1svw]">
+        <div 
+        // className=" text-left ml-[-7svw] flex flex-row py-[1svw]"
+        >
           <Button
             onClick={() => setIsChild(true)}
             variant="outline"
+            style={{zIndex:999}}
             className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]"
           >
             <svg

@@ -37,22 +37,28 @@ import { cn } from "../../lib/utils";
 import { CardTitle } from "../../ui/card";
 import { SlugContext } from "../../context/context";
 import { useRouter } from "next/router";
+import { IoReturnUpBack } from "react-icons/io5";
 const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
   if (!editor) {
     return null;
   }
- 
+
   let buttonStyle = "mr-1 bg-sky-100/50 border-none hover:bg-sky-400 ";
   let svgStyle = "stroke-zinc-700  scale-150";
   let textSvgStyle = "text-zinc-700 scale-150";
   return (
-    <div className="control-group   ">
-      <CardTitle>
-        <div className="absolute left-[51svw] top-[12svh] text-sky-100 text-3xl  ">
-          Output
+    <div className="control-group   overflow-hidden  py-[22px] ">
+    
+      <div className="   flex  text-center text-sm justify-center justify-items-center      ">
+      <div
+        className="  ml-[-8px] hover:bg-sky-100      border-none  text-sm font-bold   cursor-pointer bg-white/80 rounded-lg w-[50px] mr-[5px]  "
+        onClick={() => setEditorVisible(!editorVisible)}
+      >
+        <div className="  ml-[18px]  mt-[10px]">
+          <IoReturnUpBack   />
+    
         </div>
-      </CardTitle>
-      <div className="button-group  flex  text-center text-sm justify-center justify-items-center  py-[.5svh] mt-[4svh] ml-[7svw]   ">
+      </div>
         <NextButton
           variant="outline"
           onClick={() =>
@@ -217,18 +223,21 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
   );
 };
 
-const Tiptap = ({ setEditorVisible, editorVisible,givenTitle,givenContent }) => {
- 
+const Tiptap = ({
+  setEditorVisible,
+  editorVisible,
+  givenTitle,
+  givenContent,
+}) => {
   const [initial, setInitial] = useState(true);
-  const [title,setTitle] = useState(givenTitle)
-  const [content,setContent] = useState(givenContent)
-  const {slug} = useContext(SlugContext)
-  const Router = useRouter()
+  const [title, setTitle] = useState(givenTitle);
+  const [content, setContent] = useState(givenContent);
+  const { slug } = useContext(SlugContext);
+  const Router = useRouter();
   const editor = useEditor({
     immediatelyRender: false,
-    content:givenContent,
+    content: givenContent,
     extensions: [
-    
       BulletList.configure({
         HTMLAttributes: {
           class: "list-disc",
@@ -244,8 +253,6 @@ const Tiptap = ({ setEditorVisible, editorVisible,givenTitle,givenContent }) => 
       }),
       Highlight,
     ],
-
-   
   });
 
   useEffect(() => {
@@ -258,7 +265,6 @@ const Tiptap = ({ setEditorVisible, editorVisible,givenTitle,givenContent }) => 
         handleDOMEvents: {
           keydown: (view, event) => {
             if (editor) {
-            
               if (event.key === " ") {
                 editor.commands.insertContentAt(
                   editor.state.selection.anchor,
@@ -267,7 +273,6 @@ const Tiptap = ({ setEditorVisible, editorVisible,givenTitle,givenContent }) => 
               }
             }
             if (editor) {
-           
               if (event.key === "Tab") {
                 event.preventDefault();
                 editor.commands.insertContentAt(
@@ -280,24 +285,20 @@ const Tiptap = ({ setEditorVisible, editorVisible,givenTitle,givenContent }) => 
           },
         },
       },
-   
     });
-   setContent(editor?.getHTML()!)
+    setContent(editor?.getHTML()!);
   }, [editor?.getHTML()]);
 
-  async function saveNotes(uri,router) {
+  async function saveNotes(uri, router) {
+    const body = { title, content, uri };
 
-    const body = { title, content,uri };
-    
     await fetch("/api/notes/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    
-      
-      Router.push('/notespace/'+uri)
-    
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    Router.push("/notespace/" + uri);
   }
   // updates on changed prop, 1st and third to maintain previous cursor positionining
   useEffect(() => {
@@ -307,105 +308,56 @@ const Tiptap = ({ setEditorVisible, editorVisible,givenTitle,givenContent }) => 
     editor.commands.setTextSelection({ from, to });
   }, [content]);
 
-  useEffect(()=> {
-    if(!givenTitle){
-      setTitle('')
+  useEffect(() => {
+    if (!givenTitle) {
+      setTitle("");
     }
 
-    if(!givenContent){
-      setContent('')
-    
+    if (!givenContent) {
+      setContent("");
     } else {
-      
       editor?.commands.setContent(givenContent, true);
     }
-    console.log(title,content)
-  },[])
+    console.log(title, content);
+  }, []);
   return (
     <>
-      <ResizablePanel
-        className="    h-[9.8svh] chat-background"
-        defaultSize={1}
-      >
+      <div className="   chat-background rounded-t-xl">
         <MenuBar
           editor={editor}
           editorVisible={editorVisible}
           setEditorVisible={setEditorVisible}
         />
-        <div className="position: static flex justify-center top-0px">
-          {/* <HoverCard openDelay={0} closeDelay={0}>
-            <HoverCardTrigger>
-              <NextButton
-                variant="outline"
-                value="paperplane"
-                aria-label="Toggle paperplane"
-                
-                className="absolute top-[6.7svh] right-[2svw] z-10 bg-emerald-200"
-              >
-                <PaperPlaneIcon className="h-4 w-4" />
-              </NextButton>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-[7svw] h-[5] left-[12.5svw] top-[9svh] absolute">Save Page</HoverCardContent>
-          </HoverCard> */}
+        <div className="position: static flex justify-center top-0px"></div>
+      </div>
 
-          {/* <HoverCard  openDelay={0} closeDelay={0}>
-            <HoverCardTrigger>
-            <NextButton
-            variant="outline"
-            value="cross"
-            aria-label="toggle cross"
-            
-            className="absolute top-[6.7svh] right-[6svw] z-10 bg-rose-200"
-          >
-            <Cross1Icon className="h-4 w-4" />
-          </NextButton>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-[7svw] h-[5] left-[9.5svw] top-[9svh] absolute">Delete Page</HoverCardContent>
-          </HoverCard> */}
-        </div>
-      </ResizablePanel>
-
-      <ResizablePanel
-        style={{ backgroundSize: "100svw 100svh", overflow: "hidden" }}
-      >
-        {/* <Image
-          width="0"
-          height="0"
-          sizes="100vw"
-          style={{
-            width: "50%",
-            height: "80%",
-            position: "absolute",
-            zIndex: -100,
-            overflow: "hidden",
-          }}
-          src="/pic/complex-bg.png"
-          alt="Picture of the author"
-        /> */}
-
+      <div style={{ backgroundSize: "100svw 100svh", overflow: "hidden" }}>
         <Textarea
-         onChange={(e) => setTitle(e.target.value)}
-         value={title}
+        
+          onChange={(e) => setTitle(e.target.value)}
+          value={title}
           placeholder="Write a Title"
-          className="bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0 border-0   "
+          className=" text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
         />
 
         <ScrollArea viewportRef={null}>
-          <NextButton 
-          onClick={()=>saveNotes(slug,Router)}
-          className="z-auto absolute ml-[45svw] mt-[62svh] rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400">
+          <NextButton
+            onClick={() => saveNotes(slug, Router)}
+            className="z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-10 bottom-1"
+          >
             <div className="">Save</div>
             <LuBookUp className="w-5 h-5" />
           </NextButton>
+           
           <EditorContent
             editor={editor}
-            onChange={()=>setContent(editor?.getHTML()!)}
+            onChange={() => setContent(editor?.getHTML()!)}
             value={content}
             content={content}
-            className=" pl-5 shadow-inner   focus-visible:ring-0 border-0  h-[70svh]  bg-transparent"
+            className=" text-zinc-700 pl-5    focus-visible:ring-0 border-0  h-[70svh]  bg-transparent "
           />
         </ScrollArea>
-      </ResizablePanel>
+      </div>
     </>
   );
 };
