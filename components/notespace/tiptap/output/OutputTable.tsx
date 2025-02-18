@@ -108,7 +108,7 @@ function NoteOptions({
     }
 
     return(
-        <div className="ml-[4svw] mt-[5svw]">
+        <div className="ml-[4svw] mt-[5svw] bg-sky-100">
         <Button
           variant={"outline"}
           className="ml-[2svw]"
@@ -149,13 +149,13 @@ export default function OutputTable({
     useEffect(() => {}, [notes]);
   
     return (
-      <div>
-        <div className="w-[50svw] h-[9.8svh] chat-background" />
-        <Table className="w-[49svw] mx-auto mt-[10svh]">
+      <div className="bg-sky-100 ">
+        <div className="w-[50svw] h-[9.8svh] chat-background " />
+        <Table className="w-[49svw] mx-auto mt-[10svh] bg-sky-100">
           <TableCaption>Your recent Notespaces</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Title</TableHead>
+              <TableHead className="w-[100px] ">Title</TableHead>
               <TableHead>Amount of Sources</TableHead>
               <TableHead>Created On</TableHead>
               <TableHead className="text-right">Owner</TableHead>
@@ -170,8 +170,8 @@ export default function OutputTable({
                   onClick={() => setSelectedNote(notes[idx] as any)}
                 >
                   <TableCell
-                    onClick={() => setEditorVisible(!editorVisible)}
-                    className="font-medium cursor-pointer "
+                    onClick={() => setEditorVisible(!editorVisible) }
+                    className="font-medium cursor-pointer  "
                   >
                     {datum.title}
                   </TableCell>

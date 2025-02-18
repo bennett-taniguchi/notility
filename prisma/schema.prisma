@@ -68,7 +68,7 @@ model Notes {
   id          Int     @id @default(autoincrement())
   title       String
   content     String
-  author      User?   @relation(fields: [authorId], references: [id])
+  author      User?   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId    String?
   uri         String
   createdBy   String
@@ -125,6 +125,7 @@ model Notespace {
   messages      Message[]
  
   permissions Permissions[]
+  uploads Upload[]
 
   @@unique([uri])
  
@@ -134,7 +135,7 @@ model Notespace {
 // [0,1] -> read,write
 model Permissions{
   id         Int    @id @default(autoincrement())
-  notespace      Notespace?   @relation(fields: [uri], references: [uri])
+  notespace      Notespace?   @relation(fields: [uri], references: [uri], onDelete: Cascade)
   uri         String
   authorId    String
   email    String
@@ -154,5 +155,7 @@ model Upload {
   owner         String
   filetype      String
   summary       String?
+
+  notespace Notespace @relation(fields: [uri], references:[uri],onDelete:Cascade)
   @@unique([uri,title,originalFileName])
 }

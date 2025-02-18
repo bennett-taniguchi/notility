@@ -32,12 +32,13 @@ import { Notespace } from "@prisma/client";
 import { v4 } from "uuid";
 import Header from "../../components/Header";
 import Image from "next/image";
-import { ShareDialog, UserPopover } from "../../components/heading/Headbar";
+import { DeleteDialog, ShareDialog, UserPopover } from "../../components/heading/Headbar";
 import { UserContext } from "../../components/context/context";
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
  
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { Interface } from "node:readline";
 
 // retrieve notes and messages with chatbot, don't need to fetch both if only one is needed...
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
@@ -48,7 +49,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     return { props: { notes: [] } };
   }
 
-  const notespaces = await prisma.notespace.findMany({
+  const selfNotespaces = await prisma.notespace.findMany({
     where: {
       owner: session.user.email,
     },
@@ -78,7 +79,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     },
   });
 
-  let sharedNotespaces = {}
+  let sharedNotespaces = [{}] as any
   if(permissions) {
     sharedNotespaces = 
     permissions
@@ -86,19 +87,39 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       .filter((notespace) => notespace !== null);
   }
 
+  console.log('servernotespaces',sharedNotespaces)
 
+  let notespaces =selfNotespaces
+  
+  sharedNotespaces.forEach((shared) => {
+    if(notespaces.find((obj) => obj.uri == shared.uri)) {
+      
+    } else {
+      notespaces.push(shared)
+    }
+  })
+ 
   return {
-    props: { notespaces, sharedNotespaces },
+    props: { notespaces  },
   };
 };
+type NotespacePreview = {
+  title: string,
+  sources_count: number,
+  owner: string,
+  created_on: string,
+  uri: string,
 
+}
 type Props = {
   notespaces: Notespace[];
-  sharedNotespaces: Notespace[];
+ 
+
 };
 
 function TableView({ data, Router }) {
   if (!data) return <div></div>;
+  console.log(data)
   return (
     <Table className="w-[80svw] mx-auto ">
       <TableHeader>
@@ -110,9 +131,9 @@ function TableView({ data, Router }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map((datum) => (
+        {data.map((datum : NotespacePreview) => (
           <TableRow
-            key={datum.title}
+            key={datum.uri}
             className="w-max h-max hover:bg-slate-200/50  "
           >
             <TableCell
@@ -125,7 +146,7 @@ function TableView({ data, Router }) {
               onClick={() => Router.push("/notespace/" + datum.uri)}
               className={"cursor-pointer"}
             >
-              {datum.sources ? datum.sources : 0}
+              {datum.sources_count ? datum.sources_count : 0}
             </TableCell>
             <TableCell
               onClick={() => Router.push("/notespace/" + datum.uri)}
@@ -146,16 +167,17 @@ function TableView({ data, Router }) {
               <BsThreeDotsVertical className="cursor-pointer w-5 h-5" />
             </TableCell>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
+      <PopoverContent className="w-40 h-30">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="font-medium leading-none">Dimensions</h4>
-            <p className="text-sm text-muted-foreground">
-              Set the dimensions for the layer.
+            <h4 className="font-medium leading-none">{datum.title}</h4>
+            <p className="text-xs text-muted-foreground">
+              Share or Delete
             </p>
+            <Separator/>
           </div>
            <div>
-            Delete
+            <DeleteDialog asText={true} title={datum.title} ownerEmail={datum.owner} slug={datum.uri}/>
            </div>
 
            <div>
@@ -245,7 +267,7 @@ const createAndNavigate = async (Router) => {
   }
 };
 
-export default function Notespaces({ notespaces, sharedNotespaces }: Props) {
+export default function Notespaces({ notespaces }: Props) {
   const Router = useRouter();
   const initialView = { view: "list" };
   const { data: session } = useSession();
@@ -393,12 +415,12 @@ export default function Notespaces({ notespaces, sharedNotespaces }: Props) {
         {view!.view == "list" ? (
           <TableView
             Router={Router}
-            data={[...notespaces, ...sharedNotespaces]}
+            data={notespaces}
           />
         ) : (
           <CardView
             Router={Router}
-            data={[...notespaces, ...sharedNotespaces]}
+            data={notespaces}
           />
         )}
       </div>

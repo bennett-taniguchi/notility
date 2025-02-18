@@ -48,10 +48,10 @@ export default function OutputArea({ editorVisible, setEditorVisible }: any) {
     content: "",
   }) as any;
   return (
-    <div>
+    <div >
       {editorVisible ? (
         <Suspense fallback={<div>loading...</div>}>
-          <div>
+          <div >
             <div
               className="  hover:bg-sky-100  ml-[8svw] mt-[.7svh] fixed   border-none  text-sm font-bold text-zinc-700 cursor-pointer bg-white/80 rounded px-2"
               onClick={() => setEditorVisible(!editorVisible)}

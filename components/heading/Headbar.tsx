@@ -29,6 +29,8 @@ import {
  import Image from 'next/image'
 import { UserContext, SlugContext } from "../context/context";
 import { signOut } from "next-auth/react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { useRouter } from "next/router";
 
 export function UserPopover() {
     const {url,email} = useContext(UserContext)
@@ -54,6 +56,58 @@ export function UserPopover() {
       </PopoverContent>
     </Popover>
   );
+}
+
+// not really a 'dialog' just a delete option
+export function DeleteDialog({asText=false,title,ownerEmail,slug}) {
+    const Router = useRouter()
+ 
+    const {email} = useContext(UserContext)
+    async function handleSubmit(Router,slug,email,ownerEmail) {
+        
+        if(email!=ownerEmail){
+            console.log('Error user email is not the same as owner email')
+            return;
+        }
+        let uri = slug
+        try {
+        
+        const body = {uri}
+            await fetch("/api/notespace/delete/", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+          
+              });
+            
+        } catch(e) {
+            console.log(e,'can\'t delete someone else\'s notespace')
+        }
+   
+        
+        Router.push('/notespace')
+    }
+return (
+    <AlertDialog>
+  <AlertDialogTrigger><div className="cursor-pointer hover:underline text-cyan-800">
+        Delete
+    </div></AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This will permanently delete this notespace: <i>{title}</i>
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction onClick={()=>handleSubmit(Router,slug,email,ownerEmail)}>Continue</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+    
+)
+
 }
 export function ShareDialog({asText=false}) {
   const [options, setOptions] = useState([]);

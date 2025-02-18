@@ -49,6 +49,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   res,
   resolvedUrl,
 }) => {
+
   res.setHeader(
     "Cache-Control",
     "public, s-maxage=10, stale-while-revalidate=59"
@@ -96,7 +97,7 @@ export const getServerSideProps: GetServerSideProps = async ({
       email:true
     }
   })
-   
+ 
   return {
     props: { notespace, sources, messages, notes,permission },
   };
@@ -107,7 +108,7 @@ type Props = {
   sources: Upload[];
   messages: Message[];
   notes: string[];
-  permission: string | null;
+  permission: Object[] | null;
 };
 
 function selectedReducer(state, action) {
@@ -258,8 +259,8 @@ if(!session) {
           </Link></div>
     </div>);
 }
-  console.log(session.user.email,notespace.owner)
-  if (!permission || session.user.email != notespace.owner ) 
+
+  if (  permission!.length == 0  && session.user.email != notespace.owner ) // permissions dne or current user isnt the same as creator
   {
     return (
     <div className="text-center">
@@ -333,8 +334,8 @@ if(!session) {
                   </Suspense>
                 </ResizablePanel>
 
-                <ResizablePanel>
-                  <Suspense>
+                <ResizablePanel className="bg-sky-100 ">
+                  <Suspense >
                   <DynamicOutputArea
                     editorVisible={editorVisible}
                     setEditorVisible={setEditorVisible}
