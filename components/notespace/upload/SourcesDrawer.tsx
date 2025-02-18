@@ -168,12 +168,13 @@ export default function SourcesDrawer({
       <DrawerTrigger asChild>
         <div 
         // className=" text-left ml-[-7svw] flex flex-row py-[1svw]"
+        className="text-right mr-[5px]  mt-[-1px]"
         >
           <Button
             onClick={() => setIsChild(true)}
             variant="outline"
             style={{zIndex:999}}
-            className="hover:drop-shadow-sm   border-sky-400/50   animated-button w-[8svw] h-[5svh]"
+            className="hover:drop-shadow-sm   absolute right-[50px] top-[20px]  border-white   animated-row w-[140px] h-[45px] text-black "
           >
             <svg
               className="mr-1"
@@ -205,7 +206,7 @@ export default function SourcesDrawer({
               {sources.map((source: Upload, idx) => (
                 <div
                   key={source.title}
-                  className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5  animated-button px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
+                  className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5  animated-row px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
                 >
                   <div className="my-auto  ">
                     <Checkbox

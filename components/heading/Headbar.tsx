@@ -41,8 +41,8 @@ export function UserPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="span-1/3 ml-[10px] cursor-pointer drop-shadow-xl" id="top_dash text-cyan-800">
-        <Image src={url} alt='User Profile Picture' height={42} width={42} className="rounded-full border-2 border-cyan-500"/>
+        <div className="span-1/3 ml-[10px] cursor-pointer drop-shadow-xl    " id="top_dash text-cyan-800">
+        <Image src={url} alt='User Profile Picture' height={42} width={42} className="rounded-full border-2 border-cyan-500 hover:brightness-90 3xl"/>
           
         </div>
       </PopoverTrigger>
@@ -181,7 +181,7 @@ export function ShareDialog({asText=false}) {
       :
       <FaShare
       onClick={() => setVisible(true)}
-      className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80"
+      className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80 hover:fill-cyan-600"
     /> 
       }
        
@@ -242,7 +242,7 @@ function OptionsPopover() {
     <Popover>
       <PopoverTrigger asChild>
         <div className="ml-[20svw] span-1/3   text-cyan-800    ">
-          <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80" />
+          <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80 hover:fill-cyan-600" />
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-80">
@@ -314,7 +314,7 @@ export default function Headbar({ notespace, slug }) {
       >
         <div className="span-1/4  my-auto mr-[1svw]  ml-[1svw] rounded-md mt-[3svh]">
           <Link href="/notespace">
-            <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70" />
+            <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70 hover:fill-black/80" />
           </Link>
         </div>
         <Textarea
@@ -337,7 +337,6 @@ export default function Headbar({ notespace, slug }) {
       >
         <OptionsPopover />
         <ShareDialog />
-
         <UserPopover   />
       </div>
     </div>

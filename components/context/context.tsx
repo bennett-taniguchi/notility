@@ -24,3 +24,8 @@ export const NotesContext = createContext({
     email: '',
  })
  
+
+ export const CollapseContext = createContext({
+    collapse: 'none',
+    setCollapse: null,
+ })

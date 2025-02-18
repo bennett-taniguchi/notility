@@ -13,9 +13,9 @@ export default function SourcesBlurb({sources,selected}) {
       }
 
     return (
-        <Card className="rounded-xl bg-cyan-400/50">
-              <CardContent className="rounded-xl bg-white/50 text-md text-mono   text-center py-10 text-slate-600/90">
-                <span className="font-bold font-roboto text-xl text-slate-600">
+        <Card className="rounded-xl  bg-gradient-to-r from-cyan-200 to-indigo-200 border-white border-2">
+              <CardContent className="rounded-xl text-md text-mono   text-center py-10 text-slate-600/90">
+                <span className="  font-roboto text-xl text-black">
                   {selected.selected && selected.selected.length != 0
                     ? selected.selected
                     : "No Sources Selected, select from above"}

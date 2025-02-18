@@ -130,11 +130,11 @@ function TableView({ data, Router }) {
           <TableHead className="text-right text-black">Owner</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
+      <TableBody className="border-t-2 border-black">
         {data.map((datum : NotespacePreview) => (
           <TableRow
             key={datum.uri}
-            className="w-max h-max hover:bg-slate-200/50  "
+            className="w-max h-max hover:bg-white/50   bg-zinc-100/20 border-black  "
           >
             <TableCell
               onClick={() => Router.push("/notespace/" + datum.uri)}

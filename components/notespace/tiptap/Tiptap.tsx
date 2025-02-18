@@ -13,6 +13,7 @@ import ListItem from "@tiptap/extension-list-item";
 import React, { useContext } from "react";
 import { Button as NextButton } from "../../ui/button";
 import { LuBookUp } from "react-icons/lu";
+import { FaHashtag } from "react-icons/fa6";
 //  import SVG1 from '../../../public/svg/svg-1.svg'
 import {
   FontBoldIcon,
@@ -38,6 +39,7 @@ import { CardTitle } from "../../ui/card";
 import { SlugContext } from "../../context/context";
 import { useRouter } from "next/router";
 import { IoReturnUpBack } from "react-icons/io5";
+import BubbledInput from "../../ui/personal/BubbledInput";
 const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
   if (!editor) {
     return null;
@@ -50,15 +52,17 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
     <div className="control-group   overflow-hidden  py-[22px] ">
     
       <div className="   flex  text-center text-sm justify-center justify-items-center      ">
-      <div
-        className="  ml-[-8px] hover:bg-sky-100      border-none  text-sm font-bold   cursor-pointer bg-white/80 rounded-lg w-[50px] mr-[5px]  "
-        onClick={() => setEditorVisible(!editorVisible)}
-      >
-        <div className="  ml-[18px]  mt-[10px]">
-          <IoReturnUpBack   />
-    
-        </div>
-      </div>
+     
+        <NextButton
+          variant="outline"
+          onClick={() => setEditorVisible(!editorVisible)}
+          className={'animated-button mr-[4px] border-cyan-600/40  '}
+        >
+          <IoReturnUpBack className={svgStyle} />
+        </NextButton>
+
+
+      
         <NextButton
           variant="outline"
           onClick={() =>
@@ -229,6 +233,7 @@ const Tiptap = ({
   givenTitle,
   givenContent,
 }) => {
+  const [tags,setTags] = useState([])
   const [initial, setInitial] = useState(true);
   const [title, setTitle] = useState(givenTitle);
   const [content, setContent] = useState(givenContent);
@@ -332,21 +337,45 @@ const Tiptap = ({
       </div>
 
       <div style={{ backgroundSize: "100svw 100svh", overflow: "hidden" }}>
+        <div className="flex flex-row">
         <Textarea
+        maxLength={60}
+        onChange={(e) => setTitle(e.target.value)}
+        value={title}
+        placeholder="Write a Title"
+        className=" w-[50svw] text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
+      />
+     
+      
+      
+      {/* <Textarea
         
-          onChange={(e) => setTitle(e.target.value)}
-          value={title}
-          placeholder="Write a Title"
-          className=" text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
-        />
+      onChange={(e) => setTitle(e.target.value)}
+      value={title}
+      placeholder="Write a Title"
+      className=" w-[30svw] text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
+    /> */}
+       
+        </div>
+       
 
         <ScrollArea viewportRef={null}>
+        <NextButton
+            onClick={() => {'openTags()'}} //Needs to open tag list for current document as # is converted to tag bubble
+            className="animated-button z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-[7rem] bottom-1"
+          >
+            
+            <div className=""> Tags</div>
+            <FaHashtag className="w-5 h-5 " />
+            
+          </NextButton>
+           
           <NextButton
             onClick={() => saveNotes(slug, Router)}
-            className="z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-10 bottom-1"
+            className="animated-button z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-10 bottom-1"
           >
             <div className="">Save</div>
-            <LuBookUp className="w-5 h-5" />
+            <LuBookUp className="w-5 h-5 " />
           </NextButton>
            
           <EditorContent

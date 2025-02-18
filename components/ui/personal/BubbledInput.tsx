@@ -64,7 +64,7 @@ function TagOptions({
 // custominput : allow users to input options not listed
 // inputvalue : ref that exposes current array of selected tags
 // validator : function that runs on everyinsertion to verify input is legal
-export default function BubbledInput({ tagList, setTagList, customInput= false, inputValue=null,validator=null, maxLength=10 }) {
+export default function BubbledInput({ tagList, setTagList, customInput= false, inputValue=null,validator=null, maxLength=10, classProps='' }) {
   const [latestInput, setLatestInput] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
 
@@ -97,9 +97,11 @@ export default function BubbledInput({ tagList, setTagList, customInput= false, 
       setInputFocused(true);
     }
   }
+
   function validateInput(){
     return true
   }
+
   useEffect(() => {
   
     const handleResize = () => {
@@ -119,15 +121,11 @@ export default function BubbledInput({ tagList, setTagList, customInput= false, 
   }, []);
 
   useEffect(() => {
-
   }, [tagList]);
 
- 
   function BubbleList({ tagArr }) {
-
-
     return (
-      <div className="ml-1">
+      <div className={cn("ml-1")}>
         {tagArr.map((tag: String, idx: number) => (
           <Bubble
             key={idx + ""}
@@ -146,18 +144,17 @@ export default function BubbledInput({ tagList, setTagList, customInput= false, 
     let arr = tagList.filter((tag, i) => idx != i);
     setTagList(arr);
 
-    console.log('originaltags',originalTags)
     if(originalTags.includes(tagVal)){
       setFilteredOptions([...filteredOptions, tagVal]);
     }
   
   }
+
   function Bubble({ text, idx, totalString }) {
     const width = `w-[${text.length * 7}px]`;
 
     return (
-      <div
-      
+      <div 
         style={{ marginLeft: `${20 * idx + calcTextWidth(totalString)}px` }}
         className={cn(
           "absolute mt-[-33px] h-[30px]   bg-zinc-200 rounded-xl",
@@ -208,36 +205,30 @@ export default function BubbledInput({ tagList, setTagList, customInput= false, 
         setTagList([...tagList, latestInput]);
       }
     }
-  
-
     setLatestInput("");
   }
   // pad input after tags by appropriate amount
   function paddingAmount(tagArr) {
     let combinedLength = 0;
-
     combinedLength = calcTextWidth(tagArr.join()) + tagArr.length * 20;
-
     return `${combinedLength}px`;
   }
 
- 
    return (
     <div ref={inputDivRef}  >
       <Input
-      
         id="name"
         onChange={(e) => setLatestInput(e.currentTarget.value)}
         value={latestInput}
-        className={cn("col-span-4" )}
+        className={cn("col-span-4",classProps )}
         style={{ paddingLeft: paddingAmount(tagList) }}
         onKeyDown={(e) => handleEnterPressed(e, filteredOptions,customInput,latestInput,validator,maxLength)}
         ref={inputRef
         }
-        
         autoComplete={"off"}
       />
       <TagOptions
+
         setFilteredOptions={setFilteredOptions}
         filteredOptions={filteredOptions}
         inputFocused={inputFocused}
@@ -248,7 +239,7 @@ export default function BubbledInput({ tagList, setTagList, customInput= false, 
         parentSize={inputWidth}
         scrollAreaRef={scrollAreaRef}
       />
-      <BubbleList tagArr={tagList} />
+      <BubbleList tagArr={tagList}  />
     </div>
   );
  
