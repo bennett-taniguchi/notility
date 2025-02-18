@@ -338,15 +338,12 @@ export default function NotespacesPage({
 
                   <div>
                     <Suspense fallback={<div>loading...</div>}>
-                    {collapseState !='output' ?
+                    
                        <DynamicOutputArea
                        editorVisible={editorVisible}
                        setEditorVisible={setEditorVisible}
                      />
-                     :<div></div>
-                  
-                  }
-                   
+                     
                     </Suspense>
                   </div>
                 </div>

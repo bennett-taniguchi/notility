@@ -1,14 +1,25 @@
-import { Suspense, useState } from "react";
+import { Suspense, useContext, useState } from "react";
 import Tiptap from "../Tiptap";
 import OutputTable from "./OutputTable";
+import { CollapseContext } from "../../../context/context";
 
 export default function OutputArea({ editorVisible, setEditorVisible  }: any) {
   const [selectedNote, setSelectedNote] = useState({
     title: "",
     content: "",
   }) as any;
+  const {collapse} = useContext(CollapseContext)
+
+  if(collapse=='output') return(
+    <OutputTable
+    editorVisible={editorVisible}
+    setEditorVisible={setEditorVisible}
+    setSelectedNote={setSelectedNote}
+    selectedNote={selectedNote}
+
+  />)
   return (
-    <div className="  w-[48svw] h-[46svw] bg-sky-100   border-cyan-400/50 border-2 rounded-2xl " >
+    <div   className="  w-[48svw] h-[46svw] bg-sky-100   border-cyan-400/50 border-2 rounded-2xl " >
       {editorVisible ? (
         <Suspense fallback={<div>loading...</div>}>
           <div >

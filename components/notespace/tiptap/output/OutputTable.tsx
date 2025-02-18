@@ -211,11 +211,11 @@ export default function OutputTable({
         {" "}
         <Button
           style={{ zIndex: 999 }}
-          className="absolute right-[5px] top-[10px] cursor-pointer  hover:bg-zinc-200 bg-white border-black border-[1px]  p-0 px-[6px]  h-[15px]"
+          className="absolute right-[5px] top-[10px] cursor-pointer  hover:bg-zinc-200 bg-white border-black border-[1px]  p-0  pr-[3px]  h-[15px]"
           onClick={() => toggleCollapse()}
-        >
+        >a 
           <RiExpandHorizontalSFill
-            className="  text-black w-[20px] h-[20px]"
+            className="  text-black w-[22px] h-[22px] pr-[4px]  "
             width={40}
             height={40}
           />
