@@ -195,6 +195,7 @@ export default function OutputTable({
   selectedNote,
   setSelectedNote,
 }) {
+  const [response,setResponse] = useState([]) as any
   const [view,setView] = useState(false)
 
   const { collapse, setCollapse } = useContext(CollapseContext);
@@ -208,12 +209,32 @@ export default function OutputTable({
 
   useEffect(() => {}, [collapse]);
 
+  useEffect(()=> {console.log('response',response)}, [response])
   function toggleCollapse() {
     if (collapse == "none") {
       (setCollapse as any)("output");
     } else {
       (setCollapse as any)("none");
     }
+  }
+
+  async function testQuery() {
+    let prompt = 'Who are the enemies of harry potter and can you describe them?'
+
+    let messages= []
+    let title = []
+    let limit = 25
+    let body = {prompt,messages,title,limit}
+
+    const res = await fetch('/api/neo4j/query',
+     { headers:{'Content-Type':'application/json'},
+      method:'POST',
+      body: JSON.stringify(body)
+    })
+
+    const data = await res.json();
+
+    setResponse(data)
   }
 
   if (collapse == "output")
@@ -232,9 +253,15 @@ export default function OutputTable({
   if(view) {
     return(
       <div className="w-[46svw] h-[80svh] m-auto">
-        <Button onClick={()=>setView(false)}>
+        <div>
+        <Button onClick={()=>setView(false)} className="animated-row">
           Go Back to Table View
         </Button>
+        <Button onClick={()=>testQuery()} className="animated-row">
+          Test Neo4j-CSS-Query
+        </Button>
+        </div>
+       
         <GraphView/>
       </div>
     )

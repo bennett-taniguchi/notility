@@ -27,7 +27,67 @@ export default function GraphView() {
   }
   let cyRef = useRef(null) as any;
 
+
+
+function nodesToDict(nodePairs:Object) {
+// nodePairs [0] : usually not Document, has .elementId field  
+// nodePairs [1] : usually  Document, has .elementId field  
+// nodePairs [2] : relationship is array with each element has .startNodeElementId and .endNodeElementId
+
+let dict = new Map()
+// entity object: name, relationships: []
+let edges = [] as any
+ 
+for (const i in (nodePairs as any).records) { // process all entities first then loop thru edges later
+    let a = (nodePairs as any).records[i]._fields[0];
+    let b = (nodePairs as any).records[i]._fields[1];
+
+    let a_name = a.elementId
+    let b_name = b.elementId
+
+    let rels = (nodePairs as any).records[i]._fields[2];
+    edges.push(...rels)
+
+    if(!dict.has(a_name)) {
+        if(a.labels.includes('Document')) {
+            dict.set(a_name,{name:a.properties.title ,relationships:[]})
+        } else {
+            dict.set(a_name,{name:a.properties.id ,relationships:[]})
+        }
+       
+    }
+
+    if(!dict.has(b_name)) {
+        if(b.labels.includes('Document')) {
+            dict.set(b_name,{name:b.properties.title ,relationships:[]})
+        } else {
+            dict.set(b_name,{name:b.properties.id ,relationships:[]})
+        }
+    }
+}
+ 
+edges.forEach((edge)=> {
+    let a_elementId = edge.startNodeElementId
+    let b_elementId = edge.endNodeElementId
+
+    let a = dict.get(a_elementId)
+    let b = dict.get(b_elementId)
+    console.log(a_elementId,b_elementId, dict)
+    console.log(a,b)
+    let relationship = a.name + ' ' + edge.type + " " + b.name
+
+    a.relationships.push(relationship)
+    b.relationships.push(relationship)
+
+    dict.set(a_elementId,  a)
+    dict.set(b_elementId , b)
+})
+
+return Array.from(dict.values())
+
+}
   function fillData(nodePairs: Object) {
+    console.log('ntd',nodesToDict(nodePairs))
     let arr = [] as any;
 
     for (const first in (nodePairs as any).records) {
@@ -39,13 +99,24 @@ export default function GraphView() {
 
       let b = (nodePairs as any).records[first]._fields[1];
     
-      let b_id = b.identity.low + "";
+    let b_id = b.identity.low + "";
+
+ 
+    if('title' in a.properties) {
+        console.log('crashout a',a)
+        a_id = a.properties.title
+    }
+    if('title' in b.properties) {
+        console.log('crashout b',b)
+        b_id = b.properties.title
+    }
+
       let b_type = b.labels;
       let b_data = b.properties;
 
      
       let nodeA = { data: { id: a_id, label: a_data.id } ,  style: { // style property overrides 
-        'color': 'black'
+        'background-color': 'black'
       }};
       let nodeB = { data: { id: b_id, label: b_data.id },  style: { // style property overrides 
         'background-color': 'brown'
@@ -54,7 +125,7 @@ export default function GraphView() {
       let edges = [] as any;
 
       let rels =  (nodePairs as any).records[first]._fields[2]
-        console.log(a,b)
+      
       rels.forEach((relationship)=> {
         edges.push({
             data: {
@@ -83,6 +154,7 @@ export default function GraphView() {
     //   fillData(nodes);
     // }
     getDatabaseNodes();
+    
     return () => {
         if (cyRef.current) {
             cyRef.current.destroy();
@@ -90,6 +162,8 @@ export default function GraphView() {
         }
     };
   }, []);
+
+ 
 
 //   useEffect(() => {
 //     function reset() {
@@ -128,16 +202,16 @@ export default function GraphView() {
     if(cyRef.current && data.length > 1) {
 
         const layout = cyRef.current.layout({
-            name: "grid", // or try: 'breadthfirst', 'circle', 'concentric', 'grid', 'random'
+            name: "cose", // or try: 'breadthfirst', 'circle', 'concentric', 'grid', 'random'
             fit: true,
             padding: 30,
-            randomize: true,
+            randomize: false,
             componentSpacing: 100,
             nodeOverlap: 20,
             animate: true,
             animationDuration: 500,
             refresh: 20,
-            nodeRepulsion: 40000,
+            nodeRepulsion: 400000,
             idealEdgeLength: 100,
         
           });
@@ -172,10 +246,11 @@ export default function GraphView() {
               "target-arrow-color": "#ccc",
               "curve-style": "bezier",
               "target-arrow-shape": "triangle",
-              label: "data(label)",
+              'label': "data(label)",
               "font-size": "8px",
-              color: "#FF0000",
+              'color': "#FF0000",
               "text-rotation": "autorotate",
+              'line-style' : 'dashed'
             },
           },
         ]}
