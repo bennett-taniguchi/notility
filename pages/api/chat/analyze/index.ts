@@ -4,58 +4,134 @@ import prisma from "../../../../lib/prisma";
 import { Pinecone } from "@pinecone-database/pinecone";
 import {
   HTMLtoText,
+  SummaryRecord,
   chunkTextByMultiParagraphs,
-  embedChunks,
+
+  embedChunksDense,
+ 
   upsertVectors,
 } from "../../../../utils/parse_text";
-export default async function handle(req, res) {
-  const session = await getServerSession(req, res, authOptions);
+import OpenAI from "openai";
+import { Upload } from "@prisma/client";
+import { options } from "../../auth/[...nextauth]";
+async function updateUploadSummary(name,uri,overallSummary) {
+  await prisma.upload.update ({
 
-  const { notes_contents, notes_titles } = req.body;
-
-  const result = await prisma.upload.upsert({
     where: {
-      title_authorId: { authorId: session.id, title: notes_titles },
+        uri_title_originalFileName: {
+            uri:uri,
+            title:name,
+            originalFileName:name
+        }
+        
     },
-    update: {
-      content: notes_contents,
-      title: notes_titles,
-    },
-    create: {
-      authorId: session.id,
-      title: notes_titles,
-      content: notes_contents,
-    },
-  }); // works
+    data: {
+        summary:overallSummary
+    }
+} )
+}
+async function getOverallSummary(chunks: string[]) {
+  const openai = new OpenAI({
+    apiKey: process.env["OPENAI_API_KEY"],
+  });
 
-  //   res.json(result);
+  // Process all chunks in parallel
+  const summaries = await Promise.all(
+    chunks.map(async (chunk) => {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are a succinct analyzer who reads chunks of information and gives a concise summary that includes broad topic keywords offering context",
+          },
+          {
+            role: "user",
+            content: chunk,
+          },
+        ],
+      });
+      
+      return completion.choices[0].message.content;
+    })
+  );
 
-  const parsed = HTMLtoText(notes_contents); // remove html tags
+  // If there's only one chunk, return its summary
+  if (summaries.length === 1) {
+    return summaries[0];
+  }
 
-  const chunks = chunkTextByMultiParagraphs(parsed); // split on max words
+  // If there are multiple chunks, create a final summary of summaries
+  const combinedSummary = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: "You are a succinct analyzer who combines multiple summaries into one coherent overview",
+      },
+      {
+        role: "user",
+        content: `Please combine these summaries into one coherent overview, ensure the first sentence is comprised entirely of most relevant keywords in a comma-separated format and begin it as 'Topics Covered:': ${summaries.join(" | ")}`,
+      },
+    ],
+  });
 
-  const embeddedResult = await embedChunks(chunks); // to vecs
+  return combinedSummary.choices[0].message.content;
+}
+ 
 
-  const upserted = await upsertVectors(embeddedResult, chunks, true); // our own upsertion to pinecone db, need to split on diff users namespace
+export default async function handle(req, res) {
+  
+  const session = await getServerSession(req, res,options);
+   
+  const { plainText, name, uri,file} = req.body;   
+  if(plainText=='') {res.json('empty'); return;}
+  //const parsed = HTMLtoText(notes_contents); // remove html tags
 
+  const chunks = chunkTextByMultiParagraphs(plainText); // Chunk on max words
+ 
+
+  const overallSummary = await getOverallSummary(chunks)
+ 
+  const denseEmbeddings = await embedChunksDense(chunks); // Chunks -> Dense Vectors
+ 
+  
+  const upserted = await upsertVectors(denseEmbeddings, chunks, overallSummary!, name); // our own upsertion to pinecone db, need to split on diff users namespace
+
+
+ 
   /// eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 
   if (upserted)
     for (let i = 0; i < upserted[0]?.length; i++) {
       const batch = upserted[0][i];
-      console.log(batch);
+      
+      //console.log('analyze 34',batch);
       const pc = new Pinecone({
         apiKey: process.env.PINECONE_API_KEY as string,
       });
 
-      let index = pc.index("notility");
-      let namespace = session.user.email;
+      let index = pc.index("notespace");
+      let namespace = uri;
 
-      const result = await index.namespace(namespace).upsert([batch] as any);
-
-      res.json(result);
+      await index.namespace(namespace).upsert([batch] as any);
+     
+    
     }
 
+ 
+   let convertedUpload={ ...file as  Upload, owner: session?.user.email };
+ 
+  try {
+    let result = await prisma.upload.create({
+      data: {...convertedUpload, summary:overallSummary },
+    });
+
+    res.json({ result });
+  } catch (e) {
+    console.log(e);
+  }
+  
   ///eeeeeeeeeeeeeeee
   // format:
   // 0: {embedding (1536) [.1232,...], index:0, object:"embedding"},

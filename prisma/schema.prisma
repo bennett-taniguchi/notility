@@ -40,15 +40,19 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-
-  accounts Account[]
-  sessions Session[]
-  notes    Notes[]
+  id              String    @id @default(cuid())
+  name            String?
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
+  notespace_theme String?
+  creation_theme  String?
+  tracks_theme    String?
+  premium_start   String?
+  premium_end     String?
+  accounts        Account[]
+  sessions        Session[]
+  notes           Notes[]
 }
 
 model VerificationToken {
@@ -61,57 +65,97 @@ model VerificationToken {
 }
 
 model Notes {
-  id       Int     @id @default(autoincrement())
-  title    String
-  content  String
-  author   User?   @relation(fields: [authorId], references: [id])
-  authorId String?
+  id          Int     @id @default(autoincrement())
+  title       String
+  content     String
+  author      User?   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String?
+  uri         String
+  createdBy   String
+  prompt_type String?
+  prompt      String?
+  createdOn String
+  sources   Int
+  notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
-  @@unique([title, authorId])
+  @@unique([title,uri], name:"title_uri")
 }
-
+ 
+ 
+ 
 model Message {
-  index    Int
+  index       Int    @id
   authorId String
   role     String
   content  String
   title    String
+  uri      String
 
-  @@unique([index, authorId, title])
+  match    String?
+  matchScore String?
+
+  notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
+
+  @@unique([index, uri])
+}
+
+model Shared {
+  authorId String
+  uri      String
+  level    Int
+
+  notespace Notespace @relation(fields: [uri], references: [uri], onDelete: Cascade)
+
+  @@unique([uri, authorId])
+}
+
+model Notespace {
+  id         Int    @id @default(autoincrement())
+  authorId   String
+  created_on String
+  uri        String
+  title      String
+  owner      String
+
+  notes Notes[]
+
+  sources_count Int?
+  sources_blurb String?
+  shared        Shared[]
+  messages      Message[]
+ 
+  permissions Permissions[]
+  uploads Upload[]
+
+  @@unique([uri])
+ 
+}
+
+// shared id is new users authorId
+// [0,1] -> read,write
+model Permissions{
+  id         Int    @id @default(autoincrement())
+  notespace      Notespace?   @relation(fields: [uri], references: [uri], onDelete: Cascade)
+  uri         String
+  authorId    String
+  email    String
+  level       Int
+
+  @@unique([uri,email])
 }
 
 model Upload {
-  index    Int    @id @default(autoincrement())
-  authorId String
-  title    String
-  content  String
+  id  Int    @id @default(autoincrement())
+  uri String
+ 
 
-  @@unique([title, authorId])
-}
+ 
+  originalFileName String
+  title         String
+  owner         String
+  filetype      String
+  summary       String?
 
-model Card {
-  index Int @id @default(autoincrement())
-
-  title    String
-  authorId String
-  term     String
-  answer   String
-
-  flashcard Flashcard @relation(fields: [title, authorId], references: [title, authorId], onDelete: Cascade)
-
-  @@unique([term, answer, title])
-}
-
-model Flashcard {
-  index          Int    @id @default(autoincrement())
-  authorId       String
-  title          String
-  description    String
-  rating         Int
-  practiceCount  Int?
-  last_practiced String
-
-  cards Card[]
-
-  @@unique([title, authorId])
+  notespace Notespace @relation(fields: [uri], references:[uri],onDelete:Cascade)
+  @@unique([uri,title,originalFileName])
 }

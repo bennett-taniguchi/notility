@@ -12,12 +12,12 @@ const openai = new OpenAI({
 // {"role": "system", "content": "You are a helpful assistant."},
 // {"role": "user", "content": "message 1 content."},
 export default async function handle(req, res) {
-  const { prompt, messages } = req.body;
+  const { prompt, messages, uri } = req.body;
   const session = await getServerSession(req, res, authOptions);
 
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: "You are a helpful assistant." },
+      { role: "system", content: "Given a user query, expand it to be more specific and detailed while maintaining the original intent. Include relevant synonyms and related concepts." },
       ...messages.map((m) => ({
         role: m.role,
         content: m.content,
@@ -38,6 +38,7 @@ export default async function handle(req, res) {
   const result = await prisma.message.createMany({
     data: [
       {
+        uri:uri,
         index: messages.length + 1,
         content: content_user,
         authorId: session.id,
@@ -45,6 +46,7 @@ export default async function handle(req, res) {
         title: "",
       },
       {
+        uri:uri,
         index: messages.length + 2,
         content: content_system,
         authorId: session.id,

@@ -6,12 +6,37 @@ import {
   RecordId,
 } from "@pinecone-database/pinecone";
 import { Record } from "@prisma/client/runtime/library";
+import * as pdfjsLib from "pdfjs-dist";
+ 
+import { jsx } from "react/jsx-runtime";
+ 
+
+export async function getPdfText(file: any) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = (window as any).location.origin + "/pdf.worker.min.mjs";
+ 
+  //const pdf1 = await fs.readFile((file.originalFile.file as File).arrayBuffer());
+  let actualFile: File = file
+  const pdf = await pdfjsLib.getDocument(await actualFile.arrayBuffer())
+    .promise;
+  let fullText = "";
+  
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const textContent = await page.getTextContent();
+
+    fullText += textContent.items.map((item: any) => item.str).join(" ");
+  }
+ 
+  return fullText;
+}
 
 export function HTMLtoText(text: string): string {
   text = text.replace(/<[^>]+>/g, "");
-
   return text;
 }
+
+
+
 /**
  * Splits a given text into chunks of 1 to many paragraphs.
  *
@@ -20,12 +45,11 @@ export function HTMLtoText(text: string): string {
  * @param minChunkSize - The minimum size (in characters) required for each chunk. Default is 100.
  * @returns An array of chunked text, where each chunk contains 1 or multiple "paragraphs"
  */
-
 // Expect our non html text
 // Return array of strings aka chunks
 export function chunkTextByMultiParagraphs(
   text: string,
-  maxChunkSize = 1500,
+  maxChunkSize = 500,
   minChunkSize = 500
 ): string[] {
   const chunks: string[] = [];
@@ -66,6 +90,7 @@ export function chunkTextByMultiParagraphs(
   return chunks;
 }
 
+
 /**
  * Embed a piece of text using an embedding model or service.
  * This is a placeholder and needs to be implemented based on your embedding solution.
@@ -76,7 +101,7 @@ export function chunkTextByMultiParagraphs(
 
 // expects chunks, on all chunks
 // return res from open ai call
-export async function embedChunks(chunks: string[]): Promise<any> {
+export async function embedChunksDense(chunks: string[]): Promise<any> {
   // You can use any embedding model or service here.
   // In this example, we use OpenAI's text-embedding-3-small model.
   const openai = new OpenAI({
@@ -145,12 +170,18 @@ type VectorRecord = {
   metadata?: string;
 };
 
+export type SummaryRecord = {
+  summaries: string[];
+  overallSummary: string
+}
 // batches appropriate vectors and upserts using api path into the namespace matching users email
 export async function upsertVectors(
   embeddings: embedding[],
   chunks: string[],
-  server?: boolean
+  summaries: string,
+  name: string,
 ) {
+  
   // Get the Pinecone index
   //   let index = pc.index("notility");
   const vectors: any[] = chunks.map((chunk, idx) => ({
@@ -158,6 +189,8 @@ export async function upsertVectors(
     values: embeddings[idx].embedding,
     metadata: {
       text: chunk,
+      name: name,
+      summary: summaries
     },
   }));
 
@@ -167,19 +200,18 @@ export async function upsertVectors(
   for (let i = 0; i < vectors.length; i += batchSize) {
     const batch = vectors.slice(i, i + batchSize) as VectorRecord[]; // {id: "vec1", values: [1536]}
     const body = { batch };
-    if (server) {
-      batches = [...batches, batch];
-    } else {
-      const res = await fetch("/api/pinecone/upsert/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    }
-  }
+  
+    batches = [...batches, batch];
+    // } else {
+    //   await fetch("/api/pinecone/upsert/", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify(body),
+    //   });
+     }
+  
 
-  if (server) {
-    console.log(batches);
+  
     return batches;
-  }
+  
 }

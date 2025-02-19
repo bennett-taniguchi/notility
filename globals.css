@@ -4,7 +4,51 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
-@import url("https://fonts.googleapis.com/css2?family=Grey+Qo&family=Quicksand:wght@300..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Grey+Qo&family=Quicksand:wght@300..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Zen+Dots&display=swap");
+@layer utilities {
+
+  @property --colorSky200 {
+    syntax: "<color>";
+    initial-value: theme("colors.sky.200");
+    inherits: false;
+  }
+
+  @property --myColor1 {
+    syntax: "<color>";
+    initial-value: theme("colors.sky.500");
+    inherits: false;
+  }
+
+  @property --myColor2 {
+    syntax: "<color>";
+    initial-value: theme("colors.indigo.200");
+    inherits: false;
+  }
+
+  .animated-row {
+    background: linear-gradient(70deg,var(--colorSky200), var(--myColor2));
+    transition: --colorSky200 0.5s ease-in-out, --myColor2 0.5s ease-in-out;
+  }
+
+  .animated-row:hover {
+    --colorSky200: theme(colors.sky.300);
+    --myColor2: theme(colors.indigo.300);
+  }
+
+  .animated-button {
+    background: linear-gradient(var(--myColor1), var(--myColor2));
+    transition: --myColor1 0.5s ease-in-out, --myColor2 0.5s ease-in-out;
+  }
+
+  .animated-button:hover {
+    --myColor1: theme(colors.sky.500);
+    --myColor2: theme(colors.indigo.400);
+  }
+
+  .font-stretch {
+    font-stretch: ult;
+  }
+}
 
 @layer base {
   @font-face {
@@ -18,6 +62,16 @@
   @font-face {
     font-family: "Quicksand";
     src: url("public/fonts/Quicksand/Quicksand-Regular.ttf") format("truetype");
+  }
+  @font-face {
+    font-family: "Zen_Dots";
+    src: url("public/fonts/Zen_Dots/ZenDots-Regular.ttf") format("truetype");
+  }
+
+  .zen-dots-regular {
+    font-family: "Zen_Dots", serif;
+    font-weight: 400;
+    font-style: normal;
   }
   :root {
     --radix-popper-avaliable-height: 900px;
@@ -85,8 +139,55 @@
   }
 }
 
+.chat-background {
+  background: rgb(103, 232, 249);
+  background: linear-gradient(
+    200deg,
+    rgba(103, 232, 249, 1) 0%,
+    rgba(165, 180, 252, 1) 103%
+  );
+}
+
+.chat-background-2 {
+  background: rgb(165, 180, 252,);
+  background: linear-gradient(
+    200deg,
+    rgba(165, 180, 252, 1) 0%,
+    rgba(103, 232, 249, 1) 103%
+  );
+}
+
+.reverse-chat-background {
+  background: rgb(103, 232, 249);
+  background: linear-gradient(0deg, rgba(103, 232, 249, 1) 0% 100%);
+}
+.chat-inner-background {
+  background-image: linear-gradient(
+    to right,
+    #a5b4fc,
+    #8fc0ff,
+    #7bcaff,
+    #6ad4ff,
+    #63ddff,
+    #63ddff,
+    #63ddff,
+    #63ddff,
+    #6ad4ff,
+    #7bcaff,
+    #8fc0ff,
+    #a5b4fc
+  );
+}
+
 .ProseMirror:focus {
   outline: none;
+}
+
+:global(.upload-widget__body) {
+  pointer-events: auto;
+}
+:global(.upload-widget__modal) {
+  z-index: 100;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -101,7 +202,6 @@ body {
   overflow: auto;
 }
 
- 
 .spectrum-background {
   /* background: linear-gradient(150deg, #ecedee, transparent 30%),
     linear-gradient(330deg, rgb(210, 206, 242), transparent 30%),
@@ -113,7 +213,21 @@ body {
   animation: gradient 9s ease infinite;
 }
 .sidebarGradient {
-  background-image: linear-gradient(to right top, #c0e652, #bfe054, #bed955, #bcd357, #bacd59, #aecd62, #a2cd6c, #97cd75, #80d18b, #6ad4a2, #58d5b8, #4ed5cc);
+  background-image: linear-gradient(
+    to right top,
+    #c0e652,
+    #bfe054,
+    #bed955,
+    #bcd357,
+    #bacd59,
+    #aecd62,
+    #a2cd6c,
+    #97cd75,
+    #80d18b,
+    #6ad4a2,
+    #58d5b8,
+    #4ed5cc
+  );
 }
 
 @keyframes gradient {
@@ -252,7 +366,7 @@ body {
 }
 
 .heading {
-  font-size:large
+  font-size: large;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -261,6 +375,36 @@ body {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+@keyframes animate-color-1 {
+  from {
+    background-color: rgb(161, 161, 161);
+  }
+  to {
+    background-color: rgb(72, 72, 72);
+  }
+}
+
+.pulsing-dot-1 {
+  animation-name: animate-color-1;
+  animation-duration: .9s;
+
+  animation-iteration-count: infinite;
+}
+
+.pulsing-dot-2 {
+  animation-name: animate-color-1;
+  animation-duration: .9s;
+  animation-delay: 0.3s;
+  animation-iteration-count: infinite;
+}
+
+.pulsing-dot-3 {
+  animation-name: animate-color-1;
+  animation-duration: .9s;
+  animation-delay: 0.6s;
+  animation-iteration-count: infinite;
 }

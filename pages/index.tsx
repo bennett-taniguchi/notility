@@ -17,7 +17,8 @@ import { Separator } from "@radix-ui/react-menubar";
 // import  NotesDemo from '../public/videos/cursorful-notes.mp4' as any
 
 const Blog = () => {
-  const Trail: React.FC<{ open: boolean }> = ({ open, children }) => {
+ 
+  const Trail: React.FC<{ open: boolean,children:any}> = ({ open, children }) => {
     const items = React.Children.toArray(children);
     const trail = useTrail(items.length, {
       config: { mass: 20, tension: 2000, friction: 200 },
@@ -36,6 +37,7 @@ const Blog = () => {
       </div>
     );
   };
+ 
 
   const alignCenter = { display: "flex", alignItems: "center" };
   return (
@@ -71,18 +73,18 @@ const Blog = () => {
           >
             <Card
               className={
-                " w-[45svw] h-[60svh] spectrum-background ml-[10svw] border-transparent "
+                " w-[45svw] h-[65svh] spectrum-background ml-[10svw] border-transparent "
               }
             >
               <CardHeader>
                 <div>
                   <div className="flex flex-row">
                     <div className=" font-roboto text-[30px]   font-bold   text-[rgba(0,0,0,.6)] basis-4/5">
-                      Create Notes
+                      Notespace Layout
                     </div>
-                    <Link href="/notes/landing">
+                    <Link href="/notespace/">
                       <Button className=" basis-1/5 bg-[rgba(0,0,0,.7)] mt-[1svh] ml-[2svw] landingCard">
-                        Try it out
+                        Notespace
                       </Button>
                     </Link>
                   </div>
@@ -156,7 +158,7 @@ const Blog = () => {
           >
             <Card
               className={
-                "w-[45svw] h-[60svh] spectrum-background mr-[5svw] border-transparent "
+                "w-[45svw] h-[65svh] spectrum-background mr-[5svw] border-transparent "
               }
             >
               <CardHeader>
@@ -164,11 +166,11 @@ const Blog = () => {
                   {" "}
                   <div className="flex flex-row">
                     <div className=" font-roboto text-[30px]   font-bold   text-[rgba(0,0,0,.6)] basis-4/5">
-                      Talk to your notes
+                      Premium
                     </div>
-                    <Link href="/notes/landing">
+                    <Link href="/premium/index">
                       <Button className=" basis-1/5 bg-[rgba(0,0,0,.7)] z-20 mt-[1svh] ml-[2svw] landingCard">
-                        Try it out
+                        Go to Premium
                       </Button>{" "}
                     </Link>
                   </div>

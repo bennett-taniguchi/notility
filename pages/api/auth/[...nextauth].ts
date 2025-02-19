@@ -1,12 +1,14 @@
 import { NextApiHandler } from "next";
-import NextAuth from "next-auth";
+import NextAuth, { SessionOptions, SessionStrategy } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GitHubProvider from "next-auth/providers/github";
 import prisma from "../../../lib/prisma";
 
 import GoogleProvider from "next-auth/providers/google";
-
+import EmailProvider from "next-auth/providers/email";
+import { randomBytes, randomUUID } from "crypto";
 export const options = {
+ 
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID!,
@@ -16,6 +18,7 @@ export const options = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    
   ],
   adapter: PrismaAdapter(prisma),
   secret: process.env.SECRET,
@@ -23,6 +26,7 @@ export const options = {
   // need to know absolute url for server-side(this) fetch request
   callbacks: {
     async session({ user, session }) {
+      
       session.id = user.id;
       return session;
     },
