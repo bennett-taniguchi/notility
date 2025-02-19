@@ -29,3 +29,13 @@ export const NotesContext = createContext({
     collapse: 'none',
     setCollapse: null,
  })
+
+ export const GraphViewContext = createContext({
+    view: false,
+    setView: null,
+ })
+
+ export const GraphNodesContext = createContext({
+    nodes: [],
+    setNodes: null
+ })

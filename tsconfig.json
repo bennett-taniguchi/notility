@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
+    
     "paths": {
       "@tiptap/core": ["./node_modules/@tiptap/core/src/index"]
     },
-    "target": "es5",
+    "target": "esnext",
+    "module":"commonjs",
     "downlevelIteration": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -12,7 +14,7 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
+   
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,

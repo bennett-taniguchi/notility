@@ -4,11 +4,13 @@ import { options } from "../../../auth/[...nextauth]";
 import "neo4j-driver";
 
 import { driver, auth } from "neo4j-driver";
-
+// for the 'draco malfoy' 'draco' and 'malfoy' case where the same entity appears multiple times
+// annoying artifact to do with entity extraction, consider how much improving it improves accuracy
+// need to write process for how it works
 export default async function handle(req, res) {
   const session = await getServerSession(req, res, options);
-  const { nameA,nameB } = req.body;
- 
+  const { nameA, nameB } = req.body;
+
   const url = process.env.NEO4J_URI;
   const username = process.env.NEO4J_USER;
   const password = process.env.NEO4J_PASSWORD;

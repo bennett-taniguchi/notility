@@ -22,6 +22,7 @@ import {
   SlugContext,
   UpdateUploadsContext,
   CollapseContext,
+  GraphNodesContext,
 } from "../../components/context/context";
 import Headbar from "../../components/heading/Headbar";
 import { buttonVariants } from "../../components/ui/button";
@@ -79,7 +80,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     },
   });
 
-  const permission = await prisma.permissions.findMany({
+  let permission = await prisma.permissions.findMany({
     where: {
       uri: uuid,
       email: session.user.email,
@@ -89,6 +90,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     },
   });
 
+if(!permission)permission=[]
   return {
     props: { notespace, sources, messages, notes, permission },
   };
@@ -204,7 +206,7 @@ export default function NotespacesPage({
     selected: "",
     selectedArr: [],
   };
-
+  const [nodes,setNodes] = useState([])
   const [editorVisible, setEditorVisible] = useState(false);
   const [isChild, setIsChild] = useState(false);
   const [selected, dispatch] = useReducer(selectedReducer, initialState);
@@ -288,6 +290,7 @@ export default function NotespacesPage({
   
   if (notespace)
     return (
+  <GraphNodesContext.Provider value={{nodes:nodes,setNodes:setNodes as any}} >
   <CollapseContext.Provider value={{collapse:collapseState, setCollapse:setCollapseState as any}}>
       <UserContext.Provider
         value={{ url: session!.user.image, email: session!.user.email }}
@@ -354,6 +357,7 @@ export default function NotespacesPage({
         </NotesContext.Provider>
       </UserContext.Provider>
       </CollapseContext.Provider>
+      </GraphNodesContext.Provider>
     );
 
   return <div>Notespace doesn't exist</div>;

@@ -3,6 +3,7 @@ import { useContext, useState, useEffect } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
   CollapseContext,
+  GraphViewContext,
   NotesContext,
   SlugContext,
 } from "../../../context/context";
@@ -26,11 +27,19 @@ import {
   DialogContent,
   Dialog,
 } from "../../../ui/dialog";
+import { BiLogoGraphql } from "react-icons/bi";
 import { Label } from "../../../ui/label";
 import QuizDialog from "./QuizDialog";
 import GuideDialog from "./GuideDialog";
 import TestDialog from "./TestDialog";
 import { RiExpandHorizontalSFill } from "react-icons/ri";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../../ui/tooltip";
+import GraphView from "./graph/GraphView";
 
 function NoteOptions({
   title,
@@ -127,10 +136,10 @@ function OutputContentButtons({ setEditorVisible, Router }) {
   }
 
   return (
-    <div className="ml-[4svw] mt-[5svw] bg-sky-100">
+    <div className="justify-center   w-[46svw] whitespace-nowrap overflow-none  justify-self-center mt-[20px] align-bottom flex flex-row-4 gap-2 bg-sky-100">
       <Button
         variant={"outline"}
-        className="ml-[2svw] animated-row border-2 border-white"
+        className="    whitespace-nowrap  animated-row border-2 border-white"
         onClick={() => setEditorVisible(true)}
       >
         Create new Note
@@ -143,7 +152,7 @@ function OutputContentButtons({ setEditorVisible, Router }) {
       />
       <Button
         variant={"outline"}
-        className="ml-[2svw] animated-row border-2 border-white"
+        className="whitespace-nowrap   animated-row border-2 border-white"
         onClick={() => openSelectedDialog("Guide")}
       >
         Create new Guide
@@ -157,7 +166,7 @@ function OutputContentButtons({ setEditorVisible, Router }) {
       />
       <Button
         variant={"outline"}
-        className="ml-[2svw] animated-row border-2 border-white"
+        className=" whitespace-nowrap  animated-row border-2 border-white"
         onClick={() => openSelectedDialog("Quiz")}
       >
         Create new Quiz
@@ -171,7 +180,7 @@ function OutputContentButtons({ setEditorVisible, Router }) {
       />
       <Button
         variant={"outline"}
-        className="ml-[2svw] animated-row border-2 border-white"
+        className="whitespace-nowrap   animated-row border-2 border-white"
         onClick={() => openSelectedDialog("Test")}
       >
         Create new Test
@@ -186,6 +195,8 @@ export default function OutputTable({
   selectedNote,
   setSelectedNote,
 }) {
+  const [view,setView] = useState(false)
+
   const { collapse, setCollapse } = useContext(CollapseContext);
   const { notes } = useContext(NotesContext);
   const { slug } = useContext(SlugContext);
@@ -209,36 +220,57 @@ export default function OutputTable({
     return (
       <div>
         {" "}
-        <Button
-          style={{ zIndex: 999 }}
-          className="absolute right-[5px] top-[10px] cursor-pointer  hover:bg-zinc-200 bg-white border-black border-[1px]  p-0  pr-[3px]  h-[15px]"
+        <RiExpandHorizontalSFill
           onClick={() => toggleCollapse()}
-        >a 
-          <RiExpandHorizontalSFill
-            className="  text-black w-[22px] h-[22px] pr-[4px]  "
-            width={40}
-            height={40}
-          />
-        </Button>
+          className="text-black w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
+          width={40}
+          height={40}
+        />
       </div>
     );
+
+  if(view) {
+    return(
+      <div className="w-[46svw] h-[80svh] m-auto">
+        <Button onClick={()=>setView(false)}>
+          Go Back to Table View
+        </Button>
+        <GraphView/>
+      </div>
+    )
+  }
   return (
     <div className="bg-sky-100 rounded-xl ">
       <div className="chat-background-2 py-[21.5px] font-roboto rounded-t-xl text-3xl text-white text-left pl-[10px] border-2 border-white border-t-white rounded-xl rounded-b-none">
         <div className="drop-shadow-lg ">
           {" "}
-          <Button
-            style={{ zIndex: 999 }}
-            className="absolute right-[5px] top-[-18px] cursor-pointer hover:bg-zinc-200 bg-white border-black  border-[1px]  p-0 px-[6px]  h-[15px]"
+          <RiExpandHorizontalSFill
             onClick={() => toggleCollapse()}
-          >
-            <RiExpandHorizontalSFill
-              className="  text-black w-[20px] h-[20px]"
-              width={40}
-              height={40}
-            />
-          </Button>
+            className="  text-black w-[20px] h-[20px] absolute right-[5px] top-[-18px] cursor-pointer"
+            width={40}
+            height={40}
+          />
           Output
+        </div>
+        <div className=" absolute right-[3svw] top-[14svh]">
+          {" "}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                {" "}
+                <Button
+                  variant={"outline"}
+                  className="px-[5px] text-black animated-button border-2 border-white"
+                  onClick={()=>(setView as any)(!view)}
+                >
+                  <BiLogoGraphql className="w-[30px] h-[30px]" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className=" ">
+                <p>Graph View</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
       <Table className="w-[46svw] mx-auto   bg-sky-100">

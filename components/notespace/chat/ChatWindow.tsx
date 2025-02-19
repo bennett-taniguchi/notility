@@ -73,17 +73,20 @@ export default function ChatWindow({
     }
     }
 
-    if(collapse=='chat') return (<div>  <Button
-      style={{ zIndex: 999 }}
-      className="absolute right-[5px] top-[5px] cursor-pointer  hover:bg-zinc-200 bg-white border-black border-[1px]  p-0 px-[6px]  h-[15px]"
-      onClick={()=>toggleCollapse()}
-    >
-      <RiExpandHorizontalSFill
-        className="  text-black w-[20px] h-[20px]"
+ 
+    if(collapse=='chat') {
+      return (
+        <div>
+          <RiExpandHorizontalSFill
+        className="    text-black w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
         width={40}
         height={40}
       />
-    </Button></div>)
+          </div>
+      )
+    }
+      
+   
 
   return (
     <div className="  w-[48svw]  border-cyan-400/50 border-2 rounded-xl">
@@ -93,17 +96,13 @@ export default function ChatWindow({
           viewportRef={viewportRef}
         >
           <div className="   bg-sky-100 w-[45svw]  flex flex-col  max-w-1/2 py-10  stretch gap-y-2 min-h-[80svh]  pb-[200px] ">
-            <Button
-              style={{ zIndex: 999 }}
-              className="absolute right-[5px] top-[5px] cursor-pointer  hover:bg-zinc-200 bg-white border-black border-[1px]  p-0 px-[6px]  h-[15px]"
-              onClick={()=>toggleCollapse()}
-            >
-              <RiExpandHorizontalSFill
-                className="  text-black w-[20px] h-[20px]"
-                width={40}
-                height={40}
-              />
-            </Button>
+          <RiExpandHorizontalSFill
+          onClick={()=>toggleCollapse()}
+          style={{zIndex:999}}
+        className="    text-black w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
+        width={40}
+        height={40}
+      />
             <div className="    mt-[-4.4svh] chat-background  rounded-t-md w-[47.8svw] text-right flex flex-col  border-2 border-white border-t-white   rounded-b-none ">
               <div className="text-3xl text-left drop-shadow-md  text-white ml-[10px] pt-[21px]   font-roboto  h-[80px] whitespace-nowrap">
                 {" "}
