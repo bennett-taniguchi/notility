@@ -1,5 +1,5 @@
 import { Upload } from "@prisma/client";
-import { Checkbox } from "@radix-ui/react-checkbox";
+ 
 import {
   TooltipProvider,
   Tooltip,
@@ -21,6 +21,8 @@ import {
 import UploadButton from "../../upload/UploadButton";
 import dynamic from "next/dynamic";
 import { getPdfText } from "../../../utils/parse_text";
+import { Checkbox } from "../../ui/checkbox";
+import { ScrollArea } from "../../ui/scroll-area";
 
 const BsFiletypeCsv = dynamic(() =>
   import("react-icons/bs").then((module) => module.BsFiletypeCsv)
@@ -121,7 +123,6 @@ export default function SourcesDrawer({
   sources,
   isChild,
   setIsChild,
-
   dispatch,
   uploadOpened,
   setUploadOpened,
@@ -195,23 +196,27 @@ export default function SourcesDrawer({
           </Button>
         </div>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent  style={{zIndex: 1000}}>
         <div className="mx-auto w-full max-w-sm h-[80svh]">
           <DrawerHeader className="absolute left-[1.5svw]">
             <DrawerTitle>Selected Sources:</DrawerTitle>
             <DrawerDescription>Upload or Enter Link</DrawerDescription>
           </DrawerHeader>
           <div className="p-4 pb-0 mt-[3svw]">
+           
             <div className="flex items-center justify-center space-x-2 flex-col group">
+            <ScrollArea  viewportRef={null}>
               {sources.map((source: Upload, idx) => (
-                <div
+                <div 
                   key={source.title}
                   className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5  animated-row px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
                 >
+                  
                   <div className="my-auto  ">
-                    <Checkbox
+                  <Checkbox
+                      style={{zIndex:1000}}
                       id={source.title}
-                      className="mr-3 hover:bg-cyan-100/30"
+                      className="mr-3 hover:bg-cyan-100/30   "
                       defaultChecked={selected.map.get(source.title)}
                       value={selected.map.get(source.title)}
                       onClick={(e) =>
@@ -224,10 +229,12 @@ export default function SourcesDrawer({
                     <TooltipProvider>
                       <Tooltip delayDuration={0}>
                         <TooltipTrigger asChild>
+                          
                           <label
                             htmlFor={source.title}
                             className="text-slate-700 font-roboto text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  "
                           >
+                            
                             {source.title}
                           </label>
                         </TooltipTrigger>
@@ -252,7 +259,9 @@ export default function SourcesDrawer({
                   </TooltipProvider>
                 </div>
               ))}
+                  </ScrollArea>
             </div>
+        
             <div className="mt-3 h-[40svh]"></div>
           </div>{" "}
           <div className="text-md">{selected.selected}</div>

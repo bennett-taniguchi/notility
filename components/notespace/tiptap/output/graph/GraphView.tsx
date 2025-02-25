@@ -29,6 +29,8 @@ export default function GraphView() {
 
 
 
+
+// convert nodes to flattened format representing each n-(r)->n
 function nodesToDict(nodePairs:Object) {
 // nodePairs [0] : usually not Document, has .elementId field  
 // nodePairs [1] : usually  Document, has .elementId field  
@@ -86,8 +88,11 @@ edges.forEach((edge)=> {
 return Array.from(dict.values())
 
 }
+  
+  // convert records to cytoscape friendly format
   function fillData(nodePairs: Object) {
     console.log('ntd',nodesToDict(nodePairs))
+    console.log('np',nodePairs)
     let arr = [] as any;
 
     for (const first in (nodePairs as any).records) {

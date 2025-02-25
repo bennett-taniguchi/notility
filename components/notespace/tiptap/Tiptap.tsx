@@ -294,7 +294,7 @@ const Tiptap = ({
     setContent(editor?.getHTML()!);
   }, [editor?.getHTML()]);
 
-  async function saveNotes(uri, router) {
+  async function saveNotes(uri, router,setContent,setTitle) {
     const body = { title, content, uri };
 
     await fetch("/api/notes/save", {
@@ -302,7 +302,8 @@ const Tiptap = ({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-
+    setTitle('')
+    setContent('')
     Router.push("/notespace/" + uri);
   }
   // updates on changed prop, 1st and third to maintain previous cursor positionining
@@ -371,7 +372,7 @@ const Tiptap = ({
           </NextButton>
            
           <NextButton
-            onClick={() => saveNotes(slug, Router)}
+            onClick={() => saveNotes(slug, Router,setContent,setTitle)}
             className="animated-button z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-10 bottom-1"
           >
             <div className="">Save</div>

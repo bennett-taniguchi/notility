@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { options } from "../../auth/[...nextauth]";
 import "neo4j-driver";
 
- 
+
 import  {driver,auth} from "neo4j-driver";
 // export default async function handle(req, res) {
 //   try {
@@ -43,7 +43,9 @@ import  {driver,auth} from "neo4j-driver";
 //     res.status(500).json({ error: error.message });
 //   }
 //}
+
 // get all within two connections that are either a person or organization from the chunks with session's email
+// given total amount of nodes to return
 export default async function handle(req, res) {
   const session = await getServerSession(req, res, options);
   const  query = req.query.limit;

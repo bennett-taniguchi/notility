@@ -10,7 +10,7 @@ module.exports = {
         hostname: "lh3.googleusercontent.com",
         port: "",
         pathname: "/**",
-        search: "",
+      
       },
       {
         protocol: "https",

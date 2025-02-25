@@ -2,6 +2,7 @@ import { Card, CardContent } from "../../../ui/card";
 
 export default function SourcesBlurb({sources,selected}) {
     function getKeywords(summary: string) {
+        if(!summary) return ""
         return summary.split(".")[0];
       }
     function lookupKeywords(title: string) {

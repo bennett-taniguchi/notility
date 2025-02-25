@@ -1,7 +1,6 @@
 {
     "name": "hello-next",
     "version": "1.0.0",
-    
     "description": "",
     "scripts": {
         "copy-assets": "cp ./node_modules/pdfjs-dist/build/pdf.worker.min.mjs ./public/",
@@ -94,11 +93,11 @@
     "devDependencies": {
         "@tailwindcss/typography": "^0.5.15",
         "@types/node": "17.0.14",
-        "@types/react": "^18.3.1",
+        "@types/react": "18.3.18",
         "autoprefixer": "^10.4.19",
         "postcss": "^8.4.39",
         "prisma": "^5.17.0",
         "tailwindcss": "^3.4.6",
-        "typescript": "^5.5.3"
+        "typescript": "5.7.3"
     }
 }

@@ -281,7 +281,7 @@ export default function OutputTable({
         </div>
         <div className=" absolute right-[3svw] top-[14svh]">
           {" "}
-          <TooltipProvider>
+          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger>
                 {" "}
