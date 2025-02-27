@@ -2,12 +2,13 @@
 
 import React, { useContext, useState } from "react";
 import { Button } from "../ui/button";
-import {
-  chunkTextByMultiParagraphs,
-  getPdfText,
-} from "../../utils/parse_text";
+import { chunkTextByMultiParagraphs, getPdfText } from "../../utils/parse_text";
 import { cva, VariantProps } from "class-variance-authority";
 import { SlugContext } from "../context/context";
+import { toast } from "../../hooks/use-toast";
+import { getSession, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { Separator } from "../ui/separator";
 
 type FileType = {
   name: string;
@@ -57,225 +58,159 @@ export interface ButtonProps
 
 const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ asChild = false, ...props }) => {
+    const { data: session, status } = useSession();
     const [fileName, setFileName] = useState("");
     const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
     const [fileDetails, setFileDetails] = useState<JSX.Element | null>(null);
     const [errorMessage, setErrorMessage] = useState("");
-    
-    const allowedFiletypes = ['.csv', '.pdf', '.md', '.tex', '.json', '.txt'];
+    const Router = useRouter();
+    const allowedFiletypes = [".csv", ".pdf", ".md", ".tex", ".json", ".txt"];
     const slug = useContext(SlugContext);
 
     // On file select (from the pop up)
     const onFileChange = (event) => {
       // Reset error state
       setErrorMessage("");
-      
+
       if (!event.target.files || event.target.files.length === 0) {
         setSelectedFile(null);
         setFileName("");
         return;
       }
-      
+
       const file = event.target.files[0];
-      const extension = '.' + file.name.split('.').pop();
-      
+      const extension = "." + file.name.split(".").pop();
+
       // Validate file type
       if (!allowedFiletypes.includes(extension)) {
-        const errorMsg = `Error: file extension not allowed: ${extension} is not one of: ${allowedFiletypes.join(', ')}`;
+        const errorMsg = `Error: file extension not allowed: ${extension} is not one of: ${allowedFiletypes.join(
+          ", "
+        )}`;
         setErrorMessage(errorMsg);
         setFileName(errorMsg);
         event.target.value = "";
         setSelectedFile(null);
         return;
       }
-      
+
       // Size checking removed to allow large files
-      
+
       // File passed validation
       setSelectedFile(file);
       setFileName(file.name);
-      
+
       // Update file details display
       setFileDetails(
         <div>
-          <h2>File Details:</h2>
+         
           <p>File Name: {file.name}</p>
           <p>File Type: {file.type}</p>
-          <p>Last Modified: {new Date(file.lastModified).toDateString()}</p>
+       
         </div>
       );
-    };
-
-    // Returning nodes from neo4j, currently includes document type nodes
-    const onClickQuery = async (e: any) => {
-      e.preventDefault();
-      try {
-        let res = await fetch("/api/neo4j/get/", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        let data = await res.json();
-
-        let map = new Map();
-        let merged = [] as string[][];
-        for (const datum of data.records) {
-          let props = datum._fields[0].properties;
-
-          if (props && props.id) {
-            console.log(props.id);
-
-            let names = props.id;
-
-            if (Array.isArray(names)) {
-              // We don't want to try to merge on already merged
-            } else {
-              // 'fname lname'
-              if (names.includes(" ")) {
-                let split = names.split(" ");
-
-                split.forEach((name) => {
-                  if (map.has(name)) {
-                    map.set(name, names); // point to fullname
-                    map.set(names, names); // fullest name we know
-                    merged.push([name, names]); // create merge pair
-                  } else {
-                    map.set(name, names); // point to fullname
-                  }
-                });
-                map.set(names, names); // fullest name we know
-              } else {
-                let name = names;
-                if (map.has(name) && map.get(name) != name) {
-                  merged.push([name, map.get(name)]); // merge: fname, fullname
-                } else {
-                  map.set(name, name);
-                }
-              }
-            }
-          }
-        }
-        
-        console.log(map, merged);
-        
-        // Process merges
-        for (const toBeMerged of merged) {
-          let nameA = toBeMerged[0];
-          let nameB = toBeMerged[1];
-          const body = { nameA, nameB };
-
-          let res = await fetch("/api/neo4j/merge/on_entity/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-          });
-          let data = await res.json();
-          console.log(data);
-        }
-      } catch (error) {
-        console.error("Error in query operation:", error);
-        setErrorMessage("Error in query operation");
-      }
     };
 
     // Take uploaded file (if it exists) and converts then inserts -> neo4j
     const onClickSubmit = async (e: any) => {
       e.preventDefault();
-      
+
+      if (!session) {
+        toast({
+          title: " User is not logged in!",
+          description: "Please login",
+        });
+      }
       if (!selectedFile) {
         setErrorMessage("Please select a file to upload");
         return;
       }
-      
+      // new
       try {
-        const filename = selectedFile.name.split('.')[0];
-        const extensionType = selectedFile.name.split('.').pop();
-        
-        if (extensionType === "pdf") {
-          let txt = await getPdfText(selectedFile);
-          let chunked = chunkTextByMultiParagraphs(txt);
-          
-          const body = { chunked, filename };
-            
-          await fetch("/api/neo4j/insert", {
+        const filename = selectedFile.name.split(".")[0];
+        const extensionType = selectedFile.name.split(".").pop();
+
+        if (extensionType == "pdf") {
+          const plainText = await getPdfText(selectedFile);
+
+          let uri = slug.slug;
+          const file = {
+            uri: uri,
+            originalFileName: selectedFile.name,
+            title: filename,
+            owner: session!.user!.email,
+            filetype: extensionType,
+            summary: null,
+          };
+          const body = { plainText, filename, uri, file };
+          await fetch("/api/chat/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
           });
 
-          const upload = { 
-            uri: slug.slug, 
-            originalFileName: filename, 
-            title: filename, 
-            filetype: extensionType, 
-            summary: null 
-          };
-          
-          await fetch('/api/supabase/upload/create/', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({upload})
-          });
-        } else {
-          let txt = await (selectedFile as any).text();
-          let chunked = chunkTextByMultiParagraphs(txt);
-          
-          const upload = { 
-            uri: slug.slug, 
-            originalFileName: filename, 
-            title: filename, 
-            filetype: extensionType, 
-            summary: null 
-          };
-          
-          await fetch('/api/supabase/upload/create/', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({upload})
-          });
+          // addToLocalStorage()
+          Router.push("/notespace/" + uri);
+        } else if (extensionType == "txt") {
+          const plainText = await (selectedFile as any).text();
 
-          // Add to localstorage via function
-          const body = { chunked, filename };
-       
-          await fetch("/api/neo4j/insert", {
+          let uri = slug.slug;
+          const file = {
+            uri: uri,
+            originalFileName: selectedFile.name,
+            title: filename,
+            owner: session!.user!.email,
+            filetype: extensionType,
+            summary: null,
+          };
+          const body = { plainText, filename, uri, file };
+          await fetch("/api/chat/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
           });
+
+          // addToLocalStorage()
+          Router.push("/notespace/" + uri);
         }
-        
-        // Show success message
-        setErrorMessage("");
-        alert("File successfully uploaded and processed!");
-      } catch (error) {
-        console.error("Error in submit operation:", error);
-        setErrorMessage("Error processing file. Please try again.");
+      } catch (e) {
+        toast({
+          title: "Uh Oh",
+          description:
+            "Something went wrong with file upload please try again!",
+        });
       }
     };
 
     return (
-      <div>
-        <h1>Upload for Neo4j and Querying Testing</h1>
+      <div className="flex flex-row  w-[33.5svw] ml-[-6.5svw]">
+
+        <div className="flex flex-col mx-auto text-sm">
+        <div className="text-center">Upload a File:</div>
+
+<div className="flex flex-row">
+<input  className='ml-[2svw]' type="file" onChange={onFileChange} />
+ 
+
+</div>
+<Button className=" animated-button mx-auto mt-[10px] w-[130px]" onClick={onClickSubmit} disabled={!selectedFile}>
+  Add Source
+</Button>   
+
+
         
-        <div>
-          <input type="file" onChange={onFileChange} />
-          
-          <Button 
-            onClick={onClickSubmit}
-            disabled={!selectedFile}
-          >
-            Submit into Neo4j
-          </Button>
-          
-          <Button onClick={onClickQuery}>Query25</Button>
+         
         </div>
-        
+         
+   
+        <div className="flex flex-col text-sm text-red-700 max-w-[12svw] max-h-[12svh]">
         {errorMessage ? (
-          <p style={{ color: 'red' }}>{errorMessage}</p>
+          <p style={{ color: "red" }}>{errorMessage}</p>
         ) : (
-          <i>{fileName}</i>
+          <i> </i>
         )}
+
         
-        {fileDetails}
+        </div>
       </div>
     );
   }

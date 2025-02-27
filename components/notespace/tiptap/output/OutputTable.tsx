@@ -26,6 +26,7 @@ import {
   DialogDescription,
   DialogContent,
   Dialog,
+  DialogOverlay,
 } from "../../../ui/dialog";
 import { BiLogoGraphql } from "react-icons/bi";
 import { Label } from "../../../ui/label";
@@ -33,14 +34,7 @@ import QuizDialog from "./QuizDialog";
 import GuideDialog from "./GuideDialog";
 import TestDialog from "./TestDialog";
 import { RiExpandHorizontalSFill } from "react-icons/ri";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../../ui/tooltip";
-import GraphView from "./graph/GraphView";
-
+ 
 function NoteOptions({
   title,
   setNewTitle,
@@ -71,14 +65,18 @@ function NoteOptions({
     Router.push("/notespace/" + uri);
   }
   return (
-    <Dialog modal={true} open={open} onOpenChange={setOpen}>
+    <Dialog   open={open} onOpenChange={setOpen} >
+      
       <DialogContent className="sm:max-w-[425px]  ">
+     
         <DialogHeader>
+        
           <DialogTitle>Edit Set</DialogTitle>
           <DialogDescription>
             For Note: <i>{title}</i>
           </DialogDescription>
         </DialogHeader>
+       
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4 -ml-[3svw]">
             <Label htmlFor="name" className="text-right">
@@ -93,6 +91,7 @@ function NoteOptions({
           </div>
         </div>
         <DialogFooter>
+    
           <Button
             variant={"destructive"}
             className="mx-auto ml-0"
@@ -110,6 +109,7 @@ function NoteOptions({
           </Button>
         </DialogFooter>
       </DialogContent>
+ 
     </Dialog>
   );
 }
@@ -243,7 +243,7 @@ export default function OutputTable({
         {" "}
         <RiExpandHorizontalSFill
           onClick={() => toggleCollapse()}
-          className="text-black w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
+          className="hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
           width={40}
           height={40}
         />
@@ -262,7 +262,7 @@ export default function OutputTable({
         </Button>
         </div>
        
-        <GraphView/>
+  
       </div>
     )
   }
@@ -273,32 +273,13 @@ export default function OutputTable({
           {" "}
           <RiExpandHorizontalSFill
             onClick={() => toggleCollapse()}
-            className="  text-black w-[20px] h-[20px] absolute right-[5px] top-[-18px] cursor-pointer"
+            className="  hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[-18px] cursor-pointer"
             width={40}
             height={40}
           />
           Output
         </div>
-        <div className=" absolute right-[3svw] top-[14svh]">
-          {" "}
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger>
-                {" "}
-                <Button
-                  variant={"outline"}
-                  className="px-[5px] text-black animated-button border-2 border-white"
-                  onClick={()=>(setView as any)(!view)}
-                >
-                  <BiLogoGraphql className="w-[30px] h-[30px]" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className=" ">
-                <p>Graph View</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+     
       </div>
       <Table className="w-[46svw] mx-auto   bg-sky-100">
         {notes.length == 0 ? (
@@ -346,7 +327,7 @@ export default function OutputTable({
                 >
                   {datum.createdBy}
                 </TableCell>
-                <TableCell className="w-[2svw] h-[5svh] hover:bg-white">
+                <TableCell className="w-[2svw] h-[5svh] hover:bg-indigo-800">
                   {" "}
                   <NoteOptions
                     title={datum.title}

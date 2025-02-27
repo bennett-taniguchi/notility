@@ -49,8 +49,8 @@ export function HTMLtoText(text: string): string {
 // Return array of strings aka chunks
 export function chunkTextByMultiParagraphs(
   text: string,
-  maxChunkSize = 4000,
-  minChunkSize = 4000
+  maxChunkSize = 500,
+  minChunkSize = 500
 ): string[] {
   const chunks: string[] = [];
   let currentChunk = "";
@@ -106,7 +106,7 @@ export async function embedChunksDense(chunks: string[]): Promise<any> {
   // In this example, we use OpenAI's text-embedding-3-small model.
   const openai = new OpenAI({
     apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true,
+ 
   });
 
   try {
@@ -175,7 +175,7 @@ export type SummaryRecord = {
   overallSummary: string
 }
 // batches appropriate vectors and upserts using api path into the namespace matching users email
-export async function upsertVectors(
+export async function createVectorRecords(
   embeddings: embedding[],
   chunks: string[],
   summaries: string,
@@ -185,7 +185,7 @@ export async function upsertVectors(
   // Get the Pinecone index
   //   let index = pc.index("notility");
   const vectors: any[] = chunks.map((chunk, idx) => ({
-    id: "vec" + idx,
+    id: "vec"+ idx,
     values: embeddings[idx].embedding,
     metadata: {
       text: chunk,
@@ -193,7 +193,7 @@ export async function upsertVectors(
       summary: summaries
     },
   }));
-
+return vectors;
   //Batch the upsert operation
   let batches = [] as VectorRecord[][];
   const batchSize = 200;

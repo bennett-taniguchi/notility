@@ -39,3 +39,10 @@ export const NotesContext = createContext({
     nodes: [],
     setNodes: null
  })
+
+ export const TiptapContext = createContext({
+    title: '',
+    setTitle: null,
+    content: '',
+    setContent: null,
+ })

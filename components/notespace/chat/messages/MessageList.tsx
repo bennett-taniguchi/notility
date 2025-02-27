@@ -278,8 +278,8 @@ export default function MessageList({ messagesLoaded }) {
             <Card
               className={
                 m.role === "user"
-                  ? "bg-sky-200 drop-shadow-md border-sky-400 shadow-inner min-w-[10svw]"
-                  : "bg-indigo-200 drop-shadow-lg shadow-inner border-indigo-400 min-w-[10svw]"
+                  ? "reverse-chat-background drop-shadow-lg  border-2  border-white   min-w-[10svw]"
+                  : "chat-background drop-shadow-lg shadow-inner border-2 border-white min-w-[10svw]"
               }
             >
               <div key={m.id} className="whitespace-pre-wrap">

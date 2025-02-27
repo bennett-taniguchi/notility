@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import { SlugContext } from "../../../context/context";
 import { TrashIcon } from "@radix-ui/react-icons";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../ui/tooltip";
 
 export default function InputArea({setLoading,scrollMsg,selected,messagesLoaded,title} ) {
     const Router = useRouter()
@@ -76,10 +77,20 @@ export default function InputArea({setLoading,scrollMsg,selected,messagesLoaded,
             autoComplete="off"
           />
           <div>
-          <TrashIcon
-          className=" fixed  bottom-[5.5svh] right-[54svw] scale-150 hover:stroke-zinc-400 hover:bg-zinc-200/50 hover:stroke-[.5] rounded-full  "
+          <TooltipProvider>
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+        <TrashIcon
+          className=" fixed  bottom-[5.5svh] right-[54svw] scale-150 hover:stroke-red-400   hover:stroke-[.7] rounded-full  "
           onClick={handleDeleteChat}
         />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Delete Current Chat</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+          
           </div>
        
         </form>

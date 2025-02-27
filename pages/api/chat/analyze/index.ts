@@ -1,148 +1,94 @@
-import { getServerSession } from "next-auth";
-import { options as authOptions } from "../../auth/[...nextauth]";
 import prisma from "../../../../lib/prisma";
 import { Pinecone } from "@pinecone-database/pinecone";
 import {
-  HTMLtoText,
-  SummaryRecord,
   chunkTextByMultiParagraphs,
-
+  createVectorRecords,
   embedChunksDense,
- 
-  upsertVectors,
+  
 } from "../../../../utils/parse_text";
 import OpenAI from "openai";
-import { Upload } from "@prisma/client";
-import { options } from "../../auth/[...nextauth]";
-async function updateUploadSummary(name,uri,overallSummary) {
-  await prisma.upload.update ({
+ 
 
-    where: {
-        uri_title_originalFileName: {
-            uri:uri,
-            title:name,
-            originalFileName:name
-        }
-        
-    },
-    data: {
-        summary:overallSummary
-    }
-} )
-}
+// moving to summarize by first chunk out of laziness
 async function getOverallSummary(chunks: string[]) {
   const openai = new OpenAI({
     apiKey: process.env["OPENAI_API_KEY"],
   });
 
-  // Process all chunks in parallel
-  const summaries = await Promise.all(
-    chunks.map(async (chunk) => {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "You are a succinct analyzer who reads chunks of information and gives a concise summary that includes broad topic keywords offering context",
-          },
-          {
-            role: "user",
-            content: chunk,
-          },
-        ],
-      });
-      
-      return completion.choices[0].message.content;
-    })
-  );
-
-  // If there's only one chunk, return its summary
-  if (summaries.length === 1) {
-    return summaries[0];
-  }
-
-  // If there are multiple chunks, create a final summary of summaries
-  const combinedSummary = await openai.chat.completions.create({
-    model: "gpt-4o",
+  const chunk = chunks[0]
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: "You are a succinct analyzer who combines multiple summaries into one coherent overview",
+        content:
+          "You are a succinct analyzer who reads chunks of information and gives a concise summary that includes broad topic keywords offering context",
       },
       {
         role: "user",
-        content: `Please combine these summaries into one coherent overview, ensure the first sentence is comprised entirely of most relevant keywords in a comma-separated format and begin it as 'Topics Covered:': ${summaries.join(" | ")}`,
+        content: chunk,
       },
     ],
   });
-
-  return combinedSummary.choices[0].message.content;
-}
+  return completion.choices[0].message.content;
  
+}
 
 export default async function handle(req, res) {
-  
-  const session = await getServerSession(req, res,options);
-   
-  const { plainText, name, uri,file} = req.body;   
-  if(plainText=='') {res.json('empty'); return;}
+ 
+  const pc = new Pinecone({
+    apiKey: process.env.PINECONE_API_KEY as string,
+  });
+  const PINECONE_HOST = process.env.PINECONE_HOST as string
+  const { plainText, filename, uri, file } = req.body;
+  if (plainText == "") {
+    res.json("empty");
+    return;
+  }
+
   //const parsed = HTMLtoText(notes_contents); // remove html tags
 
   const chunks = chunkTextByMultiParagraphs(plainText); // Chunk on max words
- 
 
-  const overallSummary = await getOverallSummary(chunks)
- 
+  const overallSummary = await getOverallSummary(chunks);
   const denseEmbeddings = await embedChunksDense(chunks); // Chunks -> Dense Vectors
+  const vecs = await createVectorRecords(
+    denseEmbeddings,
+    chunks,
+    overallSummary!,
+    filename
+  );  
+
+  let index = pc.index("notespace",PINECONE_HOST);
+  let namespace = uri;
  
+  // Batch processing
+  const BATCH_SIZE = 200;
+  let batches = [] as any;
   
-  const upserted = await upsertVectors(denseEmbeddings, chunks, overallSummary!, name); // our own upsertion to pinecone db, need to split on diff users namespace
+  // First, split vectors into batches of 200
+  for (let i = 0; i < vecs.length; i += BATCH_SIZE) {
+    batches.push(vecs.slice(i, i + BATCH_SIZE));
+  }
 
-
- 
-  /// eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-
-  if (upserted)
-    for (let i = 0; i < upserted[0]?.length; i++) {
-      const batch = upserted[0][i];
-      
-      //console.log('analyze 34',batch);
-      const pc = new Pinecone({
-        apiKey: process.env.PINECONE_API_KEY as string,
-      });
-
-      let index = pc.index("notespace");
-      let namespace = uri;
-
-      await index.namespace(namespace).upsert([batch] as any);
-     
-    
+  console.log(`Split ${vecs.length} vectors into ${batches.length} batches`);
+  
+  try {
+    // Process each batch
+    for (let j = 0; j < batches.length; j++) {
+      console.log(`Upserting batch ${j + 1}/${batches.length} with ${batches[j].length} vectors`);
+      await index.namespace(namespace).upsert(batches[j]);
+      console.log(`Successfully upserted batch ${j + 1}`);
     }
 
- 
-   let convertedUpload={ ...file as  Upload, owner: session?.user.email };
- 
-  try {
+    // Save to database
     let result = await prisma.upload.create({
-      data: {...convertedUpload, summary:overallSummary },
+      data: { ...file, summary: overallSummary },
     });
 
     res.json({ result });
   } catch (e) {
-    console.log(e);
+    console.error("Error in batch processing:", e);
+    res.status(500).json({ error: "Failed to process vectors" });
   }
-  
-  ///eeeeeeeeeeeeeeee
-  // format:
-  // 0: {embedding (1536) [.1232,...], index:0, object:"embedding"},
-
-  // uploaded to our db (for what purpose?) (* once i do more, could probably only store title?)
-  //// intended feature could be taht you can scroll thru paginated combined notes and eventually
-  ////// ai will give you location and annotations upon where you query and what you looked for (...)
-  ////// This would be pretty cool in the case that you want to study quickly and ai is given a
-  ////// list of terms you need to study and it just marks on all your notes for you and can splice
-  ////// into a study page or focus upon structure and creation of related content
-
-  // do whole embeddings process thingy for pinecone
-  //
 }

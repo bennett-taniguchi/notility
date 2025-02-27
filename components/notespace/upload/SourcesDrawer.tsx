@@ -1,11 +1,6 @@
 import { Upload } from "@prisma/client";
  
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
+ 
 
 import { Drawer } from "../../ui/drawer";
 import { Button } from "../../ui/button";
@@ -23,6 +18,9 @@ import dynamic from "next/dynamic";
 import { getPdfText } from "../../../utils/parse_text";
 import { Checkbox } from "../../ui/checkbox";
 import { ScrollArea } from "../../ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
+import { FaCircleInfo } from "react-icons/fa6";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
 const BsFiletypeCsv = dynamic(() =>
   import("react-icons/bs").then((module) => module.BsFiletypeCsv)
@@ -133,28 +131,28 @@ export default function SourcesDrawer({
 }) {
   function FileIcon({ extension }) {
     switch (extension) {
-      case ".pdf":
+      case "pdf":
         return (
           <FaFilePdf className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-rose-800 fill-rose-800" />
         );
-      case ".md":
+      case "md":
         return (
           <FaMarkdown className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-blue-800 fill-blue-800" />
         );
-      case ".csv":
+      case "csv":
         return (
           <BsFiletypeCsv className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-green-800 fill-green-800" />
         );
-      case ".tex":
+      case "tex":
         return (
           <SiLatex className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-green-400 fill-green-400" />
         );
-      case ".json":
+      case "json":
         return (
           <TbJson className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-yellow-600" />
         );
 
-      case ".txt":
+      case "txt":
         return (
           <TbTxt className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-zinc-600" />
         );
@@ -192,24 +190,24 @@ export default function SourcesDrawer({
                 clip-rule="evenodd"
               ></path>
             </svg>
-            Select Sources
+            Sources
           </Button>
         </div>
       </DrawerTrigger>
       <DrawerContent  style={{zIndex: 1000}}>
-        <div className="mx-auto w-full max-w-sm h-[80svh]">
+        <div className="mx-auto w-full max-w-sm h-[85svh]">
           <DrawerHeader className="absolute left-[1.5svw]">
             <DrawerTitle>Selected Sources:</DrawerTitle>
             <DrawerDescription>Upload or Enter Link</DrawerDescription>
           </DrawerHeader>
-          <div className="p-4 pb-0 mt-[3svw]">
+          <div className="p-4   mt-[3svw]  h-[60svh] pb-[5svh]"  >
            
-            <div className="flex items-center justify-center space-x-2 flex-col group">
-            <ScrollArea  viewportRef={null}>
+            <ScrollArea className=" justify-self-center w-[32svw] h-[60svh]   group   " viewportRef={null}>
+       
               {sources.map((source: Upload, idx) => (
                 <div 
                   key={source.title}
-                  className=" shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm ml-1.5  animated-row px-[1svw] rounded-md  w-[30svw] flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
+                  className="w-[31.5svw] ml-[2px]  shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm    animated-row px-[1svw] rounded-md   flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
                 >
                   
                   <div className="my-auto  ">
@@ -226,27 +224,30 @@ export default function SourcesDrawer({
                         })
                       }
                     />
-                    <TooltipProvider>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          
-                          <label
+                       
+                       <label
                             htmlFor={source.title}
                             className="text-slate-700 font-roboto text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  "
                           >
                             
                             {source.title}
                           </label>
+         
+                  </div>
+                  <TooltipProvider>
+                      <Tooltip delayDuration={0} >
+                        <TooltipTrigger asChild>
+                        <FaCircleInfo className="absolute h-[15px] w-[15px] mt-[12px] mr-[60px] cursor-pointer my-auto ml-[5px] right-0 justify-self-end" />
                         </TooltipTrigger>
-                        <TooltipContent className="multiline w-[40svw] overflow-y-auto font-bold">
+                        <TooltipContent  className="absolute mt-[37px] ml-[15svw] multiline max-w-[400px] min-w-[200px] overflow-y-auto font-bold      "  >
+                          <ReactMarkdown>
                           {source.summary
                             ? getKeywords(source.summary)
                             : "No Summary Yet, Please Wait"}
+                            </ReactMarkdown>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  </div>
-
                   <BsThreeDotsVertical className="right-0 absolute mr-[2svw] h-[1.5svw] w-[1.5svw] mt-[.9svh]  fill-slate-700" />
                   <FileIcon extension={source.filetype as any} />
                   <TooltipProvider>
@@ -254,29 +255,28 @@ export default function SourcesDrawer({
                       <TooltipTrigger asChild>
                         <div className="w-[2svw] h-[5svh]   right-0 absolute" />
                       </TooltipTrigger>
-                      <TooltipContent>{source.filetype}</TooltipContent>
+                      <TooltipContent className="absolute mt-[37px] ml-[-30px]">{source.filetype}</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
               ))}
-                  </ScrollArea>
-            </div>
+                  
+            </ScrollArea>
         
-            <div className="mt-3 h-[40svh]"></div>
+            
           </div>{" "}
-          <div className="text-md">{selected.selected}</div>
-          <DrawerFooter className="flex flex-row  ml-[2svw] mb-[20svh]   absolute">
+      
+          <DrawerFooter className="flex flex-col  mt-[-20px] ">
           
 
-         
+             
             <UploadButton
               fileContent={fileContent}
               setFileContent={setFileContent}
             />
-          
-            <DrawerClose asChild>
+                 <DrawerClose asChild>
               <Button
-                className="w-[10svh]  "
+                className="w-[10svh] mx-auto  "
                 variant="outline"
                 onClick={() => {
                   setIsChild(false);
@@ -285,6 +285,9 @@ export default function SourcesDrawer({
                 Cancel
               </Button>
             </DrawerClose>
+            
+          
+       
           </DrawerFooter>
         </div>
       </DrawerContent>

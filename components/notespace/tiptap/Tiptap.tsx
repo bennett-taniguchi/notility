@@ -324,7 +324,7 @@ const Tiptap = ({
     } else {
       editor?.commands.setContent(givenContent, true);
     }
-    console.log(title, content);
+  
   }, []);
   return (
     <>

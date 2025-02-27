@@ -192,12 +192,12 @@ export default async function handle(req, res) {
   let content_system = completion.choices[0].message.content as string;
 
   let queriedTitles = selectedArr.length != 0 ? selectedArr.toString() : title
-  console.log('rag falled')
+
   const result = await prisma.message.createMany({
     data: [
       {
         uri:uri,
-       
+      
         content: content_user,
         authorId: session.id,
         role: "user",
@@ -205,7 +205,7 @@ export default async function handle(req, res) {
       },
       {
         uri:uri,
-       
+      
         content: content_system,
         authorId: session.id,
         role: "system",
