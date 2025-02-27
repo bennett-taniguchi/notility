@@ -1,16 +1,12 @@
 // Filename - App.js
 
-import axios from "axios";
 import React, { useContext, useState } from "react";
 import { Button } from "../ui/button";
 import {
   chunkTextByMultiParagraphs,
-  embedChunksDense,
   getPdfText,
 } from "../../utils/parse_text";
 import { cva, VariantProps } from "class-variance-authority";
-import { Slot } from "@radix-ui/react-slot";
-import { Upload } from "@prisma/client";
 import { SlugContext } from "../context/context";
 
 type FileType = {
@@ -93,15 +89,7 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         return;
       }
       
-      // Validate file size (5MB limit)
-      if (file.size > 5242880) {
-        const errorMsg = `Error: file is too large: ${file.size} Bytes, max size is: 5242880 Bytes or 5MB`;
-        setErrorMessage(errorMsg);
-        setFileName(errorMsg);
-        event.target.value = "";
-        setSelectedFile(null);
-        return;
-      }
+      // Size checking removed to allow large files
       
       // File passed validation
       setSelectedFile(file);

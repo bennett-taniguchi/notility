@@ -84,7 +84,7 @@ model Notes {
  
  
 model Message {
-  index       Int    @id
+  index       Int    @id @default(autoincrement())
   authorId String
   role     String
   content  String

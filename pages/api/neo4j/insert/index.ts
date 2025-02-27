@@ -31,6 +31,7 @@ const llmGraphTransformer = new LLMGraphTransformer({
   ],
   nodeProperties: ["good_or_evil", "job"],
   strictMode: false,
+  
 });
 
 export default async function handle(req, res) {

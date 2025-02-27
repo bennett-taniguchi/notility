@@ -210,7 +210,7 @@ function NoteModal({
             <Label htmlFor="content" className="text-right">
               Content
             </Label>
-            <ScrollArea viewportRef={null} color="h-[40svh]">
+            <ScrollArea viewportRef={null} color="h-[40svh] ">
               <div className="h-[40svh] text-sm">{content}</div>
             </ScrollArea>
           </div>

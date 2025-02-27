@@ -33,17 +33,16 @@ export default function InputArea({setLoading,scrollMsg,selected,messagesLoaded,
       let selectedArr = selected.selectedArr;
       console.log("47 chat, RAG:", selected, selectedArr);
       const body = { prompt, messages, selectedArr, uri, title, };
+
+
      await fetch("/api/neo4j/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-      }).then(async (res) => {
-        setInput("");
+      }) 
+      setInput("");
         setLoading(false);
         Router.push("/notespace/" + uri);
-        let val = await res.json()
-        console.log(val)
-      }) 
     }
   }
  // tracks text input for chat

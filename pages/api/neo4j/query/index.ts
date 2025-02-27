@@ -208,12 +208,73 @@ LIMIT ${limit}`,
 
   let queriedTitles = selectedArr.length != 0 ? selectedArr.toString() : title
 
+
+  // try {
+  //   const result = await prisma.$transaction(async (tx) => {
+  //     // Create first message
+  //     const message1 = await tx.message.create({
+  //       data: {
+  //         uri: uri,
+  //         content: content_user,
+  //         authorId: session.id,
+  //         role: "user",
+  //         title: queriedTitles,
+  //       },
+  //     });
+  
+  //     // Create second message, using the first message's index + 1
+  //     const message2 = await tx.message.create({
+  //       data: {
+  //         uri: uri,
+  //         index: message1.index + 1,  // Explicitly use message1's index + 1
+  //         content: content_system,
+  //         authorId: session.id,
+  //         role: "system",
+  //         title: queriedTitles,
+  //       },
+  //     });
+  
+  //     return [message1, message2];
+  //   });
+    
+  //   res.json({ result });
+  // } catch (e) {
+  //   console.log(e);
+  //   res.status(500).json({ error: e.message });
+  // }
   // 7) update supabase entries:
+
+//   const res1=await prisma.message.create({
+//     data:  
+//       {
+//         uri:uri,
+//         content: content_user,
+//         authorId: session.id,
+//         role: "user",
+//         title: queriedTitles,
+      
+//     } 
+// })
+
+// const res2= await prisma.message.create({
+//   data: 
+//     {
+//       uri:uri,
+//       content: content_system,
+//       authorId: session.id,
+//       role: "system",
+//       title: queriedTitles,
+    
+//   } 
+// })
+ 
+try {
+ 
   const result = await prisma.message.createMany({
     data: [
       {
         uri:uri,
-        index: messages.length + 1,
+       
         content: content_user,
         authorId: session.id,
         role: "user",
@@ -221,7 +282,7 @@ LIMIT ${limit}`,
       },
       {
         uri:uri,
-        index: messages.length + 2,
+       
         content: content_system,
         authorId: session.id,
         role: "system",
@@ -230,7 +291,13 @@ LIMIT ${limit}`,
       },
     ],
   });
-  console.log('chunks',chunks)
-  console.log('relationshipsSTRING: ',relationshipsString)
-  res.json(result);
+  res.json({result})
+} catch(e) {
+  console.log(e)
+}
+ 
+  // console.log('chunks',chunks)
+  // console.log('relationshipsSTRING: ',relationshipsString)
+  // res.json(({res1,res2}));
+ 
 }
