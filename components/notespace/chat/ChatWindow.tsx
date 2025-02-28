@@ -94,7 +94,7 @@ console.log(selected)
           <div className="   bg-sky-100 w-[45svw]  flex flex-col  max-w-1/2 py-10  stretch gap-y-2 min-h-[80svh]  pb-[200px] ">
             <RiExpandHorizontalSFill
               onClick={() => toggleCollapse()}
-              style={{ zIndex: 999 }}
+              style={{ zIndex: 10 }}
               className="    hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
               width={40}
               height={40}
@@ -103,7 +103,7 @@ console.log(selected)
               <div className="text-3xl text-left drop-shadow-md  text-white ml-[10px] pt-[21px]   font-roboto  h-[80px] whitespace-nowrap">
                 {" "}
                 
-                Chat with AI using <span className="text-indigo-800/80">{selected.selectedArr.length} {selected.selectedArr.length <= 1 ?  'Source' :'Sources'}{" "}</span>
+                Chat with AI using <span className="text-indigo-800/80">{selected.selectedArr.length} {selected.selectedArr.length == 1 ?  'Source' :'Sources'}{" "}</span>
                 <div className="text-right "> {children}</div>
               </div>
             </div>

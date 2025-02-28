@@ -6,6 +6,7 @@ import {
   GraphViewContext,
   NotesContext,
   SlugContext,
+  TiptapContext,
 } from "../../../context/context";
 import { Button } from "../../../ui/button";
 import {
@@ -34,7 +35,7 @@ import QuizDialog from "./QuizDialog";
 import GuideDialog from "./GuideDialog";
 import TestDialog from "./TestDialog";
 import { RiExpandHorizontalSFill } from "react-icons/ri";
- 
+
 function NoteOptions({
   title,
   setNewTitle,
@@ -65,18 +66,15 @@ function NoteOptions({
     Router.push("/notespace/" + uri);
   }
   return (
-    <Dialog   open={open} onOpenChange={setOpen} >
-      
-      <DialogContent className="sm:max-w-[425px]  ">
-     
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent  className="sm:max-w-[425px]  ">
         <DialogHeader>
-        
           <DialogTitle>Edit Set</DialogTitle>
           <DialogDescription>
             For Note: <i>{title}</i>
           </DialogDescription>
         </DialogHeader>
-       
+
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4 -ml-[3svw]">
             <Label htmlFor="name" className="text-right">
@@ -91,7 +89,6 @@ function NoteOptions({
           </div>
         </div>
         <DialogFooter>
-    
           <Button
             variant={"destructive"}
             className="mx-auto ml-0"
@@ -109,18 +106,26 @@ function NoteOptions({
           </Button>
         </DialogFooter>
       </DialogContent>
- 
     </Dialog>
   );
 }
 
-function OutputContentButtons({ setEditorVisible, Router }) {
+function OutputContentButtons({ setEditorVisible, Router, setSelectedNote }) {
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [guideDialogOpen, setGuideDialogOpen] = useState(false);
+
+  const { setTitle, setContent } = useContext(TiptapContext);
+
   const { collapse } = useContext(CollapseContext);
   const { slug } = useContext(SlugContext);
 
+  function newNote() {
+    if (setTitle && setContent) {
+      setSelectedNote({ title: "", content: "" });
+      setEditorVisible(true);
+    }
+  }
   // ensure only 1 dialog open at a type
   function openSelectedDialog(dialogType) {
     setTestDialogOpen(false);
@@ -140,7 +145,7 @@ function OutputContentButtons({ setEditorVisible, Router }) {
       <Button
         variant={"outline"}
         className="    whitespace-nowrap  animated-row border-2 border-white"
-        onClick={() => setEditorVisible(true)}
+        onClick={() => newNote()}
       >
         Create new Note
       </Button>
@@ -195,8 +200,9 @@ export default function OutputTable({
   selectedNote,
   setSelectedNote,
 }) {
-  const [response,setResponse] = useState([]) as any
-  const [view,setView] = useState(false)
+  const { setTitle } = useContext(TiptapContext);
+  const [response, setResponse] = useState([]) as any;
+  const [view, setView] = useState(false);
 
   const { collapse, setCollapse } = useContext(CollapseContext);
   const { notes } = useContext(NotesContext);
@@ -209,7 +215,9 @@ export default function OutputTable({
 
   useEffect(() => {}, [collapse]);
 
-  useEffect(()=> {console.log('response',response)}, [response])
+  useEffect(() => {
+    console.log("response", response);
+  }, [response]);
   function toggleCollapse() {
     if (collapse == "none") {
       (setCollapse as any)("output");
@@ -219,22 +227,23 @@ export default function OutputTable({
   }
 
   async function testQuery() {
-    let prompt = 'Who are the enemies of harry potter and can you describe them?'
+    let prompt =
+      "Who are the enemies of harry potter and can you describe them?";
 
-    let messages= []
-    let title = []
-    let limit = 25
-    let body = {prompt,messages,title,limit}
+    let messages = [];
+    let title = [];
+    let limit = 25;
+    let body = { prompt, messages, title, limit };
 
-    const res = await fetch('/api/neo4j/query',
-     { headers:{'Content-Type':'application/json'},
-      method:'POST',
-      body: JSON.stringify(body)
-    })
+    const res = await fetch("/api/neo4j/query", {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify(body),
+    });
 
     const data = await res.json();
 
-    setResponse(data)
+    setResponse(data);
   }
 
   if (collapse == "output")
@@ -250,21 +259,25 @@ export default function OutputTable({
       </div>
     );
 
-  if(view) {
-    return(
+  if (view) {
+    return (
       <div className="w-[46svw] h-[80svh] m-auto">
         <div>
-        <Button onClick={()=>setView(false)} className="animated-row">
-          Go Back to Table View
-        </Button>
-        <Button onClick={()=>testQuery()} className="animated-row">
-          Test Neo4j-CSS-Query
-        </Button>
+          <Button onClick={() => setView(false)} className="animated-row">
+            Go Back to Table View
+          </Button>
+          <Button onClick={() => testQuery()} className="animated-row">
+            Test Neo4j-CSS-Query
+          </Button>
         </div>
-       
-  
       </div>
-    )
+    );
+  }
+  function selectNoteAndTitle(note) {
+    if (setTitle) (setTitle as any)(note.title);
+
+    console.log(note);
+    setSelectedNote(note);
   }
   return (
     <div className="bg-sky-100 rounded-xl ">
@@ -279,7 +292,6 @@ export default function OutputTable({
           />
           Output
         </div>
-     
       </div>
       <Table className="w-[46svw] mx-auto   bg-sky-100">
         {notes.length == 0 ? (
@@ -301,7 +313,7 @@ export default function OutputTable({
               <TableRow
                 key={datum.title}
                 className="w-max h-max hover:bg-indigo-400/50   hover:text-white animated-row border-none text-black"
-                onClick={() => setSelectedNote(notes[idx] as any)}
+                onClick={() => selectNoteAndTitle(notes[idx])}
               >
                 <TableCell
                   onClick={() => setEditorVisible(!editorVisible)}
@@ -353,6 +365,7 @@ export default function OutputTable({
 
       <OutputContentButtons
         setEditorVisible={setEditorVisible}
+        setSelectedNote={setSelectedNote}
         Router={Router}
       />
     </div>

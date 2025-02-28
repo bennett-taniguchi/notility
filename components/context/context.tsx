@@ -40,6 +40,7 @@ export const NotesContext = createContext({
     setNodes: null
  })
 
+ 
  export const TiptapContext = createContext({
     title: '',
     setTitle: null,

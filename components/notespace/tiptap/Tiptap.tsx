@@ -36,7 +36,7 @@ import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
 import { cn } from "../../lib/utils";
 import { CardTitle } from "../../ui/card";
-import { SlugContext } from "../../context/context";
+import { SlugContext, TiptapContext } from "../../context/context";
 import { useRouter } from "next/router";
 import { IoReturnUpBack } from "react-icons/io5";
 import BubbledInput from "../../ui/personal/BubbledInput";
@@ -235,8 +235,7 @@ const Tiptap = ({
 }) => {
   const [tags,setTags] = useState([])
   const [initial, setInitial] = useState(true);
-  const [title, setTitle] = useState(givenTitle);
-  const [content, setContent] = useState(givenContent);
+  const {title,setTitle,content,setContent} = useContext(TiptapContext)
   const { slug } = useContext(SlugContext);
   const Router = useRouter();
   const editor = useEditor({
@@ -291,7 +290,8 @@ const Tiptap = ({
         },
       },
     });
-    setContent(editor?.getHTML()!);
+    if(setContent)
+    (setContent as any)(editor?.getHTML()!);
   }, [editor?.getHTML()]);
 
   async function saveNotes(uri, router,setContent,setTitle) {
@@ -310,22 +310,37 @@ const Tiptap = ({
   useEffect(() => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
-    editor?.commands.setContent(content, false);
+    editor?.commands.setContent(content, true);
     editor.commands.setTextSelection({ from, to });
+    console.log(content,'set editor',editor.getText())
   }, [content]);
 
   useEffect(() => {
     if (!givenTitle) {
-      setTitle("");
+      if(setTitle)
+      (setTitle as any)("");
     }
 
     if (!givenContent) {
-      setContent("");
+      if(setContent) {
+        (setContent as any)("");
+       
+      }
+      editor?.commands.setContent('', true);
+     
     } else {
       editor?.commands.setContent(givenContent, true);
     }
+
+ 
   
   }, []);
+
+  useEffect(()=>{
+console.log(title,'changed')
+  },[title]);
+
+ 
   return (
     <>
       <div className="   chat-background rounded-t-xl">
@@ -341,7 +356,7 @@ const Tiptap = ({
         <div className="flex flex-row">
         <Textarea
         maxLength={60}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => {if(setTitle)(setTitle as any)(e.target.value)}}
         value={title}
         placeholder="Write a Title"
         className=" w-[50svw] text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
@@ -381,7 +396,7 @@ const Tiptap = ({
            
           <EditorContent
             editor={editor}
-            onChange={() => setContent(editor?.getHTML()!)}
+            onChange={() => (setContent as any)(editor?.getHTML()!)}
             value={content}
             content={content}
             className=" text-zinc-700 pl-5    focus-visible:ring-0 border-0  h-[70svh]  bg-transparent "
