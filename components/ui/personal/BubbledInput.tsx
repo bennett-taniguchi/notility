@@ -20,7 +20,7 @@ function TagOptions({
     setFilteredOptions(filteredOptions.filter((opt) => opt != name));
     setLatestInput("");
   }
-  let options = [...tagList, "math", "physics", "english"];
+  let options = [...tagList];
   let visibility =
     inputFocused == true && filteredOptions.length != 0 ? "" : "hidden";
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function BubbledInput({ tagList, setTagList, customInput= false, 
   const scrollAreaRef = useRef(null);
   const inputRef = useRef(null);
   const inputDivRef = useRef(null);
-  const originalTags = JSON.parse(JSON.stringify(['math','physics','english',JSON.parse(JSON.stringify(tagList))]));
+  const originalTags = JSON.parse(JSON.stringify([JSON.parse(JSON.stringify(tagList))]));
 
   useImperativeHandle(inputValue, () => {
     return {

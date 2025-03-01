@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { options as authOptions } from "../../../auth/[...nextauth]";
 import prisma from "../../../../../lib/prisma";
 import { Pinecone, RecordMetadata } from "@pinecone-database/pinecone";
+import { match } from "assert";
 
 const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
@@ -20,7 +21,7 @@ export default async function handle(req, res) {
   //TITLE PROBLEM NEED TO OPT TO DEFAULT QUERY BRANCH IF SELECTEDARR BLANK AS TITLE IS FOR THE NOTESPACE NOT RELATED TO THE SOURCES UPLOADED
   ///
   const { prompt, messages, uri, selectedArr, title } = req.body;
-  console.log('rag 18', req.body)
+ 
   const session = await getServerSession(req, res, authOptions);
 
   /// for context query:
@@ -65,28 +66,47 @@ export default async function handle(req, res) {
   });
  
   const preFiltered = queryResponse.matches;
-
-  const matches = preFiltered.length >= 5 ? preFiltered.filter(
-    match => match.score! >= 0.25  
-  ) : preFiltered
-  ;
+const matches = preFiltered;
+  // const matches = preFiltered.length >= 5 ? preFiltered.filter(
+  //   //match => match.score! >= 0.25  
+  //   match => match.score! >= 0.25  
+  // ) : preFiltered
+  // ;
 
   let top_matches : any[] = [] //
   let top_score : number = 0.0
-  console.log('matches from pinecone:',matches);
+  
   let metadata = '';
+
+  // MESSAGE SPECIFIC TOP 3
+  let top_five_match = ""
+  let top_five_matchScore = ""
+  // MESSAGE SPECIFIC TOP 3
+
   for (let i = 0; i < matches.length; i++) {
     if(i==0) top_score = matches[i].score as number
 
     if(top_matches.length <= 2 && (matches[i].score as number) - top_score <= .2) {
-      top_matches.push({text: matches[i]!.metadata!.text! as any, 
+      let matchText = matches[i]!.metadata!.text! as any
+      matchText =  matchText.replace('*',"")
+      top_matches.push({text: matchText, 
        
         relevance:  Math.round((matches[i].score! + Number.EPSILON) * 100) / 100})
+
+        
+      
+        if(i < 5) {
+          top_five_match += '*' +  matchText;
+          top_five_matchScore += "*"+Math.round((matches[i].score! + Number.EPSILON) * 100) / 100
+        }
     }
 
     metadata +=
-      "Source " + matches[0].id + (matches[0].metadata as RecordMetadata).text;
+      "Source " + matches[0].id + (matches[0].metadata as RecordMetadata).text + ' ';
   }
+
+  //  match: top_matches && top_matches.length > 1 ? top_matches[0].text : 'No Matches',
+  //   matchScore: top_matches && top_matches.length > 1 ? top_matches[0].relevance+"" : 0.+""
 
 
   // Returns:
@@ -113,7 +133,7 @@ export default async function handle(req, res) {
   // }
 
   let context = metadata + " Users Question: " + prompt;
-  console.log(context);
+ 
   // 3) use result in content :
   // 	content: {
   // 		rules {
@@ -152,7 +172,7 @@ export default async function handle(req, res) {
 
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: "Given a user query, expand it to be more specific and detailed while maintaining the original intent. Include relevant synonyms and related concepts." },
+      { role: "system", content: "Given a user query, analytically anaswer it to the best of your knowledge while maintaining the original intent. Include relevant synonyms and related concepts." },
       ...truncated.map((m) => ({
         role: m.role,
         // content: m.content,
@@ -173,7 +193,6 @@ export default async function handle(req, res) {
           - If the context doesn't contain exact information, suggest related information that might be helpful
           START CONTEXT BLOCK
           Topics: The query is related to topics regarding: ${selectedArr.toString()}
-
           User Query:
           ${context}
           END OF CONTEXT BLOCK`,
@@ -210,8 +229,8 @@ export default async function handle(req, res) {
         authorId: session.id,
         role: "system",
         title: queriedTitles,
-        match: top_matches && top_matches.length > 1 ? top_matches[0].text : 'No Matches',
-        matchScore: top_matches && top_matches.length > 1 ? top_matches[0].relevance+"" : 0.+""
+        match: top_matches && top_matches.length > 1 ? top_five_match : 'No Matches',
+        matchScore: top_matches && top_matches.length > 1 ? top_five_matchScore+"" : 0.+""
       },
     ],
   });

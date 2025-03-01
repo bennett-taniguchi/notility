@@ -18,16 +18,20 @@ import BubbledInput from "../../../ui/personal/BubbledInput";
 export default function GuideDialog({ visible, setVisible, uri, Router }) {
   const [guideTitle, setGuideTitle] = useState("");
   const [tagList, setTagList] = useState([]);
-
+  const [content,setContent] = useState('')
   async function createQuiz(str) {
-    //   let oldTitle = title;
-    //   const body = { newTitle, oldTitle, uri };
-    //   await fetch("/api/notes/update/title", {
-    //     method: "PATCH",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(body),
-    //   });
-    //   Router.push("/notespace/" + uri);
+    let title = guideTitle
+    let content = ''
+    const body = { title, content, uri };
+
+    await fetch("/api/notes/create_guide", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then(() => {
+      setVisible(false);
+    });
+    Router.push("/notespace/" + uri);
   }
   return (
     <Dialog modal={true} open={visible} onOpenChange={setVisible}  >
@@ -63,11 +67,13 @@ export default function GuideDialog({ visible, setVisible, uri, Router }) {
 
           <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
             <Label htmlFor="name" className="text-left text-gray-500">
-              Describe what you want to be quizzed on (optional)
+              Describe what you want to be quizzed on 
             </Label>
             <Textarea
+            value={content}
               id="name"
               className="col-span-3 h-[20svh] resize-none"
+              onChange={(e) => setContent(e.currentTarget.value)}
             />
           </div>
         </div>

@@ -286,7 +286,7 @@ export default function OutputTable({
           {" "}
           <RiExpandHorizontalSFill
             onClick={() => toggleCollapse()}
-            className="  hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[-18px] cursor-pointer"
+            className=" bg-white/30 rounded hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[-18px] cursor-pointer"
             width={40}
             height={40}
           />
@@ -339,7 +339,7 @@ export default function OutputTable({
                 >
                   {datum.createdBy}
                 </TableCell>
-                <TableCell className="w-[1.5svw] h-[5svh] hover:bg-indigo-800">
+                <TableCell className="w-[1svw] h-[5svh] hover:bg-indigo-800">
                   {" "}
                   <NoteOptions
                     title={datum.title}

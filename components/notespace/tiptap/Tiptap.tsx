@@ -46,23 +46,21 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
   }
 
   let buttonStyle = "mr-1 bg-sky-100/50 border-none hover:bg-sky-400 ";
-  let svgStyle = "stroke-zinc-700  scale-150";
+  let svgStyle = "stroke-zinc-700  scale-150 ";
   let textSvgStyle = "text-zinc-700 scale-150";
   return (
     <div className="control-group   overflow-hidden  py-[22px] ">
-    
       <div className="   flex  text-center text-sm justify-center justify-items-center      ">
-     
         <NextButton
           variant="outline"
           onClick={() => setEditorVisible(!editorVisible)}
-          className={'animated-button mr-[4px] border-cyan-600/40  '}
+          className={
+            "border-2 border-white animated-button mr-[4px] border-cyan-600/40  "
+          }
         >
           <IoReturnUpBack className={svgStyle} />
         </NextButton>
 
-
-      
         <NextButton
           variant="outline"
           onClick={() =>
@@ -70,7 +68,7 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
           }
           className={cn(
             editor.isActive("heading", { level: 1 }) ? "is-active" : "",
-            buttonStyle
+            buttonStyle 
           )}
         >
           <LuHeading1 className={svgStyle} />
@@ -233,9 +231,9 @@ const Tiptap = ({
   givenTitle,
   givenContent,
 }) => {
-  const [tags,setTags] = useState([])
+  const [tags, setTags] = useState([]);
   const [initial, setInitial] = useState(true);
-  const {title,setTitle,content,setContent} = useContext(TiptapContext)
+  const { title, setTitle, content, setContent } = useContext(TiptapContext);
   const { slug } = useContext(SlugContext);
   const Router = useRouter();
   const editor = useEditor({
@@ -290,11 +288,10 @@ const Tiptap = ({
         },
       },
     });
-    if(setContent)
-    (setContent as any)(editor?.getHTML()!);
+    if (setContent) (setContent as any)(editor?.getHTML()!);
   }, [editor?.getHTML()]);
 
-  async function saveNotes(uri, router,setContent,setTitle) {
+  async function saveNotes(uri, router, setContent, setTitle) {
     const body = { title, content, uri };
 
     await fetch("/api/notes/save", {
@@ -302,8 +299,8 @@ const Tiptap = ({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    setTitle('')
-    setContent('')
+    setTitle("");
+    setContent("");
     Router.push("/notespace/" + uri);
   }
   // updates on changed prop, 1st and third to maintain previous cursor positionining
@@ -312,35 +309,28 @@ const Tiptap = ({
     const { from, to } = editor.state.selection;
     editor?.commands.setContent(content, true);
     editor.commands.setTextSelection({ from, to });
-    console.log(content,'set editor',editor.getText())
+    console.log(content, "set editor", editor.getText());
   }, [content]);
 
   useEffect(() => {
     if (!givenTitle) {
-      if(setTitle)
-      (setTitle as any)("");
+      if (setTitle) (setTitle as any)("");
     }
 
     if (!givenContent) {
-      if(setContent) {
+      if (setContent) {
         (setContent as any)("");
-       
       }
-      editor?.commands.setContent('', true);
-     
+      editor?.commands.setContent("", true);
     } else {
       editor?.commands.setContent(givenContent, true);
     }
-
- 
-  
   }, []);
 
-  useEffect(()=>{
-console.log(title,'changed')
-  },[title]);
+  useEffect(() => {
+    console.log(title, "changed");
+  }, [title]);
 
- 
   return (
     <>
       <div className="   chat-background rounded-t-xl">
@@ -354,29 +344,27 @@ console.log(title,'changed')
 
       <div style={{ backgroundSize: "100svw 100svh", overflow: "hidden" }}>
         <div className="flex flex-row">
-        <Textarea
-        maxLength={60}
-        onChange={(e) => {if(setTitle)(setTitle as any)(e.target.value)}}
-        value={title}
-        placeholder="Write a Title"
-        className=" w-[50svw] text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
-      />
-     
-      
-      
-      {/* <Textarea
+          <Textarea
+            maxLength={60}
+            onChange={(e) => {
+              if (setTitle) (setTitle as any)(e.target.value);
+            }}
+            value={title}
+            placeholder="Write a Title"
+            className=" w-[50svw] text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
+          />
+
+          {/* <Textarea
         
       onChange={(e) => setTitle(e.target.value)}
       value={title}
       placeholder="Write a Title"
       className=" w-[30svw] text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
     /> */}
-       
         </div>
-       
 
         <ScrollArea viewportRef={null}>
-        <NextButton
+          {/* <NextButton
             onClick={() => {'openTags()'}} //Needs to open tag list for current document as # is converted to tag bubble
             className="animated-button z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-[7rem] bottom-1"
           >
@@ -384,16 +372,16 @@ console.log(title,'changed')
             <div className=""> Tags</div>
             <FaHashtag className="w-5 h-5 " />
             
-          </NextButton>
-           
+          </NextButton> */}
+
           <NextButton
-            onClick={() => saveNotes(slug, Router,setContent,setTitle)}
-            className="animated-button z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-10 bottom-1"
+            onClick={() => saveNotes(slug, Router, setContent, setTitle)}
+            className="border-2 border-white animated-button z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-10 bottom-1"
           >
             <div className="">Save</div>
             <LuBookUp className="w-5 h-5 " />
           </NextButton>
-           
+
           <EditorContent
             editor={editor}
             onChange={() => (setContent as any)(editor?.getHTML()!)}

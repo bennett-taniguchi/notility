@@ -185,7 +185,7 @@ export async function createVectorRecords(
   // Get the Pinecone index
   //   let index = pc.index("notility");
   const vectors: any[] = chunks.map((chunk, idx) => ({
-    id: "vec"+ idx,
+    id: name + "_vec_"+ idx,
     values: embeddings[idx].embedding,
     metadata: {
       text: chunk,

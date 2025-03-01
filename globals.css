@@ -25,7 +25,9 @@
     initial-value: theme("colors.indigo.200");
     inherits: false;
   }
-
+  .is-active {
+    background-color: #23f8f894;
+  }
   .countdown:hover::before {
     content: '3';
     position: absolute;

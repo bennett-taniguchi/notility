@@ -187,7 +187,7 @@ export function ShareDialog({asText=false}) {
        
       </div>
       <Dialog modal={true} open={visible} onOpenChange={setVisible}>
-        <DialogContent className="sm:max-w-[800px]  ">
+        <DialogContent className="sm:max-w-[800px]   ">
           <DialogHeader>
             <DialogTitle>Share</DialogTitle>
             <DialogDescription>
@@ -196,19 +196,23 @@ export function ShareDialog({asText=false}) {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
-              <Label htmlFor="name" className="text-left">
+              
+              <div className="w-[400px] mx-auto flex flex-row gap-2">
+              <Label htmlFor="name" className="text-left my-auto">
                 Email:
               </Label>
               <BubbledInput
+              classProps="w-[350px]"
                 inputValue={inputValue}
                 customInput={true}
                 tagList={options}
                 setTagList={setOptions}
                 validator={emailValidator as any}
-              />
+              /></div>
             </div>
             <div className="mx-auto">
-              <Label className="ml-[30px]">Select Permissions</Label>
+              <div className="italic text-sm text-red-500/70">Warning shared users have full read and write permissions!</div>
+              {/* <Label className="ml-[30px]">Select Permissions</Label>
               <Select onValueChange={setPermissionSelected}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select Level" />
@@ -220,7 +224,7 @@ export function ShareDialog({asText=false}) {
                     <SelectItem value="write">Write</SelectItem>
                   </SelectGroup>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
           </div>
           <DialogFooter>
@@ -255,7 +259,10 @@ function OptionsPopover() {
               Change settings related to this notespace.
             </p>
           </div>
-          <div className="grid gap-2">
+          <div className="italic text-xs text-zinc-400">
+            Theme and other visual options coming soon
+          </div>
+          {/* <div className="grid gap-2">
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="width">Theme</Label>
               <Input
@@ -288,7 +295,7 @@ function OptionsPopover() {
                 className="col-span-2 h-8"
               />
             </div>
-          </div>
+          </div> */}
         </div>
       </PopoverContent>
     </Popover>

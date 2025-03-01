@@ -42,6 +42,30 @@ async function createAsNote({ m }) {
   });
 }
 
+function MatchesList({ m, s }) {
+  let splitMatches = m.split("*");
+  let splitScores = s.split("*");
+  if (splitMatches[0] == "") {
+    splitMatches = splitMatches.slice(1, splitMatches.length);
+  }
+  if (splitScores[0] == "") {
+    splitScores = splitScores.slice(1, splitScores.length);
+  }
+  return (
+    <>
+      {splitMatches.map((match, idx) => (
+        <div  >
+          <div className="text-large font-bold text-black"> Source {idx + 1}</div>
+
+          <blockquote className="  italic line-clamp-2 hover:line-clamp-none  mt-1 text-xs text-black/80 border-l-2 border-sky-800/40 pl-3 ">{"... " + match + " ..."}</blockquote>
+          <p className="mt-1 text-xs text-black/50 italic">
+            Relevance score: {Math.round(splitScores[idx] * 100)}%
+          </p>
+        </div>
+      ))}
+    </>
+  );
+}
 function MatchScoreArea({ m }) {
   return (
     <>
@@ -50,14 +74,11 @@ function MatchScoreArea({ m }) {
           <div className="flex flex-col gap-2 px-2 rounded-lg bg-indigo-600/20 shadow-sm mt-5">
             {true && (
               <div className=" ">
-                <div className=" bg-transparent rounded-md mb-2">
-                  <p className="text-sm text-black/80 font-bold">Source :</p>
-                  <blockquote className= "  mt-1 text-xs text-black/80 border-l-2 border-sky-800/40 pl-3 ">
-                    {m.match}
-                  </blockquote>
-                  <p className="mt-1 text-xs text-black/50 italic">
-                    Relevance score: {Math.round(m.matchScore * 100)}%
-                  </p>
+                <div className=" bg-transparent rounded-md mb-2 ">
+                 
+                 
+                    <MatchesList m={m.match} s={m.matchScore} />
+                  
                 </div>
               </div>
             )}
@@ -286,18 +307,17 @@ export default function MessageList({ messagesLoaded }) {
             >
               <div key={m.id} className="whitespace-pre-wrap">
                 <CardHeader>
-                  <CardTitle style={{textAlign: m.role=='user' ? 'right' : 'left'}}className="font-bold font-mono">
+                  <CardTitle
+                    style={{ textAlign: m.role == "user" ? "right" : "left" }}
+                    className="font-bold font-mono"
+                  >
                     {m.role === "user" ? "User: " : "AI: "}
                   </CardTitle>
                 </CardHeader>
                 <span className=" text-slate-600">
                   <CardContent>
-
-                 
-                      
                     <Latex>{m.content}</Latex>
-                    
-                     
+
                     <MatchScoreArea m={m} />
                     <CreateOutputButtons m={m} handleModal={handleModal} />
                   </CardContent>
