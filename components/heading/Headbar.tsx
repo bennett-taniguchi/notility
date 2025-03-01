@@ -238,6 +238,8 @@ export function ShareDialog({asText=false}) {
   );
 }
 function OptionsPopover() {
+
+  
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -320,7 +322,7 @@ export default function Headbar({ notespace, slug }) {
         <Textarea
           spellCheck={false}
           onBlur={(e) => updateTitle(e, slug)}
-          className="whitespace-nowrap overflow-hidden bg-gradient-to-r  shadow-none    text-cyan-500/80 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none "
+          className="ring-sky-200 ring-2 whitespace-nowrap overflow-hidden bg-gradient-to-r  shadow-none    text-cyan-500/80 span-3/4 resize-none h-[6svh] my-auto mr-[2svw] text-start   text-4xl/10 font-bold border-none "
           defaultValue={notespace.title}
         />
       

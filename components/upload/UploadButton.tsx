@@ -1,6 +1,6 @@
 // Filename - App.js
 
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { chunkTextByMultiParagraphs, getPdfText } from "../../utils/parse_text";
 import { cva, VariantProps } from "class-variance-authority";
@@ -48,10 +48,32 @@ const buttonVariants = cva(
   }
 );
 
+function FileSelector({onFileChange,fileName}) {
+  const hiddenFileInput = useRef(null); 
+
+  const handleClick = event => {
+    (hiddenFileInput!.current! as any).click();   
+  };
+
+ let redText = false
+  if(fileName.includes('Error: file extension not allowed:') && fileName.includes('is not one of: .csv, .pdf, .md, .tex, .json, .txt')) {
+    redText = true
+    console.log('redText',redText)
+  }
+  return (
+    <>
+     <div className="flex flex-col">
+          <Button   onClick={handleClick} className="animated-button w-[200px] mx-auto">Select File</Button>
+            <input  type="file" onChange={onFileChange} ref={hiddenFileInput} style={{display:'none'}}/>
+            {fileName ? <p style={{color: redText ? 'red' : 'black',fontWeight: redText ? 'lighter' : 'bold', marginTop:'1px'}}>Uploaded file: {fileName}</p> : null}
+          </div>
+    </>
+  )
+}
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
+  asChild?: boolean; 
   setFileContent: any;
   fileContent: any;
 }
@@ -102,10 +124,8 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       // Update file details display
       setFileDetails(
         <div>
-         
           <p>File Name: {file.name}</p>
           <p>File Type: {file.type}</p>
-       
         </div>
       );
     };
@@ -181,36 +201,27 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       }
     };
 
+
     return (
       <div className="flex flex-row  w-[33.5svw] ml-[-6.5svw]">
-
+        
         <div className="flex flex-col mx-auto text-sm">
-        <div className="text-center">Upload a File:</div>
-
-<div className="flex flex-row">
-<input  className='ml-[2svw]' type="file" onChange={onFileChange} />
- 
-
-</div>
-<Button className=" animated-button mx-auto mt-[10px] w-[130px]" onClick={onClickSubmit} disabled={!selectedFile}>
-  Add Source
-</Button>   
-
-
-        
-         
-        </div>
-         
+      
+          <div className="text-center text-zinc-600 text-extrabold mb-2">
+            Upload a File:
+          </div>
    
-        <div className="flex flex-col text-sm text-red-700 max-w-[12svw] max-h-[12svh]">
-        {errorMessage ? (
-          <p style={{ color: "red" }}>{errorMessage}</p>
-        ) : (
-          <i> </i>
-        )}
-
-        
+         <FileSelector onFileChange={onFileChange} fileName={fileName}/>
+          <Button
+            className=" bg-indigo-500 mx-auto mt-[10px] w-[130px] "
+            onClick={onClickSubmit}
+            disabled={!selectedFile}
+          >
+            Add Source
+          </Button>
         </div>
+  
+  
       </div>
     );
   }

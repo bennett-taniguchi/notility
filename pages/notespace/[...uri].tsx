@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import React, {
   Suspense,
+  useContext,
   useEffect,
   useReducer,
   useRef,
@@ -105,6 +106,8 @@ type Props = {
 };
 
 function selectedReducer(state, action) {
+  const {slug} = useContext(SlugContext)
+  let uri = slug;
   switch (action.type) {
     case "add_source": {
     }
@@ -123,7 +126,7 @@ function selectedReducer(state, action) {
         localMap.set(action.sources[i].title, false);
       }
 
-      let locallyStored = localStorage.getItem("savedSelectedSources");
+      let locallyStored = localStorage.getItem(uri+"*savedSelectedSources");
 
       let count = 0;
       let locallyStoredArr: Array<string> = [];
@@ -182,7 +185,7 @@ function selectedReducer(state, action) {
 
       if (savedSelectedSources.length == 0) savedSelectedSources += "*";
       localStorage.setItem(
-        "savedSelectedSources",
+        uri+"*savedSelectedSources",
         savedSelectedSources.slice(0, savedSelectedSources.length - 1)
       );
 
@@ -219,10 +222,11 @@ export default function NotespacesPage({
 
   useEffect(() => {
     if (sources)
+
       dispatch({
         type: "init_sources",
         sources: JSON.parse(JSON.stringify(sources)),
-        sourcesArr: localStorage.getItem("savedSelectedSources"),
+        sourcesArr: localStorage.getItem(slug+"*savedSelectedSources"),
       });
     return () => {
       setUploadOpened(false); // Cleanup upload state when component unmounts
@@ -256,7 +260,7 @@ export default function NotespacesPage({
     );
   }
 
-  if (permission!.length == 0 && session.user.email != notespace.owner) {
+  if (permission && permission!.length == 0 && session.user.email != notespace.owner) {
     // permissions dne or current user isnt the same as creator
     return (
       <div className="text-center">

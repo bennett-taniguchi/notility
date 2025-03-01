@@ -20,15 +20,15 @@ export default function SourcesBlurb({sources,selected}) {
     return (
         <Card className="rounded-xl  bg-gradient-to-r from-cyan-200 to-indigo-200 border-white border-2">
               <CardContent className="rounded-xl text-md text-mono   text-center py-10 text-slate-600/90">
-                <span className="[text-shadow:_0_2px_2px_rgb(132_102_241_/_.4)]   font-bold text-2xl text-black  font-roboto">
+                <span className="[text-shadow:_0_2px_2px_rgb(132_192_241_/_.9)]   font-bold text-2xl text-black  font-roboto">
                   {selected.selected && selected.selected.length != 0
-                    ? selected.selected +":"
+                    ? selected.selected 
                     : "No Sources Selected, select from above"}
                 </span>
                 {selected.selectedArr.map((title, idx) => (
                   <div id={idx}>
-                    <span className="font-semibold font-roboto">{title}:</span>{" "}
-                    <span className="text-xs overflow-hidden text-ellipsis line-clamp-3"><ReactMarkdown>{lookupKeywords(title)}</ReactMarkdown>
+                    <span className="font-semibold font-roboto text-black/70">{title}:</span>{" "}
+                    <span className="text-xs overflow-hidden text-ellipsis line-clamp-3 text-zinc-500/90"><ReactMarkdown>{lookupKeywords(title)}</ReactMarkdown>
                     </span>
                   </div>
                 ))}

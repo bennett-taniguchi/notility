@@ -9,6 +9,7 @@ import InputArea from "./input/InputArea";
 import SourcesBlurb from "./messages/SourcesBlurb";
 import { RiExpandHorizontalSFill } from "react-icons/ri";
 import { CollapseContext } from "../../context/context";
+import { Toaster } from "../../ui/toaster";
 
 export default function ChatWindow({
   messagesLoaded,
@@ -45,7 +46,7 @@ export default function ChatWindow({
 
   async function dropUploads(slug: string) {
     // delete local storage
-    localStorage.setItem("savedSelectedSources", "");
+    localStorage.setItem(slug+"*savedSelectedSources", "");
     // delte upload content info in supabase
     await fetch("/api/supabase/upload/dropall", {
       method: "DELETE",
@@ -88,7 +89,7 @@ console.log(selected)
     <div className="  w-[48svw]  border-cyan-400/50 border-2 rounded-md">
       <div>
       <ScrollArea
-            className="   bg-sky-100  h-[86.7svh]  rounded-[12px]  rounded-b-[10px]"
+            className="   bg-sky-100  h-[86.7svh]  rounded-[12px]  rounded-b-[1px]"
             viewportRef={viewportRef}
           >
           <div className="   bg-sky-100 w-[45svw]  flex flex-col  max-w-1/2 py-10  stretch gap-y-2 min-h-[80svh]  pb-[200px] ">
@@ -137,7 +138,7 @@ console.log(selected)
             </Button>
 
           
-          </div>
+          </div><Toaster />
           </ScrollArea>
       </div>
     </div>

@@ -1,8 +1,10 @@
+'use client'
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import { SlugContext } from "../../../context/context";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../ui/tooltip";
+import { toast } from "../../../../hooks/use-toast";
 
 export default function InputArea({setLoading,scrollMsg,selected,messagesLoaded,title} ) {
     const Router = useRouter()
@@ -11,13 +13,24 @@ export default function InputArea({setLoading,scrollMsg,selected,messagesLoaded,
 
   // for submitting current chat message and updating state reflecting back and forth
   async function handleSubmit(e: React.SyntheticEvent) {
+    
     e.preventDefault();
+    if(input.length < 20) {
+      toast({
+        title:'Please enter a longer prompt',
+        description:`Enter at least 20 characters currently you\'ve entered ${input.length} characters`,
+        duration:5000
+      })
+      console.log('short input case, length:',input.length)
+      return;
+    }
     setLoading(true);
     scrollMsg();
     const prompt = input;
     const uri = slug;
     const messages = messagesLoaded;
 
+    
 
     if (selected.selectedArr.length === 0) {
       const body = { prompt, messages, uri, title };
@@ -36,7 +49,7 @@ export default function InputArea({setLoading,scrollMsg,selected,messagesLoaded,
       const body = { prompt, messages, selectedArr, uri, title, };
 
 
-     await fetch("/api/neo4j/query", {
+     await fetch("/api/chat/update/rag", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

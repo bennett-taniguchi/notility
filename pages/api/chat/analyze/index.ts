@@ -8,6 +8,7 @@ import {
 } from "../../../../utils/parse_text";
 import OpenAI from "openai";
  
+ 
 
 // moving to summarize by first chunk out of laziness
 async function getOverallSummary(chunks: string[]) {
@@ -36,6 +37,7 @@ async function getOverallSummary(chunks: string[]) {
 
 export default async function handle(req, res) {
  
+ 
   const pc = new Pinecone({
     apiKey: process.env.PINECONE_API_KEY as string,
   });
@@ -59,6 +61,7 @@ export default async function handle(req, res) {
     filename
   );  
 
+  console.log('upload64',vecs)
   let index = pc.index("notespace",PINECONE_HOST);
   let namespace = uri;
  

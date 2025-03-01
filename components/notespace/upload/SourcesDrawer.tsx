@@ -1,7 +1,5 @@
 import { Upload } from "@prisma/client";
- 
- 
-
+import { createPortal } from "react-dom";
 import { Drawer } from "../../ui/drawer";
 import { Button } from "../../ui/button";
 import {
@@ -18,9 +16,41 @@ import dynamic from "next/dynamic";
 import { getPdfText } from "../../../utils/parse_text";
 import { Checkbox } from "../../ui/checkbox";
 import { ScrollArea } from "../../ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../ui/tooltip";
 import { FaCircleInfo } from "react-icons/fa6";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../ui/dialog";
+import { useEffect, useRef, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
+import { BsBodyText } from "react-icons/bs";
+import { useRouter } from "next/router";
 
 const BsFiletypeCsv = dynamic(() =>
   import("react-icons/bs").then((module) => module.BsFiletypeCsv)
@@ -115,6 +145,97 @@ function getKeywords(summary: string) {
   return summary.split(".")[0];
 }
 
+function SourceOptions({slug,title}) {
+  const Router = useRouter()
+  const [showDialog, setShowDialog] = useState(false);
+  function handleOpenAndParent() {
+    setShowDialog(true);
+  }
+ 
+  const [deleteReady, setDeleteReady] = useState(false);
+  const buttonRef = useRef(null);
+  const animationTimeout = useRef(null);
+  
+  async function deleteSource() {
+   
+    //await fetch('/api/supabase/upload/delete')
+    let uri = slug;
+    let name = title
+    let body = {name,uri}
+    await fetch('/api/pinecone/delete/upload', {
+      headers: {'Content-Type' : 'application/json'},
+      method:'DELETE',
+      body:JSON.stringify(body)
+    })
+
+    
+    await fetch('/api/supabase/upload/delete', {
+      headers: {'Content-Type' : 'application/json'},
+      method:'DELETE',
+      body:JSON.stringify(body)
+    })
+
+    let selected = (localStorage.getItem(slug+"*savedSelectedSources"));
+    if(!selected)return
+    selected = selected.replace(title,'')
+    localStorage.setItem(slug+"*savedSelectedSources",selected)
+
+    Router.push('/notespace/'+slug)
+  }
+ 
+  const handleMouseEnter = () => {
+    (animationTimeout.current as any) = setTimeout(() => {
+      setDeleteReady(true);
+    }, 2000);
+  };
+
+  const handleMouseLeave = () => {
+    if (animationTimeout.current) {
+      clearTimeout(animationTimeout.current);
+    }
+    setDeleteReady(false);
+  };
+
+ 
+  const handleDelete = () => {
+    if (deleteReady) {
+      deleteSource()
+      setDeleteReady(false);
+    }
+  };
+
+  useEffect(() => {}, [deleteReady]);
+  return (
+    <div className="mr-[0svw] mt-[-1svh] ">
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <BsThreeDotsVertical
+            onClick={() => handleOpenAndParent()}
+            className="absolute hover:bg-blue-400 rounded hover:fill-black right-0   h-[20px] w-[20px]   fill-slate-600"
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="ml-[50svw] mt-[2svh]"
+          style={{ zIndex: 999999 }}
+        >
+          <DropdownMenuLabel>Options</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            ref={buttonRef}
+            style={{ cursor: deleteReady ? "pointer" : "" }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onClick={handleDelete}
+            className="text-red-700   countdown"
+          >
+            Delete Source
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
 export default function SourcesDrawer({
   selected,
   slug,
@@ -133,46 +254,46 @@ export default function SourcesDrawer({
     switch (extension) {
       case "pdf":
         return (
-          <FaFilePdf className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-rose-800 fill-rose-800" />
+          <FaFilePdf className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-rose-800 fill-rose-800" />
         );
       case "md":
         return (
-          <FaMarkdown className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-blue-800 fill-blue-800" />
+          <FaMarkdown className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-blue-800 fill-blue-800" />
         );
       case "csv":
         return (
-          <BsFiletypeCsv className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-green-800 fill-green-800" />
+          <BsFiletypeCsv className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-green-800 fill-green-800" />
         );
       case "tex":
         return (
-          <SiLatex className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-green-400 fill-green-400" />
+          <SiLatex className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-green-400 fill-green-400" />
         );
       case "json":
         return (
-          <TbJson className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-yellow-600" />
+          <TbJson className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-yellow-600" />
         );
 
       case "txt":
         return (
-          <TbTxt className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-zinc-600" />
+          <TbTxt className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-zinc-600" />
         );
     }
     return (
-      <TbTxt className="right-0 absolute mr-[.5svw] h-[1.25svw] w-[1.25svw] mt-[.9svh] stroke-zinc-600" />
+      <TbTxt className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-zinc-600" />
     );
   }
 
   return (
     <Drawer open={isChild}>
       <DrawerTrigger asChild>
-        <div 
-        // className=" text-left ml-[-7svw] flex flex-row py-[1svw]"
-        className="text-right mr-[5px]  mt-[-1px]"
+        <div
+          // className=" text-left ml-[-7svw] flex flex-row py-[1svw]"
+          className="text-right mr-[5px]  mt-[-1px]"
         >
           <Button
             onClick={() => setIsChild(true)}
             variant="outline"
-            style={{zIndex:999}}
+            style={{ zIndex: 999 }}
             className="hover:drop-shadow-sm   absolute right-[50px] top-[20px]  border-white   animated-row w-[140px] h-[45px] text-black "
           >
             <svg
@@ -194,27 +315,28 @@ export default function SourcesDrawer({
           </Button>
         </div>
       </DrawerTrigger>
-      <DrawerContent  style={{zIndex: 1000}}>
+      <DrawerContent style={{ zIndex: 1000 }}>
         <div className="mx-auto w-full max-w-sm h-[85svh]">
           <DrawerHeader className="absolute left-[1.5svw]">
             <DrawerTitle>Selected Sources:</DrawerTitle>
             <DrawerDescription>Upload or Enter Link</DrawerDescription>
           </DrawerHeader>
-          <div className="p-4   mt-[3svw]  h-[60svh] pb-[5svh]"  >
-           
-            <ScrollArea className=" justify-self-center w-[32svw] h-[60svh]   group   " viewportRef={null}>
-       
+          <div className="p-4   mt-[3svw]  h-[60svh] pb-[5svh]">
+            <ScrollArea
+              className=" justify-self-center w-[32svw] h-[60svh]   group   "
+              viewportRef={null}
+            >
               {sources.map((source: Upload, idx) => (
-                <div 
+                <div
                   key={source.title}
+                  style={{ zIndex: 100 }}
                   className="w-[31.5svw] ml-[2px]  shadow-cyan-800/40 group hover:shadow-cyan-600/40 hover:shadow-md hover:my-[.3svh] transform duration-300 shadow-sm    animated-row px-[1svw] rounded-md   flex flex-row h-[5svh] mt-1 border-b-[.1svw]  border-r-[.1svw] border-l-[.1svw] mb-[.1svw] border-zinc-300  "
                 >
-                  
                   <div className="my-auto  ">
-                  <Checkbox
-                      style={{zIndex:1000}}
+                    <Checkbox
+                      style={{ zIndex: 1000 }}
                       id={source.title}
-                      className="mr-3 hover:bg-cyan-100/30   "
+                      className="mr-3 hover:bg-cyan-100/30"
                       defaultChecked={selected.map.get(source.title)}
                       value={selected.map.get(source.title)}
                       onClick={(e) =>
@@ -224,57 +346,73 @@ export default function SourcesDrawer({
                         })
                       }
                     />
-                       
-                       <label
-                            htmlFor={source.title}
-                            className="text-slate-700 font-roboto text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  "
-                          >
-                            
-                            {source.title}
-                          </label>
-         
+
+                    <label
+                      htmlFor={source.title}
+                      className="text-slate-700 font-roboto text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  "
+                    >
+                      {source.title}
+                    </label>
                   </div>
-                  <TooltipProvider>
-                      <Tooltip delayDuration={0} >
-                        <TooltipTrigger asChild>
-                        <FaCircleInfo className="absolute h-[15px] w-[15px] mt-[12px] mr-[60px] cursor-pointer my-auto ml-[5px] right-0 justify-self-end" />
-                        </TooltipTrigger>
-                        <TooltipContent  className="absolute mt-[37px] ml-[15svw] multiline max-w-[400px] min-w-[200px] overflow-y-auto font-bold      "  >
-                          <ReactMarkdown>
-                          {source.summary
-                            ? getKeywords(source.summary)
-                            : "No Summary Yet, Please Wait"}
-                            </ReactMarkdown>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  <BsThreeDotsVertical className="right-0 absolute mr-[2svw] h-[1.5svw] w-[1.5svw] mt-[.9svh]  fill-slate-700" />
-                  <FileIcon extension={source.filetype as any} />
                   <TooltipProvider>
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger asChild>
-                        <div className="w-[2svw] h-[5svh]   right-0 absolute" />
+                        <FaCircleInfo className="absolute h-[15px] w-[15px] mt-[12px] mr-[60px] cursor-pointer my-auto ml-[5px] right-0 justify-self-end" />
                       </TooltipTrigger>
-                      <TooltipContent className="absolute mt-[37px] ml-[-30px]">{source.filetype}</TooltipContent>
+
+                      {createPortal(
+                        <TooltipContent
+                          className="absolute ml-[67svw] multiline max-w-[400px] min-w-[200px] overflow-y-auto font-bold bg-cyan-700/60"
+                          style={{
+                            zIndex: 9999,
+                            position: "absolute",
+                            marginTop: idx * 7 + "svw",
+                          }}
+                        >
+                          {" "}
+                          <ReactMarkdown>
+                            {source.summary
+                              ? getKeywords(source.summary)
+                              : "No Summary Yet, Please Wait"}
+                          </ReactMarkdown>
+                        </TooltipContent>,
+                        document.body
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                  <SourceOptions   slug={slug} title={source.title}/>
+                  <div className=" absolute right-[1svw] top-[1px]">
+                    <FileIcon extension={source.filetype as any} />
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <div className="w-[2svw] h-[5svh]   right-[1svw] absolute">
+                          {" "}
+                        </div>
+                      </TooltipTrigger>
+
+                      {createPortal(
+                        <TooltipContent
+                          style={{ zIndex: 9999 }}
+                          className="absolute mt-[39px] ml-[-30px]"
+                        >
+                          {source.filetype}
+                        </TooltipContent>,
+                        document.body
+                      )}
                     </Tooltip>
                   </TooltipProvider>
                 </div>
               ))}
-                  
             </ScrollArea>
-        
-            
           </div>{" "}
-      
           <DrawerFooter className="flex flex-col  mt-[-20px] ">
-          
-
-             
             <UploadButton
               fileContent={fileContent}
               setFileContent={setFileContent}
             />
-                 <DrawerClose asChild>
+            <DrawerClose asChild>
               <Button
                 className="w-[10svh] mx-auto  "
                 variant="outline"
@@ -285,9 +423,6 @@ export default function SourcesDrawer({
                 Cancel
               </Button>
             </DrawerClose>
-            
-          
-       
           </DrawerFooter>
         </div>
       </DrawerContent>

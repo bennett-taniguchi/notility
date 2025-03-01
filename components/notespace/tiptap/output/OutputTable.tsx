@@ -300,7 +300,7 @@ export default function OutputTable({
           <div></div>
         )}
         <TableHeader>
-          <TableRow>
+          <TableRow >
             <TableHead className="w-[100px] text-black">Title</TableHead>
             <TableHead className="text-black">Amount of Sources</TableHead>
             <TableHead className="text-black">Created On</TableHead>
@@ -312,12 +312,12 @@ export default function OutputTable({
             notes.map((datum: any, idx: number) => (
               <TableRow
                 key={datum.title}
-                className="w-max h-max hover:bg-indigo-400/50   hover:text-white animated-row border-none text-black"
+                className="  w-max h-max hover:bg-indigo-400/50   hover:text-white animated-row border-none text-black"
                 onClick={() => selectNoteAndTitle(notes[idx])}
               >
                 <TableCell
                   onClick={() => setEditorVisible(!editorVisible)}
-                  className="font-medium cursor-pointer  "
+                  className="font-medium cursor-pointer    "
                 >
                   {datum.title}
                 </TableCell>
@@ -339,7 +339,7 @@ export default function OutputTable({
                 >
                   {datum.createdBy}
                 </TableCell>
-                <TableCell className="w-[2svw] h-[5svh] hover:bg-indigo-800">
+                <TableCell className="w-[1.5svw] h-[5svh] hover:bg-indigo-800">
                   {" "}
                   <NoteOptions
                     title={datum.title}

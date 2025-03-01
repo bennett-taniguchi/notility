@@ -26,6 +26,8 @@ import { ScrollArea } from "../../../ui/scroll-area";
 import { title } from "process";
 import { useRouter } from "next/router";
 import { SlugContext } from "../../../context/context";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import { cn } from "../../../lib/utils";
 
 async function createAsNote({ m }) {
   let title = m.title;
@@ -45,15 +47,15 @@ function MatchScoreArea({ m }) {
     <>
       {m.role !== "user" && m.match && m.match.length != 0 ? (
         <>
-          <div className="flex flex-col gap-2 px-2 rounded-lg bg-white shadow-sm mt-5">
+          <div className="flex flex-col gap-2 px-2 rounded-lg bg-indigo-600/20 shadow-sm mt-5">
             {true && (
               <div className=" ">
                 <div className=" bg-transparent rounded-md mb-2">
-                  <p className="text-sm text-gray-600 font-medium">Source :</p>
-                  <blockquote className="mt-1 text-xs text-black border-l-2 border-sky-800/40 pl-3 line-clamp-3">
+                  <p className="text-sm text-black/80 font-bold">Source :</p>
+                  <blockquote className= "  mt-1 text-xs text-black/80 border-l-2 border-sky-800/40 pl-3 ">
                     {m.match}
                   </blockquote>
-                  <p className="mt-1 text-xs text-black">
+                  <p className="mt-1 text-xs text-black/50 italic">
                     Relevance score: {Math.round(m.matchScore * 100)}%
                   </p>
                 </div>
@@ -76,7 +78,7 @@ function CreateOutputButtons({ handleModal, m }) {
           <TooltipTrigger>
             {" "}
             <FaStickyNote
-              className="w-[20px] h-[20px] cursor-pointer fill-zinc-800/80 hover:fill-zinc-600/80"
+              className="w-[15px] h-[15px] cursor-pointer fill-zinc-800 hover:fill-zinc-600/60"
               onClick={() => handleModal(m, "Note")}
             />
           </TooltipTrigger>
@@ -91,7 +93,7 @@ function CreateOutputButtons({ handleModal, m }) {
           <TooltipTrigger>
             {" "}
             <ImListNumbered
-              className="w-[20px] h-[20px] cursor-pointer fill-zinc-800/80 hover:fill-zinc-600/80"
+              className="w-[15px] h-[15px] cursor-pointer fill-zinc-800 hover:fill-zinc-600/60"
               onClick={() => handleModal(m, "Guide")}
             />
           </TooltipTrigger>
@@ -284,14 +286,18 @@ export default function MessageList({ messagesLoaded }) {
             >
               <div key={m.id} className="whitespace-pre-wrap">
                 <CardHeader>
-                  <CardTitle className="font-bold font-mono">
+                  <CardTitle style={{textAlign: m.role=='user' ? 'right' : 'left'}}className="font-bold font-mono">
                     {m.role === "user" ? "User: " : "AI: "}
                   </CardTitle>
                 </CardHeader>
                 <span className=" text-slate-600">
                   <CardContent>
-                    <Latex>{m.content}</Latex>
 
+                 
+                      
+                    <Latex>{m.content}</Latex>
+                    
+                     
                     <MatchScoreArea m={m} />
                     <CreateOutputButtons m={m} handleModal={handleModal} />
                   </CardContent>

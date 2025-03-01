@@ -220,12 +220,15 @@ function TableView({ data, Router }) {
 function CardView({ data, Router }) {
   if (!data) return <div></div>;
   return (
-    <div className="w-[80svw] mx-auto">
+    <div className="w-[80svw] mx-auto flex flex-row gap-2">
       {data ? (
-        data.map((datum) => (
-          <Card
+        data.map((datum,idx) => (
+          <>
+          {
+            idx % 2 == 0 ?
+            <Card
             onClick={() => Router.push("/notespace/" + datum.title)}
-            className="cursor-pointer w-[25svw] h-[20svh] bg-gradient-to-r from-cyan-500 to-white opacity-85 hover:opacity-100 "
+            className="cursor-pointer w-[25svw] h-[20svh] chat-background hover:opacity-75 "
           >
             <CardTitle className="ml-[2svw] mt-[1svh]">{datum.title}</CardTitle>
             <CardDescription className="ml-[2svw] text-slate-800">
@@ -236,6 +239,22 @@ function CardView({ data, Router }) {
               Created on {datum.createdOn}
             </CardFooter>
           </Card>
+            :
+            <Card
+            onClick={() => Router.push("/notespace/" + datum.title)}
+            className="cursor-pointer w-[25svw] h-[20svh] reverse-chat-background hover:opacity-75 "
+          >
+            <CardTitle className="ml-[2svw] mt-[1svh]">{datum.title}</CardTitle>
+            <CardDescription className="ml-[2svw] text-slate-800">
+              Amount of Sources: {datum.sources}
+            </CardDescription>
+            <CardContent></CardContent>
+            <CardFooter className="text-sm text-slate-800 ml-[.75svw] ">
+              Created on {datum.createdOn}
+            </CardFooter>
+          </Card>
+          }
+        </>
         ))
       ) : (
         <div></div>
