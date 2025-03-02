@@ -35,6 +35,7 @@ import QuizDialog from "./QuizDialog";
 import GuideDialog from "./GuideDialog";
 import TestDialog from "./TestDialog";
 import { RiExpandHorizontalSFill } from "react-icons/ri";
+import { cn } from "../../../lib/utils";
 
 function NoteOptions({
   title,
@@ -141,7 +142,7 @@ function OutputContentButtons({ setEditorVisible, Router, setSelectedNote }) {
   }
 
   return (
-    <div className="justify-center   w-[46svw] whitespace-nowrap overflow-none  justify-self-center mt-[20px] align-bottom flex flex-row-4 gap-2 bg-sky-100">
+    <div className={"justify-center   w-[46svw] whitespace-nowrap overflow-none  justify-self-center mt-[20px] align-bottom flex flex-row-4 gap-2 bg-sky-100"}>
       <Button
         variant={"outline"}
         className="    whitespace-nowrap  animated-row border-2 border-white"
@@ -177,7 +178,7 @@ function OutputContentButtons({ setEditorVisible, Router, setSelectedNote }) {
         Create new Quiz
       </Button>
 
-      <TestDialog
+      {/* <TestDialog
         visible={testDialogOpen}
         setVisible={setTestDialogOpen}
         uri={slug}
@@ -189,7 +190,7 @@ function OutputContentButtons({ setEditorVisible, Router, setSelectedNote }) {
         onClick={() => openSelectedDialog("Test")}
       >
         Create new Test
-      </Button>
+      </Button> */}
     </div>
   );
 }
@@ -219,7 +220,9 @@ export default function OutputTable({
     console.log("response", response);
   }, [response]);
   function toggleCollapse() {
-    if (collapse == "none") {
+    if (collapse == "chat") {
+      (setCollapse as any)("none");
+    } else if (collapse=='none'){
       (setCollapse as any)("output");
     } else {
       (setCollapse as any)("none");
@@ -259,20 +262,7 @@ export default function OutputTable({
       </div>
     );
 
-  if (view) {
-    return (
-      <div className="w-[46svw] h-[80svh] m-auto">
-        <div>
-          <Button onClick={() => setView(false)} className="animated-row">
-            Go Back to Table View
-          </Button>
-          <Button onClick={() => testQuery()} className="animated-row">
-            Test Neo4j-CSS-Query
-          </Button>
-        </div>
-      </div>
-    );
-  }
+ 
   function selectNoteAndTitle(note) {
     if (setTitle) (setTitle as any)(note.title);
 
@@ -280,7 +270,9 @@ export default function OutputTable({
     setSelectedNote(note);
   }
   return (
-    <div className="bg-sky-100 rounded-xl ">
+    <div className={cn("bg-sky-100 rounded-xl", 
+   // collapse=='chat' ? 'w-[98svw] mx-auto ml-[-26svw]' : 'w-[46svw]')
+  )}>
       <div className="chat-background-2 py-[21.5px] font-roboto rounded-t-xl text-3xl text-white text-left pl-[10px] border-2 border-white border-t-white rounded-xl rounded-b-none">
         <div className="drop-shadow-lg ">
           {" "}
@@ -293,7 +285,7 @@ export default function OutputTable({
           Output
         </div>
       </div>
-      <Table className="w-[46svw] mx-auto   bg-sky-100">
+      <Table className={cn(" mx-auto   bg-sky-100", collapse=='chat' ? 'w-[92svw]' : 'w-[46svw]')}>
         {notes.length == 0 ? (
           <TableCaption>Your recent Notes</TableCaption>
         ) : (
@@ -302,7 +294,7 @@ export default function OutputTable({
         <TableHeader>
           <TableRow >
             <TableHead className="w-[100px] text-black">Title</TableHead>
-            <TableHead className="text-black">Amount of Sources</TableHead>
+            {/* <TableHead className="text-black">Amount of Sources</TableHead> */}
             <TableHead className="text-black">Created On</TableHead>
             <TableHead className="text-right text-black">Owner</TableHead>
           </TableRow>
@@ -321,12 +313,12 @@ export default function OutputTable({
                 >
                   {datum.title}
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                   onClick={() => setEditorVisible(!editorVisible)}
                   className={"cursor-pointer"}
                 >
                   {datum.sources}
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   onClick={() => setEditorVisible(!editorVisible)}
                   className={"cursor-pointer"}

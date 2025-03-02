@@ -2,6 +2,7 @@ import { Suspense, useContext, useState } from "react";
 import Tiptap from "../Tiptap";
 import OutputTable from "./OutputTable";
 import { CollapseContext, GraphViewContext, TiptapContext } from "../../../context/context";
+import { cn } from "../../../lib/utils";
 
 export default function OutputArea({ editorVisible, setEditorVisible  }: any) {
   const [selectedNote, setSelectedNote] = useState({
@@ -30,7 +31,7 @@ export default function OutputArea({ editorVisible, setEditorVisible  }: any) {
   />)
   return (
     <TiptapContext.Provider value={TiptapContextValue}>
-    <div   className="  w-[48svw] h-[87.3svh] bg-sky-100   border-cyan-400/50 border-2 rounded-2xl " >
+    <div   className={cn("   h-[87.3svh] bg-sky-100   border-cyan-400/50 border-2 rounded-2xl ", collapse=='chat' ? 'w-[98svw] ml-[-1svw]' : 'w-[48svw]')} >
       {editorVisible ? (
         <Suspense fallback={<div>loading...</div>}>
           <div >

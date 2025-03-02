@@ -36,7 +36,7 @@ import { ScrollArea } from "../../ui/scroll-area";
 import { ResizablePanel } from "../../ui/resizable";
 import { cn } from "../../lib/utils";
 import { CardTitle } from "../../ui/card";
-import { SlugContext, TiptapContext } from "../../context/context";
+import { CollapseContext, SlugContext, TiptapContext } from "../../context/context";
 import { useRouter } from "next/router";
 import { IoReturnUpBack } from "react-icons/io5";
 import BubbledInput from "../../ui/personal/BubbledInput";
@@ -231,6 +231,7 @@ const Tiptap = ({
   givenTitle,
   givenContent,
 }) => {
+  const {collapse} = useContext(CollapseContext)
   const [tags, setTags] = useState([]);
   const [initial, setInitial] = useState(true);
   const { title, setTitle, content, setContent } = useContext(TiptapContext);
@@ -351,7 +352,7 @@ const Tiptap = ({
             }}
             value={title}
             placeholder="Write a Title"
-            className=" w-[50svw] text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
+            className=" w-full text-zinc-700 border-b-2 border-x-0 border-t-2 border-cyan-400/50 bg-transparent z-auto  pl-5 rounded-none shadow-inner   max-h-[60px] min-h-[60px] text-2xl resize-none  focus-visible:ring-0   "
           />
 
           {/* <Textarea

@@ -45,7 +45,7 @@ export default function GuideDialog({ visible, setVisible, uri, Router }) {
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
             <Label htmlFor="name" className="text-left">
-              New Quiz
+              New Guide
             </Label>
             <Input
               id="name"
@@ -55,7 +55,7 @@ export default function GuideDialog({ visible, setVisible, uri, Router }) {
             />
           </div>
 
-          <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
+          {/* <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
             <Label htmlFor="name" className="text-left">
               Select Sources, Notes, or Topics
             </Label>
@@ -63,11 +63,11 @@ export default function GuideDialog({ visible, setVisible, uri, Router }) {
               tagList={tagList}
               setTagList={setTagList}  
             />
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
             <Label htmlFor="name" className="text-left text-gray-500">
-              Describe what you want to be quizzed on 
+              Describe what you want your guide to be about (Please give a hefty description)
             </Label>
             <Textarea
             value={content}
@@ -83,7 +83,7 @@ export default function GuideDialog({ visible, setVisible, uri, Router }) {
             type="submit"
             onClick={() => createQuiz(guideTitle).then(() => setVisible(false))}
           >
-            Generate Quiz
+            Generate Guide
           </Button>
         </DialogFooter>
       </DialogContent>

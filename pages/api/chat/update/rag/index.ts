@@ -66,12 +66,12 @@ export default async function handle(req, res) {
   });
  
   const preFiltered = queryResponse.matches;
-const matches = preFiltered;
-  // const matches = preFiltered.length >= 5 ? preFiltered.filter(
-  //   //match => match.score! >= 0.25  
-  //   match => match.score! >= 0.25  
-  // ) : preFiltered
-  // ;
+//const matches = preFiltered;
+  const matches = preFiltered.length >= 5 ? preFiltered.filter(
+    //match => match.score! >= 0.25  
+    match => match.score! >= 0.25  
+  ) : preFiltered
+  ;
 
   let top_matches : any[] = [] //
   let top_score : number = 0.0

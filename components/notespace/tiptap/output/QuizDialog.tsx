@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button } from "../../../ui/button";
 import {
   Dialog,
@@ -12,14 +12,25 @@ import { Input } from "../../../ui/input";
 import { Label } from "../../../ui/label";
 import { Textarea } from "../../../ui/textarea";
 import BubbledInput from "../../../ui/personal/BubbledInput";
+import { SlugContext } from "../../../context/context";
  
 
 // OutputQuiz will be another component, rendered within the OutputArea OutputTable
 export default function QuizDialog({ visible, setVisible, uri, Router }) {
   const [quizTitle, setQuizTitle] = useState("");
   const [tagList, setTagList] = useState([]);
+ 
+  async function createQuiz() {
+    let prompt = 'Generate quiz options to test on different types of quasi newton optimization functions'
+    let body = {prompt,uri}
+    const res = await fetch('/api/quiz/create', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    })
+    const data = res.json()
 
-  async function createQuiz(str) {
+    console.log(data)
     //   let oldTitle = title;
     //   const body = { newTitle, oldTitle, uri };
     //   await fetch("/api/notes/update/title", {
@@ -75,7 +86,7 @@ export default function QuizDialog({ visible, setVisible, uri, Router }) {
           <Button
             className="mx-auto"
             type="submit"
-            onClick={() => createQuiz(quizTitle).then(() => setVisible(false))}
+            onClick={() => createQuiz().then(() => setVisible(false))}
           >
             Generate Quiz
           </Button>

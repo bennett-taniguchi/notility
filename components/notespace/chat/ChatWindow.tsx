@@ -10,6 +10,7 @@ import SourcesBlurb from "./messages/SourcesBlurb";
 import { RiExpandHorizontalSFill } from "react-icons/ri";
 import { CollapseContext } from "../../context/context";
 import { Toaster } from "../../ui/toaster";
+import { cn } from "../../lib/utils";
 
 export default function ChatWindow({
   messagesLoaded,
@@ -65,12 +66,15 @@ export default function ChatWindow({
   }
 
   function toggleCollapse() {
-    console.log(collapse);
-    if (collapse == "chat") {
+ 
+    if (collapse == "output") {
       (setCollapse as any)("none");
-    } else {
+    } else if (collapse=='none'){
       (setCollapse as any)("chat");
+    } else {
+      (setCollapse as any)("none");
     }
+    
   }
 
   if (collapse == "chat") {
@@ -84,15 +88,15 @@ export default function ChatWindow({
       </div>
     );
   }
-  console.log(selected);
+ 
   return (
-    <div className="  w-[48svw]  border-cyan-400/50 border-2 rounded-md">
+    <div   className= {cn("border-cyan-400/50 border-2 rounded-md ", collapse=='output' ? 'w-[98svw] ml-[1svw] ' : 'w-[48svw]')} >
       <div>
         <ScrollArea
           className="   bg-sky-100  h-[86.7svh]  rounded-[12px]  rounded-b-[1px]"
           viewportRef={viewportRef}
         >
-          <div className="   bg-sky-100 w-[45svw]  flex flex-col  max-w-1/2 py-10  stretch gap-y-2 min-h-[80svh]  pb-[200px] ">
+          <div className={cn("bg-sky-100   flex flex-col  max-w-1/2 py-10  stretch gap-y-2 min-h-[80svh]  pb-[200px] ", collapse=='output' ? 'w-[98svw] mr-[2svw] ml-[-2svw]' : 'w-[45svw]')}>
             <RiExpandHorizontalSFill
               onClick={() => toggleCollapse()}
               style={{ zIndex: 10 }}
@@ -102,7 +106,7 @@ export default function ChatWindow({
             />
             <div
               style={{ zIndex: 1 }}
-              className="fixed  mt-[-4.4svh] chat-background  rounded-t-md w-[47.8svw] text-right flex flex-col  border-2 border-white border-t-white   rounded-b-none "
+              className={cn("fixed  mt-[-4.4svh] chat-background  rounded-t-md  text-right flex flex-col  border-2 border-white border-t-white   rounded-b-none ", collapse=='output' ? 'w-[97.8svw] ml-[2svw] ' : 'w-[47.8svw]')}
             >
               <div className="text-3xl text-left drop-shadow-md  text-white ml-[10px] pt-[21px]   font-roboto  h-[80px] whitespace-nowrap">
                 {" "}
@@ -115,7 +119,7 @@ export default function ChatWindow({
               </div>
             </div>
 
-            <div className="ml-[3svw]  mt-[50px]">
+            <div className= {cn("ml-[3svw]  mt-[50px]", collapse=='output' ? 'w-[70svw]  ml-[15svw]' : '')}>
               <SourcesBlurb sources={sources} selected={selected} />
             </div>
 

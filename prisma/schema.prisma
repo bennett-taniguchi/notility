@@ -126,6 +126,7 @@ model Notespace {
  
   permissions Permissions[]
   uploads Upload[]
+  //quizzes Quiz[]
 
   @@unique([uri])
  
@@ -158,4 +159,31 @@ model Upload {
 
   notespace Notespace @relation(fields: [uri], references:[uri],onDelete:Cascade)
   @@unique([uri,title,originalFileName])
+}
+
+
+model Quiz {
+  id  Int    @id @default(autoincrement())
+  uri String
+  //questions Question[]
+ 
+  //notespace Notespace @relation(fields: [uri], references:[uri],onDelete:Cascade)
+
+  @@unique([uri])
+}
+
+model Question {
+  id  Int    @id @default(autoincrement())
+  uri String
+  question String
+  a String
+  b String
+  c String
+  d String
+  hint String
+  e String?
+  f String?
+  correctOption String
+  @@unique([uri,a,b,c,d])
+  //quiz Quiz @relation(fields: [uri],references:[uri],onDelete: Cascade)
 }
