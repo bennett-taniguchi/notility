@@ -280,12 +280,12 @@ export default function OutputTable({
             width={40}
             height={40}
           />
-          Output
+          Studio
         </div>
       </div>
       <Table className={cn(" mx-auto   bg-sky-100", collapse=='chat' ? 'w-[92svw]' : 'w-[46svw]')}>
         {notes.length == 0 ? (
-          <TableCaption>Your recent Notes</TableCaption>
+          <TableCaption>Your recent Notes and Quizzes</TableCaption>
         ) : (
           <div></div>
         )}
