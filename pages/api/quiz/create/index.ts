@@ -1,129 +1,26 @@
-import OpenAI from "openai";
-import type { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions";
-import { z } from "zod";
-import prisma from "../../../../lib/prisma";
- 
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
-
-/**
- * Define the JSON schema for our poll using OpenAI's structured output format.
- * This schema tells the AI exactly what we expect—a question and an array of options.
- */
-const pollSchema: OpenAI.ResponseFormatJSONSchema["json_schema"] = {
-  name: "createAIQuiz",
-  description:
-    "Create a high-quality quiz that engages participants and develops deepened understanding",
-  schema: {
-    type: "object",
-    properties: {
-        hint: {
-            type:'string',
-            description:'A short hint that offers a useful explanation of what the question is trying to convey or test on.'
-        },
-
-      question: {
-        type: "string",
-        description:
-          "A clear and concise question that can be answered by selecting one of the provided options.",
-      },
-      options: {
-        type: "array",
-        description:
-          "A list of possible answers for the quiz. Each option should be distinct and cover a range of likely responses. Aim to create 3 incorrect and 1 correct options",
-        items: {
-          type: "string",
-          description:
-            "A possible answer to the poll question. Ensure each option is concise and unambiguous.",
-        },
-      },
-    },
-    required: ["question", "options",'hint'],
-    additionalProperties: false,
-  },
-  strict: true,
-};
-
-/**
- * Create a Zod schema to validate the API response.
- */
-const aiPoll = z.object({
-  question: z.string(),
-  options: z.array(z.string()),
-  hint: z.string()
-});
-
-export type AIPoll = z.infer<typeof aiPoll>;
-
-/**
- * getAIPoll calls OpenAI's chat completion API using structured outputs.
- * 
- * @param prompt - The prompt provided by the user to guide poll creation.
- * @param languageCode - The language in which the poll should be generated.
- * @param params - Additional parameters for the OpenAI API.
- * @returns A promise that resolves to a validated poll object.
- */
-export const getAIPoll = async (
-  prompt: string,
-  languageCode: string,
-  params: Partial<ChatCompletionCreateParamsBase> = {}
-): Promise<AIPoll> => {
-  const resp = await openai.beta.chat.completions.parse({
-    ...params,
-    stream: false,
-    model: "gpt-4o-2024-11-20",
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a quiz generator AI. Your task is to generate challenging quizzes that improve nuanced understanding. Focus on providing options that develop a deepened understanding of the subject.",
-      },
-      {
-        role: "user",
-        content: `The prompt for the poll is: ${prompt}. Generate the response in English`,
-      },
-    ],
-    response_format: {
-      type: "json_schema",
-      json_schema: pollSchema,
-    },
-  });
-console.log(aiPoll.parse(resp.choices[0]?.message.parsed))
-  // Parse and validate the response using Zod
-  return aiPoll.parse(resp.choices[0]?.message.parsed);
-};
+import { headers } from "next/headers";
 
 export default async function handle(req,res) {
+    const {prompt,uri,amount} = req.body;
+    let body = {prompt,uri,amount}
+//  const {amount,topics,prompt,uri} = req.body
 
+    //(1)
+   // if (note/guide) => upload to pinecone and prisma as source
+   
+   //(2) {generate subtopics then questions on each subtopic} {assume valid call}
+   const subTopics = await fetch('/api/openai/generate/subtopic',
+    {method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+    }
+   )
+   const subTitle = subTopics[0].title
+   //  (**Optionally**) use prompt if provided to flavor and narrow down list of topics
+   // { }
 
-    const {prompt,uri} = req.body;
-
-    const result = await getAIPoll(prompt,"EN");
-
-     await prisma.question.create({
-data: {
-    uri:uri,
-    a:result.options[0],
-    b:result.options[1],
-    c:result.options[2],
-    d:result.options[3],
-    hint:result.hint,
-    question:result.question,
-    correctOption:result.options[0],
-  
-}
-    })
-//     {
-//         question: 'Which type of machine learning model uses labeled data to train and make predictions?',
-//         options: [
-//           'Supervised learning',
-//           'Unsupervised learning',
-//           'Reinforcement learning',
-//           'Generative modeling'
-//         ],
-//         hint: 'Consider the different paradigms in machine learning, such as supervised, unsupervised, reinforced learning, and others.'
-//       }
-    res.json(result)
-
+   //(3) Generate questions per subTopic
+   //const questions = fetch /api/question/createMany
+        
+ 
 }

@@ -34,7 +34,7 @@ import { Label } from "../../../ui/label";
 import QuizDialog from "./QuizDialog";
 import GuideDialog from "./GuideDialog";
 import TestDialog from "./TestDialog";
-import { RiExpandHorizontalSFill } from "react-icons/ri";
+import { RiCollapseHorizontalFill  } from "react-icons/ri";
 import { cn } from "../../../lib/utils";
 
 function NoteOptions({
@@ -111,7 +111,7 @@ function NoteOptions({
   );
 }
 
-function OutputContentButtons({ setEditorVisible, Router, setSelectedNote }) {
+function OutputContentButtons({ setEditorVisible, Router, setSelectedNote, setQuizVisible }) {
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [guideDialogOpen, setGuideDialogOpen] = useState(false);
@@ -177,7 +177,14 @@ function OutputContentButtons({ setEditorVisible, Router, setSelectedNote }) {
       >
         Create new Quiz
       </Button>
-
+      <Button
+        variant={"outline"}
+        className=" whitespace-nowrap  animated-row border-2 border-white"
+        onClick={()=>setQuizVisible(true)}
+      >
+        Open Quiz Area!
+      </Button>
+    
       {/* <TestDialog
         visible={testDialogOpen}
         setVisible={setTestDialogOpen}
@@ -200,6 +207,7 @@ export default function OutputTable({
   setEditorVisible,
   selectedNote,
   setSelectedNote,
+  setQuizVisible
 }) {
   const { setTitle } = useContext(TiptapContext);
   const [response, setResponse] = useState([]) as any;
@@ -249,11 +257,12 @@ export default function OutputTable({
     setResponse(data);
   }
 
+ 
   if (collapse == "output")
     return (
       <div>
         {" "}
-        <RiExpandHorizontalSFill
+        <RiCollapseHorizontalFill 
           onClick={() => toggleCollapse()}
           className="hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
           width={40}
@@ -276,7 +285,7 @@ export default function OutputTable({
       <div className="chat-background-2 py-[21.5px] font-roboto rounded-t-xl text-3xl text-white text-left pl-[10px] border-2 border-white border-t-white rounded-xl rounded-b-none">
         <div className="drop-shadow-lg ">
           {" "}
-          <RiExpandHorizontalSFill
+          <RiCollapseHorizontalFill 
             onClick={() => toggleCollapse()}
             className=" bg-white/30 rounded hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[-18px] cursor-pointer"
             width={40}
@@ -296,6 +305,7 @@ export default function OutputTable({
             <TableHead className="w-[100px] text-black">Title</TableHead>
             {/* <TableHead className="text-black">Amount of Sources</TableHead> */}
             <TableHead className="text-black">Created On</TableHead>
+            <TableHead className="text-right text-black">Type</TableHead>
             <TableHead className="text-right text-black">Owner</TableHead>
           </TableRow>
         </TableHeader>
@@ -313,12 +323,12 @@ export default function OutputTable({
                 >
                   {datum.title}
                 </TableCell>
-                {/* <TableCell
+                <TableCell
                   onClick={() => setEditorVisible(!editorVisible)}
                   className={"cursor-pointer"}
                 >
-                  {datum.sources}
-                </TableCell> */}
+                  Note
+                </TableCell>
                 <TableCell
                   onClick={() => setEditorVisible(!editorVisible)}
                   className={"cursor-pointer"}
@@ -359,6 +369,7 @@ export default function OutputTable({
         setEditorVisible={setEditorVisible}
         setSelectedNote={setSelectedNote}
         Router={Router}
+        setQuizVisible={setQuizVisible}
       />
     </div>
   );

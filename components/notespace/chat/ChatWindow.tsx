@@ -7,7 +7,7 @@ import MessageList from "./messages/MessageList";
 import PulsingDots from "./loading/PulsingDots";
 import InputArea from "./input/InputArea";
 import SourcesBlurb from "./messages/SourcesBlurb";
-import { RiExpandHorizontalSFill } from "react-icons/ri";
+import { RiCollapseHorizontalFill  } from "react-icons/ri";
 import { CollapseContext } from "../../context/context";
 import { Toaster } from "../../ui/toaster";
 import { cn } from "../../lib/utils";
@@ -80,7 +80,7 @@ export default function ChatWindow({
   if (collapse == "chat") {
     return (
       <div>
-        <RiExpandHorizontalSFill
+        <RiCollapseHorizontalFill 
           className="     hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
           width={40}
           height={40}
@@ -97,7 +97,7 @@ export default function ChatWindow({
           viewportRef={viewportRef}
         >
           <div className={cn("bg-sky-100   flex flex-col  max-w-1/2 py-10  stretch gap-y-2 min-h-[80svh]  pb-[200px] ", collapse=='output' ? 'w-[98svw] mr-[2svw] ml-[-2svw]' : 'w-[45svw]')}>
-            <RiExpandHorizontalSFill
+            <RiCollapseHorizontalFill 
               onClick={() => toggleCollapse()}
               style={{ zIndex: 10 }}
               className="    bg-white/30 rounded  hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"

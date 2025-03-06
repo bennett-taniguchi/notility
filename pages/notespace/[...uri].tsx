@@ -199,7 +199,7 @@ export default function NotespacesPage({
   notes,
   permission,
 }: Props) {
-  const [collapseState, setCollapseState] = useState(''); 
+  const [collapseState, setCollapseState] = useState('none'); 
   const inputRef = useRef(null);
   const Router = useRouter();
   const slug = Router.asPath.split("/")[2];

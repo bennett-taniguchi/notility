@@ -75,7 +75,7 @@ model Notes {
   prompt_type String?
   prompt      String?
   createdOn String
-  sources   Int
+
   notespace Notespace? @relation(fields: [uri], references: [uri], onDelete: Cascade)
 
   @@unique([title,uri], name:"title_uri")
@@ -126,7 +126,7 @@ model Notespace {
  
   permissions Permissions[]
   uploads Upload[]
-  //quizzes Quiz[]
+  quizzes Quiz[]
 
   @@unique([uri])
  
@@ -161,21 +161,24 @@ model Upload {
   @@unique([uri,title,originalFileName])
 }
 
+ 
 
 model Quiz {
   id  Int    @id @default(autoincrement())
   uri String
-  //questions Question[]
- 
-  //notespace Notespace @relation(fields: [uri], references:[uri],onDelete:Cascade)
-
-  @@unique([uri])
+  questions Question[]
+  title String
+  notespace Notespace @relation(fields: [uri], references:[uri],onDelete:Cascade)
+  topics String[]
+  @@unique([uri,title])
 }
+
 
 model Question {
   id  Int    @id @default(autoincrement())
   uri String
   question String
+  title String
   a String
   b String
   c String
@@ -183,7 +186,9 @@ model Question {
   hint String
   e String?
   f String?
+
+  topic String 
   correctOption String
   @@unique([uri,a,b,c,d])
-  //quiz Quiz @relation(fields: [uri],references:[uri],onDelete: Cascade)
+  quiz Quiz @relation(fields: [uri,title],references:[uri,title],onDelete: Cascade)
 }

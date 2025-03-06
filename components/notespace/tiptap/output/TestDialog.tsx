@@ -33,7 +33,7 @@ export default function TestDialog({ visible, setVisible, uri, Router }) {
     <Dialog modal={true} open={visible} onOpenChange={setVisible}  >
       <DialogContent className="sm:max-w-[800px]  ">
         <DialogHeader>
-          <DialogTitle>Create Quiz</DialogTitle>
+          <DialogTitle>Create Test</DialogTitle>
           <DialogDescription>
             New Quiz Name: <i>{testTitle}</i>
           </DialogDescription>
@@ -41,7 +41,7 @@ export default function TestDialog({ visible, setVisible, uri, Router }) {
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
             <Label htmlFor="name" className="text-left">
-              New Quiz
+              New Test
             </Label>
             <Input
               id="name"

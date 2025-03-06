@@ -13,6 +13,10 @@ import { Label } from "../../../ui/label";
 import { Textarea } from "../../../ui/textarea";
 import BubbledInput from "../../../ui/personal/BubbledInput";
 import { SlugContext } from "../../../context/context";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../../../ui/command";
+import { cn } from "../../../lib/utils";
+ 
  
 
 // OutputQuiz will be another component, rendered within the OutputArea OutputTable
@@ -20,6 +24,9 @@ export default function QuizDialog({ visible, setVisible, uri, Router }) {
   const [quizTitle, setQuizTitle] = useState("");
   const [tagList, setTagList] = useState([]);
  
+  const [amount,setAmount] = useState(10)
+
+
   async function createQuiz() {
     let prompt = 'Generate quiz options to test on different types of quasi newton optimization functions'
     let body = {prompt,uri}
@@ -46,19 +53,39 @@ export default function QuizDialog({ visible, setVisible, uri, Router }) {
         <DialogHeader>
           <DialogTitle>Create Quiz</DialogTitle>
           <DialogDescription>
-            New Quiz Name: <i>{quizTitle}</i>
+            <i>{quizTitle}<span className="text-white select-none">.</span></i>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
             <Label htmlFor="name" className="text-left">
-              New Quiz
+             Title:
             </Label>
             <Input
               id="name"
               onChange={(e) => setQuizTitle(e.currentTarget.value)}
               value={quizTitle}
               className="col-span-3"
+            />
+          </div>
+
+          <div className="flex flex-col">
+          <Label htmlFor="amount" className="text-left">
+              Amount of Questions (max 20)
+            </Label>
+
+            <Input
+              id="amount"
+              onKeyDown={(event) => {
+                if (!/[0-9]/.test(event.key)) {
+                  event.preventDefault();
+                }
+
+                
+              }}
+              onChange={(e) => setAmount(Number(e.currentTarget.value))}
+              value={amount}
+              className="col-span-3 w-[50px] mt-[5px]"
             />
           </div>
 

@@ -37,7 +37,7 @@ export default function GuideDialog({ visible, setVisible, uri, Router }) {
     <Dialog modal={true} open={visible} onOpenChange={setVisible}  >
       <DialogContent className="sm:max-w-[800px]  ">
         <DialogHeader>
-          <DialogTitle>Create Quiz</DialogTitle>
+          <DialogTitle>Create Guide</DialogTitle>
           <DialogDescription>
             New Guide Name: <i>{guideTitle}</i>
           </DialogDescription>
