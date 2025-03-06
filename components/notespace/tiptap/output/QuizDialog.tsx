@@ -23,13 +23,14 @@ import { cn } from "../../../lib/utils";
 export default function QuizDialog({ visible, setVisible, uri, Router }) {
   const [quizTitle, setQuizTitle] = useState("");
   const [tagList, setTagList] = useState([]);
- 
+  const [prompt,setPrompt] = useState('')
   const [amount,setAmount] = useState(10)
 
 
   async function createQuiz() {
-    let prompt = 'Generate quiz options to test on different types of quasi newton optimization functions'
-    let body = {prompt,uri}
+ 
+    let notes_selected = 'n_a'
+    let body = {prompt,uri,amount,notes_selected}
     const res = await fetch('/api/quiz/create', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -105,6 +106,7 @@ export default function QuizDialog({ visible, setVisible, uri, Router }) {
             </Label>
             <Textarea
               id="name"
+              onChange={(e) => setPrompt((e.currentTarget.value))}
               className="col-span-3 h-[20svh] resize-none"
             />
           </div>

@@ -3,7 +3,8 @@ import Tiptap from "../Tiptap";
 import OutputTable from "./OutputTable";
 import {
   CollapseContext,
-  GraphViewContext,
+  
+ 
   TiptapContext,
 } from "../../../context/context";
 import { cn } from "../../../lib/utils";
@@ -15,6 +16,7 @@ export default function OutputArea({ editorVisible, setEditorVisible }: any) {
     content: "",
   }) as any;
   const { collapse } = useContext(CollapseContext);
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [quizVisible,setQuizVisible] = useState(false)

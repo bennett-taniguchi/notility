@@ -1,26 +1,24 @@
 import { headers } from "next/headers";
-
+import {getAiSubTopics} from '../../openai/generate/subtopic'
+import {  getAiQuiz, populateQuestionsAndQuiz}  from '../../question/createMany'
+import { getAiTitle } from "../../openai/generate/title";
 export default async function handle(req,res) {
-    const {prompt,uri,amount} = req.body;
+    const {prompt,uri,amount,notes_selected} = req.body;
     let body = {prompt,uri,amount}
-//  const {amount,topics,prompt,uri} = req.body
-
-    //(1)
-   // if (note/guide) => upload to pinecone and prisma as source
-   
-   //(2) {generate subtopics then questions on each subtopic} {assume valid call}
-   const subTopics = await fetch('/api/openai/generate/subtopic',
-    {method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(body)
-    }
-   )
-   const subTitle = subTopics[0].title
-   //  (**Optionally**) use prompt if provided to flavor and narrow down list of topics
-   // { }
-
-   //(3) Generate questions per subTopic
-   //const questions = fetch /api/question/createMany
-        
  
+    //(1) Notes/Guides => Sources {notes_selected are to be uploaded}
+        // insert into prisma and pinecone
+
+
+   //(2) {generate subtopics then questions on each subtopic} {assume valid call}
+    const topics = (await getAiSubTopics(prompt,amount, "EN")).subTopics;
+
+   //  {(**Optionally**) use prompt if provided to flavor and narrow down list of topics}
+ 
+   //(3) Generate questions per subTopic
+   const {title} = await getAiTitle(topics,'EN')
+   const quiz = await getAiQuiz(prompt, 'EN', topics)
+   const transaction = await populateQuestionsAndQuiz(quiz,title,topics,uri)
+ 
+   res.json(transaction)
 }

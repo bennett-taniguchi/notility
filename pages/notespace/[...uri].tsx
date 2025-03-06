@@ -11,7 +11,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 
 import { getSession, useSession } from "next-auth/react";
-import { Message, Notespace, Upload } from "@prisma/client";
+import { Message, Notespace, Quiz, Upload } from "@prisma/client";
 
 import prisma from "../../lib/prisma";
 import { GetServerSideProps } from "next";
@@ -23,7 +23,8 @@ import {
   SlugContext,
   UpdateUploadsContext,
   CollapseContext,
-  GraphNodesContext,
+  QuizzesContext,
+ 
 } from "../../components/context/context";
 import Headbar from "../../components/heading/Headbar";
 import { buttonVariants } from "../../components/ui/button";
@@ -81,6 +82,13 @@ export const getServerSideProps: GetServerSideProps = async ({
     },
   });
 
+  const quizzes = await prisma.quiz.findMany({
+    where:{
+      uri:uuid
+    },
+     
+  })
+
   let permission = await prisma.permissions.findMany({
     where: {
       uri: uuid,
@@ -91,9 +99,10 @@ export const getServerSideProps: GetServerSideProps = async ({
     },
   });
 
+
 if(!permission)permission=[]
   return {
-    props: { notespace, sources, messages, notes, permission },
+    props: { notespace, sources, messages, notes, quizzes, permission },
   };
 };
 
@@ -102,6 +111,7 @@ type Props = {
   sources: Upload[];
   messages: Message[];
   notes: string[];
+  quizzes: Quiz[] | null;
   permission: Object[] | null;
 };
 
@@ -197,6 +207,7 @@ export default function NotespacesPage({
   sources,
   messages,
   notes,
+  quizzes,
   permission,
 }: Props) {
   const [collapseState, setCollapseState] = useState('none'); 
@@ -209,15 +220,17 @@ export default function NotespacesPage({
     selected: "",
     selectedArr: [],
   };
-  const [nodes,setNodes] = useState([])
+ 
   const [editorVisible, setEditorVisible] = useState(false);
   const [isChild, setIsChild] = useState(false);
   const [selected, dispatch] = useReducer(selectedReducer, initialState);
 
+  const [selectedQuiz,setSelectedQuiz] = useState([])
+
   const [fileContent, setFileContent] = useState(null);
   const { data: session } = useSession();
 
-  const ref = useRef(null);
+ 
   const [uploadOpened, setUploadOpened] = useState(false);
 
   useEffect(() => {
@@ -294,7 +307,8 @@ export default function NotespacesPage({
   
   if (notespace)
     return (
-  <GraphNodesContext.Provider value={{nodes:nodes,setNodes:setNodes as any}} >
+ 
+      <QuizzesContext.Provider value={{quizzes:quizzes,setSelectedQuiz:setSelectedQuiz as any,selectedQuiz:selectedQuiz}}>
   <CollapseContext.Provider value={{collapse:collapseState, setCollapse:setCollapseState as any}}>
       <UserContext.Provider
         value={{ url: session!.user.image, email: session!.user.email }}
@@ -361,7 +375,7 @@ export default function NotespacesPage({
         </NotesContext.Provider>
       </UserContext.Provider>
       </CollapseContext.Provider>
-      </GraphNodesContext.Provider>
+      </QuizzesContext.Provider>
     );
 
   return <div>Notespace doesn't exist</div>;

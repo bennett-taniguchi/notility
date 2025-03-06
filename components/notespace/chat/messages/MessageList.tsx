@@ -316,8 +316,10 @@ export default function MessageList({ messagesLoaded }) {
                 </CardHeader>
                 <span className=" text-slate-600">
                   <CardContent>
-                    <Latex>{m.content}</Latex>
-
+                    {/* <Latex>{m.content}</Latex> */}
+                  
+                <ReactMarkdown>{m.content}</ReactMarkdown>
+            
                     <MatchScoreArea m={m} />
                     <CreateOutputButtons m={m} handleModal={handleModal} />
                   </CardContent>

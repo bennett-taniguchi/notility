@@ -3,8 +3,9 @@ import { useContext, useState, useEffect } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
   CollapseContext,
-  GraphViewContext,
+ 
   NotesContext,
+  QuizzesContext,
   SlugContext,
   TiptapContext,
 } from "../../../context/context";
@@ -215,18 +216,21 @@ export default function OutputTable({
 
   const { collapse, setCollapse } = useContext(CollapseContext);
   const { notes } = useContext(NotesContext);
+
+  const { quizzes } = useContext(QuizzesContext)
+  const {selectedQuiz,setSelectedQuiz} = useContext(QuizzesContext)
+
+
   const { slug } = useContext(SlugContext);
   const [newTitle, setNewTitle] = useState("");
   const [open, setOpen] = useState(false);
   const Router = useRouter();
 
-  useEffect(() => {}, [notes]);
-
-  useEffect(() => {}, [collapse]);
+  useEffect(() => {}, [notes,collapse,quizzes]);
 
   useEffect(() => {
-    console.log("response", response);
   }, [response]);
+
   function toggleCollapse() {
     if (collapse == "chat") {
       (setCollapse as any)("none");
@@ -235,26 +239,6 @@ export default function OutputTable({
     } else {
       (setCollapse as any)("none");
     }
-  }
-
-  async function testQuery() {
-    let prompt =
-      "Who are the enemies of harry potter and can you describe them?";
-
-    let messages = [];
-    let title = [];
-    let limit = 25;
-    let body = { prompt, messages, title, limit };
-
-    const res = await fetch("/api/neo4j/query", {
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-
-    setResponse(data);
   }
 
  
@@ -272,10 +256,14 @@ export default function OutputTable({
     );
 
  
+    function selectQuiz(q) {
+      if(setSelectedQuiz)
+      (setSelectedQuiz as any)(q)
+    }
+
   function selectNoteAndTitle(note) {
     if (setTitle) (setTitle as any)(note.title);
 
-    console.log(note);
     setSelectedNote(note);
   }
   return (
@@ -304,8 +292,8 @@ export default function OutputTable({
           <TableRow >
             <TableHead className="w-[100px] text-black">Title</TableHead>
             {/* <TableHead className="text-black">Amount of Sources</TableHead> */}
-            <TableHead className="text-black">Created On</TableHead>
-            <TableHead className="text-right text-black">Type</TableHead>
+            <TableHead className="text-black">Type</TableHead>
+            <TableHead className="text-right text-black">Created On</TableHead>
             <TableHead className="text-right text-black">Owner</TableHead>
           </TableRow>
         </TableHeader>
@@ -340,6 +328,59 @@ export default function OutputTable({
                   className="text-right cursor-pointer"
                 >
                   {datum.createdBy}
+                </TableCell>
+                <TableCell className="w-[1svw] h-[5svh] hover:bg-indigo-800">
+                  {" "}
+                  <NoteOptions
+                    title={datum.title}
+                    newTitle={newTitle}
+                    setNewTitle={setNewTitle}
+                    open={open}
+                    setOpen={setOpen}
+                    uri={slug}
+                    Router={Router}
+                  />
+                  <BsThreeDotsVertical
+                    className="cursor-pointer w-5 h-5"
+                    onClick={() => setOpen(!open)}
+                  />
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <div></div>
+          )}
+
+{quizzes && quizzes.length != 0 ? (
+            quizzes.map((datum: any, idx: number) => (
+              <TableRow
+                key={datum.title}
+                className="  w-max h-max hover:bg-indigo-400/50   hover:text-white animated-row border-none text-black"
+                onClick={() => selectQuiz(quizzes[idx])}
+              >
+                <TableCell
+                  onClick={() => setQuizVisible(!setQuizVisible)}
+                  className="font-medium cursor-pointer    "
+                >
+                  {datum.title}
+                </TableCell>
+                <TableCell
+                  onClick={() => setQuizVisible(!setQuizVisible)}
+                  className={"cursor-pointer"}
+                >
+                  Quiz
+                </TableCell>
+                <TableCell
+                  onClick={() => setQuizVisible(!setQuizVisible)}
+                  className={"cursor-pointer"}
+                >
+                  datum.createdOn
+                </TableCell>
+                <TableCell
+                  onClick={() => setQuizVisible(!setQuizVisible)}
+                  className="text-right cursor-pointer"
+                >
+                  datum.createdBy
                 </TableCell>
                 <TableCell className="w-[1svw] h-[5svh] hover:bg-indigo-800">
                   {" "}

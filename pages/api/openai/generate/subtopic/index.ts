@@ -31,7 +31,7 @@ const subTopicSchema: OpenAI.ResponseFormatJSONSchema["json_schema"] = {
         },
       },
     },
-    required: ["subtopics"],
+    required: ["subTopics"],
     additionalProperties: false,
   },
   strict: true,
@@ -46,12 +46,14 @@ export type AiSubTopic = z.infer<typeof aiSubTopics>;
  * getAIPoll calls OpenAI's chat completion API using structured outputs.
  *
  * @param prompt - The prompt provided by the user to guide poll creation.
+ * @param amount - The amount of subtopics to be made
  * @param languageCode - The language in which the poll should be generated.
  * @param params - Additional parameters for the OpenAI API.
  * @returns A promise that resolves to a validated poll object.
  */
 export const getAiSubTopics = async (
   prompt: string,
+  amount: number,
   languageCode: string,
   params: Partial<ChatCompletionCreateParamsBase> = {}
 ): Promise<AiSubTopic> => {
@@ -67,7 +69,7 @@ export const getAiSubTopics = async (
       },
       {
         role: "user",
-        content: `The amount of required sub-topics is: ${prompt}. Generate the response in English`,
+        content: `The amount of required sub-topics is: ${amount}. Generate the response in English`,
       },
     ],
     response_format: {
@@ -83,9 +85,9 @@ export const getAiSubTopics = async (
 // {"role": "system", "content": "You are a helpful assistant."},
 // {"role": "user", "content": "message 1 content."},
 export default async function handle(req, res) {
-  const { prompt, amount, uri } = req.body;
+  const { prompt, amount,  } = req.body;
 
-  const result = await getAiSubTopics(prompt, "EN");
+  const result = await getAiSubTopics(prompt,amount, "EN");
 
 
 const topics = result.subTopics.map((topic)=> {return {

@@ -1,8 +1,10 @@
+import { useContext } from "react";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import { RadioGroup, RadioGroupItem } from "../../ui/radio-group";
 import { ScrollArea } from "../../ui/scroll-area";
 import { IoMdArrowBack } from "react-icons/io";
+import { QuizzesContext } from "../../context/context";
 
 
  
@@ -43,6 +45,8 @@ function QuizQuestion({q} ) {
 }
 export default function Quiz({ setQuizVisible }) {
   let nums = [1, 2, 3, 4];
+  const {selectedQuiz} = useContext(QuizzesContext)
+console.log(selectedQuiz)
   return (
     <ScrollArea className="text-center h-[87svh]" viewportRef={null}>
         <div className="text-start">
@@ -51,7 +55,7 @@ export default function Quiz({ setQuizVisible }) {
       </Button></div>
 
       <div className="font-bold text-2xl text-sky-800 pb-[10px] [text-shadow:_0_1px_0_rgb(40_40_200_/_10%)]">
-        Quiz on Red Rising:
+        Quiz on {(selectedQuiz as any).title!}
       </div>
 
       <div className="gap-3 flex flex-col pb-[20px]">

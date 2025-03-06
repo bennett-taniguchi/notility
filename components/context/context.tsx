@@ -1,3 +1,4 @@
+import { Quiz } from "@prisma/client";
 import { createContext } from "react";
 
 export const SelectedRowsContext = createContext({
@@ -19,6 +20,14 @@ export const NotesContext = createContext({
     notes: [] as string[]
 })
 
+export const QuizzesContext = createContext({
+   quizzes: [] as Quiz[] | null,
+   selectedQuiz:[],
+   setSelectedQuiz:null
+ 
+})
+
+
  export const UserContext = createContext({
     url: '',
     email: '',
@@ -30,15 +39,15 @@ export const NotesContext = createContext({
     setCollapse: null,
  })
 
- export const GraphViewContext = createContext({
-    view: false,
-    setView: null,
- })
+//  export const GraphViewContext = createContext({
+//     view: false,
+//     setView: null,
+//  })
 
- export const GraphNodesContext = createContext({
-    nodes: [],
-    setNodes: null
- })
+//  export const GraphNodesContext = createContext({
+//     nodes: [],
+//     setNodes: null
+//  })
 
  
  export const TiptapContext = createContext({

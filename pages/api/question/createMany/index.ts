@@ -14,22 +14,23 @@ const openai = new OpenAI({
  * This schema tells the AI exactly what we expect—a question and an array of options.
  */
 const quizSchema: OpenAI.ResponseFormatJSONSchema["json_schema"] = {
-  name: "createAIQuiz",
-  description:
-    "Create a high-quality quiz question that engages participants and develops deepened understanding",
-  schema: {
-    type: "object",
-    properties: {
-      questions: {
-        type: "array",
-        description: "An array of multiple choice quiz questions that test a user's understanding of subtopics",
-        items:{
-            hint: {
+    name: "createAIQuiz",
+    description:
+      "Create a high-quality quiz question that engages participants and develops deepened understanding",
+    schema: {
+      type: "object",
+      properties: {
+        questions: {
+          type: "array",
+          description: "An array of multiple choice quiz questions that test a user's understanding of subtopics",
+          items: {
+            type: "object", // This was missing
+            properties: {  // You need to wrap your properties in a properties object
+              hint: {
                 type: "string",
                 description:
                   "A short hint that offers a useful explanation of what the question is trying to convey or test on.",
               },
-      
               question: {
                 type: "string",
                 description:
@@ -45,15 +46,17 @@ const quizSchema: OpenAI.ResponseFormatJSONSchema["json_schema"] = {
                     "A possible answer to the poll question. Ensure each option is concise and unambiguous.",
                 },
               },
-        }
-       
+            },
+            additionalProperties: false,
+            required: ["question", "options", "hint"] // Move these required fields here for the item level
+          }
+        },
       },
+      required: ["questions"], // This should only contain top-level required properties
+      additionalProperties: false,
     },
-    required: ["questions","question", "options", "hint"],
-    additionalProperties: false,
-  },
-  strict: true,
-};
+    strict: true,
+  };
 
 /**
  * Create a Zod schema to validate the API response.
@@ -65,7 +68,7 @@ const aiQuiz = z.object({
         options: z.array(z.string()),
         hint: z.string()
       })
-    )
+    ) 
   });
 
 export type AIPoll = z.infer<typeof aiQuiz>;
@@ -108,53 +111,46 @@ export const getAiQuiz = async (
   // Parse and validate the response using Zod
   return aiQuiz.parse(resp.choices[0]?.message.parsed);
 };
-
-export default async function handle(req, res) {
-  const { prompt, uri, topics} = req.body;
-  const {title} = await getAiTitle(topics,'EN')
-  
-  const quiz = await getAiQuiz(prompt, "EN",topics);
-
+export async function populateQuestionsAndQuiz(quiz, title, topics, uri) {
   const transaction = await prisma.$transaction(async (tx) => {
-
-    const questions = await tx.question.createMany({
-        data: 
-            (quiz.questions).map((quest: AiQuestion,idx) => {
-
-                return {
-                    uri:uri  ,
-                    a:quest.options[0],
-                    b:quest.options[1],
-                    c:quest.options[2],
-                    d:quest.options[3],
-                    hint: quest.hint,
-                    question: quest.question,
-                    correctOption: quest.options[0],
-                    title: title,
-                    topic: topics[idx] ,
-                
-                }  
-            })
-        
-    })
-  // Query for the created questions
-  const createdQuestions = await tx.question.findMany({
-    where: { uri: uri }
-});
-    const quizResult = await tx.quiz.create({
-        data: {
-            notespace: { connect: { uri: uri } },
-            uri:uri,
-            title: 'TITLE HERE',
-            questions: {
-                connect: createdQuestions ,
-            },
-            topics: topics ,
-        }
+      // Create Quiz with nested questions
+      const quizResult = await tx.quiz.create({
+          data: {
+              notespace: { connect: { uri: uri } },
+              title: title,
+              topics: topics,
+              questions: {
+                  create: quiz.questions.map((quest, idx) => ({
+                     
+                      a: quest.options[0],
+                      b: quest.options[1],
+                      c: quest.options[2],
+                      d: quest.options[3],
+                      hint: quest.hint,
+                      question: quest.question,
+                      correctOption: quest.options[0],
+                    
+                      topic: topics[idx],
+                  }))
+              }
+          },
+          include: {
+              questions: true
+          }
       });
 
+      return quizResult;
+  });
 
-  })
+  return transaction;
+}
+
+export default async function handle(req, res) {
+  const { prompt, uri, topics } = req.body;
+
+  const {title} = await getAiTitle(topics,'EN')
+  const quiz = await getAiQuiz(prompt, "EN",topics);
+    const transaction = await populateQuestionsAndQuiz(quiz,title,topics,uri)
 
   // see /api/question/create for example usage of single question
   res.json(transaction);
