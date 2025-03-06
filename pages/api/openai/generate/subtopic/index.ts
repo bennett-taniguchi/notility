@@ -69,7 +69,7 @@ export const getAiSubTopics = async (
       },
       {
         role: "user",
-        content: `The amount of required sub-topics is: ${amount}. Generate the response in English`,
+        content: `The amount of required sub-topics is: ${amount}. The student prompt is: ${prompt} Generate the response in English`,
       },
     ],
     response_format: {

@@ -189,6 +189,6 @@ model Question {
 
   topic String 
   correctOption String
-  @@unique([uri,a,b,c,d])
+  @@unique([title,uri,question])
   quiz Quiz @relation(fields: [uri,title],references:[uri,title],onDelete: Cascade)
 }

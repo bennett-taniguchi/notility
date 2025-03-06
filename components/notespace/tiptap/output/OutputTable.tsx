@@ -178,13 +178,13 @@ function OutputContentButtons({ setEditorVisible, Router, setSelectedNote, setQu
       >
         Create new Quiz
       </Button>
-      <Button
+      {/* <Button
         variant={"outline"}
         className=" whitespace-nowrap  animated-row border-2 border-white"
         onClick={()=>setQuizVisible(true)}
       >
         Open Quiz Area!
-      </Button>
+      </Button> */}
     
       {/* <TestDialog
         visible={testDialogOpen}
@@ -259,6 +259,7 @@ export default function OutputTable({
     function selectQuiz(q) {
       if(setSelectedQuiz)
       (setSelectedQuiz as any)(q)
+    setQuizVisible(true)
     }
 
   function selectNoteAndTitle(note) {

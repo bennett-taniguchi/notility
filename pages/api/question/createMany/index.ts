@@ -121,7 +121,7 @@ export async function populateQuestionsAndQuiz(quiz, title, topics, uri) {
               topics: topics,
               questions: {
                   create: quiz.questions.map((quest, idx) => ({
-                     
+                   
                       a: quest.options[0],
                       b: quest.options[1],
                       c: quest.options[2],

@@ -16,6 +16,7 @@ import { SlugContext } from "../../../context/context";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../../../ui/command";
 import { cn } from "../../../lib/utils";
+import { toast } from "../../../../hooks/use-toast";
  
  
 
@@ -30,23 +31,37 @@ export default function QuizDialog({ visible, setVisible, uri, Router }) {
   async function createQuiz() {
  
     let notes_selected = 'n_a'
-    let body = {prompt,uri,amount,notes_selected}
+    let title = quizTitle
+    let body = {prompt,uri,amount,notes_selected,title}
+    if(!title || !prompt ) {
+
+      toast({
+        title:'Error: Please Provide a title or prompt',
+        description:'Make sure both fields are filled out'
+      })
+
+      return;
+    }
+
+    if(amount < 5 || amount > 20 ) {
+
+      toast({
+        title:'Error: Please Change amount of specified questions',
+        description:'Amount of questions must be 5 or greater AND less than 21'
+      })
+      return;
+    }
+
+
     const res = await fetch('/api/quiz/create', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(body)
     })
-    const data = res.json()
-
+    const data = await res.json()
+    Router.push('/notespace/'+uri)
     console.log(data)
-    //   let oldTitle = title;
-    //   const body = { newTitle, oldTitle, uri };
-    //   await fetch("/api/notes/update/title", {
-    //     method: "PATCH",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(body),
-    //   });
-    //   Router.push("/notespace/" + uri);
+ 
   }
   return (
     <Dialog modal={true} open={visible} onOpenChange={setVisible}  >
