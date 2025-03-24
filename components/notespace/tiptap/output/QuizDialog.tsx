@@ -87,7 +87,7 @@ export default function QuizDialog({ visible, setVisible, uri, Router }) {
 
           <div className="flex flex-col">
           <Label htmlFor="amount" className="text-left">
-              Amount of Questions (max 20)
+              Amount of Questions (5 to 20)
             </Label>
 
             <Input
@@ -105,7 +105,7 @@ export default function QuizDialog({ visible, setVisible, uri, Router }) {
             />
           </div>
 
-          <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
+          {/* <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
             <Label htmlFor="name" className="text-left">
               Select Sources, Notes, or Topics
             </Label>
@@ -113,11 +113,11 @@ export default function QuizDialog({ visible, setVisible, uri, Router }) {
               tagList={tagList}
               setTagList={setTagList}  
             />
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 items-center gap-4 -ml-[0svw]">
             <Label htmlFor="name" className="text-left text-gray-500">
-              Describe what you want to be quizzed on (optional)
+              Describe what you want to be quizzed on  
             </Label>
             <Textarea
               id="name"

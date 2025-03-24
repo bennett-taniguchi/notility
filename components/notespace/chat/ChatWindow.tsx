@@ -143,7 +143,7 @@ export default function ChatWindow({
               }
               onClick={() => dropUploads(slug)}
             >
-              Drop Supabase and Local Storage and Pinecone Namespace
+              Delete all local Data
             </Button>
           </div>
           <Toaster />

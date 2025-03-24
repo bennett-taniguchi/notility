@@ -11,9 +11,22 @@ export default async function handle(req,res) {
     const PINECONE_HOST = process.env.PINECONE_HOST as string
     const index = pc.index("notespace", PINECONE_HOST)
     
-    const result = await index.namespace(uri).deleteMany(
-      { filter:{'name': {$eq: name}} }
-    );
+    let pageList = await index.namespace(uri).listPaginated({ prefix: name });
+    if(!pageList || !pageList.vectors) {res.json(pageList); return;}
+   
+    // page one exists
+    let vecIds = pageList!.vectors.map((vector) => vector.id);
+    console.log(vecIds)
+    await index.namespace(uri).deleteMany(vecIds);
 
-    res.json(result)
+    while (pageList.pagination != undefined) {
+      let page_next = pageList.pagination.next
+      pageList = await index.namespace(uri).listPaginated({ prefix: name, paginationToken: page_next });
+      if(!pageList || !pageList.vectors) {res.json(pageList); return;}
+      vecIds = pageList.vectors.map((vector) => vector.id);
+
+      await index.deleteMany(vecIds);
+    }
+
+    res.json(pageList)
 }

@@ -24,7 +24,6 @@ import {
   UpdateUploadsContext,
   CollapseContext,
   QuizzesContext,
- 
 } from "../../components/context/context";
 import Headbar from "../../components/heading/Headbar";
 import { buttonVariants } from "../../components/ui/button";
@@ -83,11 +82,10 @@ export const getServerSideProps: GetServerSideProps = async ({
   });
 
   const quizzes = await prisma.quiz.findMany({
-    where:{
-      uri:uuid
+    where: {
+      uri: uuid,
     },
-     
-  })
+  });
 
   let permission = await prisma.permissions.findMany({
     where: {
@@ -99,8 +97,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     },
   });
 
-
-if(!permission)permission=[]
+  if (!permission) permission = [];
   return {
     props: { notespace, sources, messages, notes, quizzes, permission },
   };
@@ -115,8 +112,8 @@ type Props = {
   permission: Object[] | null;
 };
 
-function selectedReducer(state, action) {
-  const {slug} = useContext(SlugContext)
+export function selectedReducer(state, action) {
+  const { slug } = useContext(SlugContext);
   let uri = slug;
   switch (action.type) {
     case "add_source": {
@@ -136,7 +133,7 @@ function selectedReducer(state, action) {
         localMap.set(action.sources[i].title, false);
       }
 
-      let locallyStored = localStorage.getItem(uri+"*savedSelectedSources");
+      let locallyStored = localStorage.getItem(uri + "*savedSelectedSources");
 
       let count = 0;
       let locallyStoredArr: Array<string> = [];
@@ -162,6 +159,45 @@ function selectedReducer(state, action) {
         selected: count + amtselectedstr,
         selectedArr: arr,
       };
+    
+    case 'remove_source':
+      let newMap_ = new Map(state.map);
+
+      newMap_.delete(action.title);
+
+      const keys_ = newMap_.keys();
+
+      let strArr_: Array<string> = []; //becomes selectedArr
+      let str_ = ""; // becomes selected
+      let c_ = 0; // track # of selected sources (used in selected)
+      let savedSelectedSources_ = "";
+
+      for (const key of keys_) {
+        let value = newMap_.get(key);
+        if (value) {
+          let modifiedKey = key + "";
+          strArr_.push(modifiedKey);
+          savedSelectedSources_ += key + "*";
+
+          c_++;
+        }
+      }
+
+      if (c_ == 0) {
+        str_ = "No Sources Selected, select from above!";
+      } else if (c_ == 1) {
+        str_ = c_ + " Source Selected";
+      } else {
+        str_ = c_ + " Sources Selected";
+      }
+
+      if (savedSelectedSources_.length == 0) savedSelectedSources_ += "*";
+      localStorage.setItem(
+        uri + "*savedSelectedSources",
+        savedSelectedSources_.slice(0, savedSelectedSources_.length - 1)
+      );
+
+      return { map: newMap_, selected: str_, selectedArr: strArr_ };
     case "toggle_source":
       let newMap = new Map(state.map);
 
@@ -195,7 +231,7 @@ function selectedReducer(state, action) {
 
       if (savedSelectedSources.length == 0) savedSelectedSources += "*";
       localStorage.setItem(
-        uri+"*savedSelectedSources",
+        uri + "*savedSelectedSources",
         savedSelectedSources.slice(0, savedSelectedSources.length - 1)
       );
 
@@ -210,50 +246,41 @@ export default function NotespacesPage({
   quizzes,
   permission,
 }: Props) {
-  const [collapseState, setCollapseState] = useState('none'); 
+  const [collapseState, setCollapseState] = useState("none");
+  const [sourcesData,setSourcesData] = useState(JSON.parse(JSON.stringify(sources)))
   const inputRef = useRef(null);
   const Router = useRouter();
   const slug = Router.asPath.split("/")[2];
- 
+
   const initialState = {
     map: new Map<string, boolean>(),
     selected: "",
     selectedArr: [],
   };
- 
+
   const [editorVisible, setEditorVisible] = useState(false);
   const [isChild, setIsChild] = useState(false);
-  const [selected, dispatch] = useReducer(selectedReducer, initialState);
+    const [selected, dispatch] = useReducer(selectedReducer, initialState);
 
-  const [selectedQuiz,setSelectedQuiz] = useState([])
+  const [selectedQuiz, setSelectedQuiz] = useState([]);
 
   const [fileContent, setFileContent] = useState(null);
   const { data: session } = useSession();
 
- 
   const [uploadOpened, setUploadOpened] = useState(false);
 
   useEffect(() => {
     if (sources)
-
       dispatch({
         type: "init_sources",
         sources: JSON.parse(JSON.stringify(sources)),
-        sourcesArr: localStorage.getItem(slug+"*savedSelectedSources"),
+        sourcesArr: localStorage.getItem(slug + "*savedSelectedSources"),
       });
     return () => {
       setUploadOpened(false); // Cleanup upload state when component unmounts
     };
   }, []);
   useEffect(() => {}, [selected, sources]);
-  function validateFile(originalFilename: string) {
-    if (!sources) return false;
-    if (sources.length >= 25)
-      for (let i = 0; i < sources.length; i++) {
-        if (sources[i].originalFileName == originalFilename) return true;
-      }
-    return false;
-  }
 
   if (!session) {
     return (
@@ -273,7 +300,11 @@ export default function NotespacesPage({
     );
   }
 
-  if (permission && permission!.length == 0 && session.user.email != notespace.owner) {
+  if (
+    permission &&
+    permission!.length == 0 &&
+    session.user.email != notespace.owner
+  ) {
     // permissions dne or current user isnt the same as creator
     return (
       <div className="text-center">
@@ -304,81 +335,81 @@ export default function NotespacesPage({
       summary: summary,
     });
   }
-  
+ 
   if (notespace)
     return (
- 
-      <QuizzesContext.Provider value={{quizzes:quizzes,setSelectedQuiz:setSelectedQuiz as any,selectedQuiz:selectedQuiz}}>
-  <CollapseContext.Provider value={{collapse:collapseState, setCollapse:setCollapseState as any}}>
-      <UserContext.Provider
-        value={{ url: session!.user.image, email: session!.user.email }}
+      <QuizzesContext.Provider
+        value={{
+          quizzes: quizzes,
+          setSelectedQuiz: setSelectedQuiz as any,
+          selectedQuiz: selectedQuiz,
+        }}
       >
-        <NotesContext.Provider value={{ notes: notes as any }}>
-          <UpdateUploadsContext.Provider
-            value={{ updateFunction: updateUploads }}
+        <CollapseContext.Provider
+          value={{
+            collapse: collapseState,
+            setCollapse: setCollapseState as any,
+          }}
+        >
+          <UserContext.Provider
+            value={{ url: session!.user.image, email: session!.user.email }}
           >
-            <SlugContext.Provider value={{ slug: slug }}>
-              <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
+            <NotesContext.Provider value={{ notes: notes as any }}>
+              <UpdateUploadsContext.Provider
+                value={{ updateFunction: updateUploads }}
+              >
+                <SlugContext.Provider value={{ slug: slug }}>
+                  <div className="w-[100svw] h-[100svh]  bg-transparent grid grid-rows-1 ">
+                    <Header />
+                    <Headbar notespace={notespace} slug={slug} />
 
-                <Header />
-                <Headbar notespace={notespace} slug={slug} />
+                    <div className=" w-[100svw] h-[90svh] flex flex-row gap-6 py-[1svh] mx-auto  content-center justify-center">
+                      <div>
+                        <Suspense fallback={<div>loading...</div>}>
+                          <DynamicChatWindow
+                            messagesLoaded={messages}
+                            title={notespace.title}
+                            blurb={notespace.sources_blurb}
+                            selected={selected}
+                            slug={slug}
+                            sources={sourcesData}
+                          >
+                            <DynamicSourcesDrawer
+                              slug={slug}
+                              sources={sourcesData}
+                              setSources={setSourcesData}
+                              isChild={isChild}
+                              setIsChild={setIsChild}
+                              dispatch={dispatch}
+                              selected={selected}
+                              uploadOpened={uploadOpened}
+                              setUploadOpened={setUploadOpened}
+                              inputRef={inputRef}
+                              Router={Router}
+                              fileContent={fileContent}
+                              setFileContent={setFileContent}
+                            />
+                          </DynamicChatWindow>
+                        </Suspense>
+                      </div>
 
-                <div className=" w-[100svw] h-[90svh] flex flex-row gap-6 py-[1svh] mx-auto  content-center justify-center">
-                  <div>
-                    <Suspense fallback={<div>loading...</div>}> 
-                        <DynamicChatWindow
-                        messagesLoaded={messages}
-                        title={notespace.title}
-                        blurb={notespace.sources_blurb}
-                        selected={selected}
-                        slug={slug}
-                        sources={JSON.parse(JSON.stringify(sources))}
-                      
-                      >
-                        <DynamicSourcesDrawer
-                          slug={slug}
-                          sources={JSON.parse(JSON.stringify(sources))}
-                          isChild={isChild}
-                          setIsChild={setIsChild}
-                          dispatch={dispatch}
-                          selected={selected}
-                          uploadOpened={uploadOpened}
-                          setUploadOpened={setUploadOpened}
-                          inputRef={inputRef}
-                          Router={Router}
-                          fileContent={fileContent}
-                          setFileContent={setFileContent}
-                        />
-                      </DynamicChatWindow>
-                     
-                  
-                  
-                      
-                    </Suspense>
+                      <div>
+                        <Suspense fallback={<div>loading...</div>}>
+                          <DynamicOutputArea
+                            editorVisible={editorVisible}
+                            setEditorVisible={setEditorVisible}
+                          />
+                        </Suspense>
+                      </div>
+                    </div>
                   </div>
-
-                  <div>
-                    <Suspense fallback={<div>loading...</div>}>
-                    
-                       <DynamicOutputArea
-                       editorVisible={editorVisible}
-                       setEditorVisible={setEditorVisible}
-                     />
-                     
-                    </Suspense>
-                  </div>
-                </div>
-            
-              </div>
-            </SlugContext.Provider>
-          </UpdateUploadsContext.Provider>
-        </NotesContext.Provider>
-      </UserContext.Provider>
-      </CollapseContext.Provider>
+                </SlugContext.Provider>
+              </UpdateUploadsContext.Provider>
+            </NotesContext.Provider>
+          </UserContext.Provider>
+        </CollapseContext.Provider>
       </QuizzesContext.Provider>
     );
 
   return <div>Notespace doesn't exist</div>;
 }
-
- 

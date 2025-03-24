@@ -1,4 +1,4 @@
-// Filename - App.js
+ 
 
 import React, { useContext, useRef, useState } from "react";
 import { Button } from "../ui/button";
@@ -76,6 +76,7 @@ export interface ButtonProps
   asChild?: boolean; 
   setFileContent: any;
   fileContent: any;
+  setLoading:any;
 }
 
 const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -92,6 +93,7 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // On file select (from the pop up)
     const onFileChange = (event) => {
       // Reset error state
+     
       setErrorMessage("");
 
       if (!event.target.files || event.target.files.length === 0) {
@@ -120,7 +122,7 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       // File passed validation
       setSelectedFile(file);
       setFileName(file.name);
-
+      
       // Update file details display
       setFileDetails(
         <div>

@@ -291,11 +291,12 @@ export default function OutputTable({
         )}
         <TableHeader>
           <TableRow >
-            <TableHead className="w-[100px] text-black">Title</TableHead>
+            <TableHead className="  text-black">Title</TableHead>
             {/* <TableHead className="text-black">Amount of Sources</TableHead> */}
             <TableHead className="text-black">Type</TableHead>
             <TableHead className="text-right text-black">Created On</TableHead>
             <TableHead className="text-right text-black">Owner</TableHead>
+           
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -373,15 +374,15 @@ export default function OutputTable({
                 </TableCell>
                 <TableCell
                   onClick={() => setQuizVisible(!setQuizVisible)}
-                  className={"cursor-pointer"}
+                  className={"cursor-pointer  text-right"}
                 >
-                  datum.createdOn
+                  {datum.createdOn}
                 </TableCell>
                 <TableCell
                   onClick={() => setQuizVisible(!setQuizVisible)}
                   className="text-right cursor-pointer"
                 >
-                  datum.createdBy
+                  {datum.createdBy}
                 </TableCell>
                 <TableCell className="w-[1svw] h-[5svh] hover:bg-indigo-800">
                   {" "}

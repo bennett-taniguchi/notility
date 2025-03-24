@@ -31,7 +31,7 @@ export default async function handle(req, res) {
       notespace:{connect: {uri: uri}},
       createdBy: session?.user?.email,
       createdOn:d.toDateString(),
-      sources: 0
+ 
     },
     update: {
       title: title,

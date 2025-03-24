@@ -12,12 +12,12 @@ const range = max - min + 1;
 
 
   for (let i = array.length - 1; i > 0; i--) {
-    // const j = Math.floor( Math.random() * (i + 1)); // Random index
+    const j = Math.floor( Math.random() * (i + 1)); // Random index
 
-    const arr = new Uint32Array(1);
-crypto.getRandomValues(arr);
-const randomNumber = arr[0];
-const j = min + (randomNumber % range);
+//     const arr = new Uint32Array(1);
+// crypto.getRandomValues(arr);
+// const randomNumber = arr[0];
+// const j = min + (randomNumber % range);
 
   
     if(!array[i]||!array[j])continue

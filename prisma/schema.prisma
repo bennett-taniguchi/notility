@@ -167,6 +167,8 @@ model Quiz {
   id  Int    @id @default(autoincrement())
   uri String
   questions Question[]
+  createdOn String
+  createdBy String
   title String
   notespace Notespace @relation(fields: [uri], references:[uri],onDelete:Cascade)
   topics String[]

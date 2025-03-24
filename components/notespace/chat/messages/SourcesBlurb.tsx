@@ -1,12 +1,9 @@
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { Card, CardContent } from "../../../ui/card";
+import { useEffect } from "react";
 
 export default function SourcesBlurb({sources,selected}) {
-  console.log(sources,selected)
-    function getKeywords(str: string) {
-        if(!str) return ""
-        return str.split(".")[0];
-      }
+ 
     function lookupKeywords(title: string) {
      
         for (let i = 0; i < sources.length; i++) {
@@ -16,7 +13,10 @@ export default function SourcesBlurb({sources,selected}) {
           }
         }
       }
-
+      useEffect(() => {
+// sources discrepanccy with selected
+ console.log(selected)
+      },[sources])
     return (
         <Card className="rounded-xl  bg-gradient-to-r from-cyan-200 to-indigo-200 border-white border-2">
               <CardContent className="rounded-xl text-md text-mono   text-center py-10 text-slate-600/90">

@@ -13,7 +13,6 @@ import {
 } from "../../ui/drawer";
 import UploadButton from "../../upload/UploadButton";
 import dynamic from "next/dynamic";
-import { getPdfText } from "../../../utils/parse_text";
 import { Checkbox } from "../../ui/checkbox";
 import { ScrollArea } from "../../ui/scroll-area";
 import {
@@ -24,23 +23,7 @@ import {
 } from "../../ui/tooltip";
 import { FaCircleInfo } from "react-icons/fa6";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../ui/dialog";
-import { useEffect, useRef, useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../../ui/alert-dialog";
+import { useEffect, useReducer, useRef, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,8 +32,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
-import { BsBodyText } from "react-icons/bs";
 import { useRouter } from "next/router";
+import PulsingDots from "../chat/loading/PulsingDots";
+import { selectedReducer } from "../../../pages/notespace/[...uri]";
 
 const BsFiletypeCsv = dynamic(() =>
   import("react-icons/bs").then((module) => module.BsFiletypeCsv)
@@ -74,115 +58,61 @@ const TbTxt = dynamic(() =>
   import("react-icons/tb").then((module) => module.TbTxt)
 );
 
-// Need to add:
-// add files to pinecone
-// variable chunk based on file
-async function addFileNamesToDB(files: any, uri: string, Router: any) {
-  if (!files || files.length == 0) return [];
-  let uploads: any[] = [];
-  let res_arr: any[] = [];
-  function splitOnFileType(filename: string) {
-    let lastDotI = filename.lastIndexOf(".");
-    let fileExtension = filename.substring(lastDotI, filename.length);
-    let name = filename.substring(0, lastDotI);
-
-    return { extension: fileExtension, name: name };
-  }
-  const reader = new FileReader();
-  files.map(
-    async (
-      file: { originalFile: { originalFileName: string }; fileUrl: any },
-      idx: number
-    ) => {
-      let { name, extension } = splitOnFileType(
-        file.originalFile.originalFileName
-      );
-      let upload = {
-        uri: uri,
-        fileUrl: file.fileUrl,
-        originalFileName: file.originalFile.originalFileName,
-        title: name,
-        filetype: extension,
-      };
-      uploads.push(upload);
-
-      getPdfText(file)
-        .then(async (text) => {
-          const plainText = text;
-          let file = upload;
-          const body2 = { plainText, name, uri, file };
-          await fetch("/api/chat/analyze/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body2),
-          });
-        })
-        .catch((err) => console.error(err));
-
-      // file.file                name
-    }
-  );
-
-  Router.push("/notespace/" + uri);
-}
-
-async function updateSources(selected: any, uri: string, Router: any) {
-  let count = selected.selectedArr.length;
-  const body = { count, uri };
-
-  await fetch("/api/notespace/update/sources_count", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  setTimeout(() => {
-    Router.push("/notespace/" + uri); // Replace with your target route
-  }, 2000); // 2000ms = 2 seconds
-}
-
 function getKeywords(summary: string) {
   return summary.split(".")[0];
 }
-
-function SourceOptions({slug,title}) {
-  const Router = useRouter()
+ 
+function SourceOptions({ slug, title,setLoading,sources,setSources,dispatch  }) {
+  const Router = useRouter();
+ 
   const [showDialog, setShowDialog] = useState(false);
   function handleOpenAndParent() {
     setShowDialog(true);
   }
- 
+
   const [deleteReady, setDeleteReady] = useState(false);
   const buttonRef = useRef(null);
   const animationTimeout = useRef(null);
-  
-  async function deleteSource() {
-   
+
+  async function deleteSource(setLoading) {
     //await fetch('/api/supabase/upload/delete')
     let uri = slug;
-    let name = title
-    let body = {name,uri}
-    await fetch('/api/pinecone/delete/upload', {
-      headers: {'Content-Type' : 'application/json'},
-      method:'DELETE',
-      body:JSON.stringify(body)
-    })
+    let name = title;
+    let body = { name, uri };
+    setLoading(true)
+    await fetch("/api/pinecone/delete/upload", {
+      headers: { "Content-Type": "application/json" },
+      method: "DELETE",
+      body: JSON.stringify(body),
+    });
 
-    
-    await fetch('/api/supabase/upload/delete', {
-      headers: {'Content-Type' : 'application/json'},
-      method:'DELETE',
-      body:JSON.stringify(body)
-    })
+    await fetch("/api/supabase/upload/delete", {
+      headers: { "Content-Type": "application/json" },
+      method: "DELETE",
+      body: JSON.stringify(body),
+    });
 
-    let selected = (localStorage.getItem(slug+"*savedSelectedSources"));
-    if(!selected)return
-    selected = selected.replace(title,'')
-    localStorage.setItem(slug+"*savedSelectedSources",selected)
+      // update hook to change local data
+      setLoading(false)
+      let s_d = [...sources]
+      s_d = s_d.filter((s) => s.title != name)
+      setSources(s_d)
+      dispatch({
+        type: "remove_source",
+        title: name,
+      })
 
-    Router.push('/notespace/'+slug)
-  }
+    let selected = localStorage.getItem(slug + "*savedSelectedSources");
+    if (!selected) return;
+    selected = selected.replace(title, "");
+    localStorage.setItem(slug + "*savedSelectedSources", selected);
+
+  
+
  
+    Router.push("/notespace/" + slug);
+  }
+
   const handleMouseEnter = () => {
     (animationTimeout.current as any) = setTimeout(() => {
       setDeleteReady(true);
@@ -196,15 +126,14 @@ function SourceOptions({slug,title}) {
     setDeleteReady(false);
   };
 
- 
-  const handleDelete = () => {
+  const handleDelete = (setLoading) => {
     if (deleteReady) {
-      deleteSource()
+      deleteSource(setLoading);
       setDeleteReady(false);
     }
   };
-
-  useEffect(() => {}, [deleteReady]);
+ 
+  useEffect(() => {}, [deleteReady,sources]);
   return (
     <div className="mr-[0svw] mt-[-1svh] ">
       <DropdownMenu>
@@ -225,7 +154,7 @@ function SourceOptions({slug,title}) {
             style={{ cursor: deleteReady ? "pointer" : "" }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onClick={handleDelete}
+            onClick={()=>handleDelete(setLoading)}
             className="text-red-700   countdown"
           >
             Delete Source
@@ -240,6 +169,7 @@ export default function SourcesDrawer({
   selected,
   slug,
   sources,
+  setSources,
   isChild,
   setIsChild,
   dispatch,
@@ -250,6 +180,7 @@ export default function SourcesDrawer({
   fileContent,
   setFileContent,
 }) {
+  const [loading, setLoading] = useState(false);
   function FileIcon({ extension }) {
     switch (extension) {
       case "pdf":
@@ -317,7 +248,7 @@ export default function SourcesDrawer({
       </DrawerTrigger>
       <DrawerContent style={{ zIndex: 1000 }}>
         <div className="mx-auto w-full max-w-sm h-[85svh]">
-          <DrawerHeader className="absolute left-[1.5svw]">
+          <DrawerHeader className="absolute left-[12.5svw] ">
             <DrawerTitle>Selected Sources:</DrawerTitle>
             <DrawerDescription>Upload or Enter Link</DrawerDescription>
           </DrawerHeader>
@@ -380,7 +311,7 @@ export default function SourcesDrawer({
                       )}
                     </Tooltip>
                   </TooltipProvider>
-                  <SourceOptions   slug={slug} title={source.title}/>
+                  <SourceOptions dispatch={dispatch} slug={slug} title={source.title} setLoading={setLoading} sources={sources} setSources={setSources}  />
                   <div className=" absolute right-[1svw] top-[1px]">
                     <FileIcon extension={source.filetype as any} />
                   </div>
@@ -405,12 +336,17 @@ export default function SourcesDrawer({
                   </TooltipProvider>
                 </div>
               ))}
+              <div className="m-auto">
+              <PulsingDots loading={loading} />
+              </div>
+             
             </ScrollArea>
           </div>{" "}
           <DrawerFooter className="flex flex-col  mt-[-20px] ">
             <UploadButton
               fileContent={fileContent}
               setFileContent={setFileContent}
+              setLoading={setLoading}
             />
             <DrawerClose asChild>
               <Button

@@ -4,6 +4,10 @@ import { z } from "zod";
 import prisma from "../../../../lib/prisma";
 import { AiQuestion } from "../create";
 import { getAiTitle } from "../../openai/generate/title";
+import { useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { options } from "../../auth/[...nextauth]";
+import { Question } from "@prisma/client";
 
 const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
@@ -111,16 +115,18 @@ export const getAiQuiz = async (
   // Parse and validate the response using Zod
   return aiQuiz.parse(resp.choices[0]?.message.parsed);
 };
-export async function populateQuestionsAndQuiz(quiz, title, topics, uri) {
+export async function populateQuestionsAndQuiz(quiz, title, topics, uri,email) {
   const transaction = await prisma.$transaction(async (tx) => {
       // Create Quiz with nested questions
       const quizResult = await tx.quiz.create({
           data: {
+            createdBy: email,
+              createdOn: (new Date()).toDateString(),
               notespace: { connect: { uri: uri } },
               title: title,
               topics: topics,
               questions: {
-                  create: quiz.questions.map((quest, idx) => ({
+                  create: quiz.questions.map((quest:any, idx) => ({
                    
                       a: quest.options[0],
                       b: quest.options[1],
@@ -146,11 +152,13 @@ export async function populateQuestionsAndQuiz(quiz, title, topics, uri) {
 }
 
 export default async function handle(req, res) {
+  const session = await getServerSession(req, res, options);
   const { prompt, uri, topics } = req.body;
 
   const {title} = await getAiTitle(topics,'EN')
   const quiz = await getAiQuiz(prompt, "EN",topics);
-    const transaction = await populateQuestionsAndQuiz(quiz,title,topics,uri)
+  const email = session.user.email;
+    const transaction = await populateQuestionsAndQuiz(quiz,title,topics,uri,email)
 
   // see /api/question/create for example usage of single question
   res.json(transaction);
