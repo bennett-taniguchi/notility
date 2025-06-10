@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { RiHome2Fill } from "react-icons/ri";
+import { House } from "lucide-react";
+ 
 import { Textarea } from "../ui/textarea";
-import { FaGear, FaShare } from "react-icons/fa6";
-import { FaUserAlt } from "react-icons/fa";
+import {Settings,Share2} from 'lucide-react'
+ 
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+ 
 import { Button } from "../ui/button";
 import BubbledInput from "../ui/personal/BubbledInput";
-import { RiPencilFill } from "react-icons/ri";
+ 
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Dialog,
@@ -179,9 +180,9 @@ export function ShareDialog({asText=false}) {
         Share
         </div>
       :
-      <FaShare
+      <Share2
       onClick={() => setVisible(true)}
-      className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80 hover:fill-cyan-600"
+      className="w-[4svw] h-[4svh] cursor-pointer stroke-cyan-600/90 hover:stroke-cyan-600"
     /> 
       }
        
@@ -248,7 +249,7 @@ function OptionsPopover() {
     <Popover>
       <PopoverTrigger asChild>
         <div className="ml-[20svw] span-1/3   text-cyan-800    ">
-          <FaGear className="w-[4svw] h-[4svh] cursor-pointer fill-cyan-600/80 hover:fill-cyan-600" />
+          <Settings className="w-[4svw] h-[4svh] cursor-pointer stroke-cyan-600/80 hover:stroke-cyan-600" />
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-80">
@@ -323,7 +324,7 @@ export default function Headbar({ notespace, slug }) {
       >
         <div className="span-1/4  my-auto mr-[1svw]  ml-[1svw] rounded-md mt-[3svh]">
           <Link href="/notespace">
-            <RiHome2Fill className="w-[3svw] h-[5svh] fill-black/70 hover:fill-black/80" />
+            <House className="w-[4svw] h-[6svh] stroke-cyan-500 hover:stroke-cyan-800  " />
           </Link>
         </div>
         <Textarea

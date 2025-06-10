@@ -21,9 +21,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../ui/tooltip";
-import { FaCircleInfo } from "react-icons/fa6";
+import { Info } from "lucide-react";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,29 +35,8 @@ import {
 import { useRouter } from "next/router";
 import PulsingDots from "../chat/loading/PulsingDots";
 import { selectedReducer } from "../../../pages/notespace/[...uri]";
-
-const BsFiletypeCsv = dynamic(() =>
-  import("react-icons/bs").then((module) => module.BsFiletypeCsv)
-);
-const BsThreeDotsVertical = dynamic(() =>
-  import("react-icons/bs").then((module) => module.BsThreeDotsVertical)
-);
-const FaFilePdf = dynamic(() =>
-  import("react-icons/fa6").then((module) => module.FaFilePdf)
-);
-const FaMarkdown = dynamic(() =>
-  import("react-icons/fa6").then((module) => module.FaMarkdown)
-);
-const SiLatex = dynamic(() =>
-  import("react-icons/si").then((module) => module.SiLatex)
-);
-const TbJson = dynamic(() =>
-  import("react-icons/tb").then((module) => module.TbJson)
-);
-const TbTxt = dynamic(() =>
-  import("react-icons/tb").then((module) => module.TbTxt)
-);
-
+import {Table2,EllipsisVertical,FileText, SquareSigma,FileJson} from 'lucide-react'
+ 
 function getKeywords(summary: string) {
   return summary.split(".")[0];
 }
@@ -138,7 +117,7 @@ function SourceOptions({ slug, title,setLoading,sources,setSources,dispatch  }) 
     <div className="mr-[0svw] mt-[-1svh] ">
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <BsThreeDotsVertical
+          <EllipsisVertical
             onClick={() => handleOpenAndParent()}
             className="absolute hover:bg-blue-400 rounded hover:fill-black right-0   h-[20px] w-[20px]   fill-slate-600"
           />
@@ -185,32 +164,32 @@ export default function SourcesDrawer({
     switch (extension) {
       case "pdf":
         return (
-          <FaFilePdf className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-rose-800 fill-rose-800" />
+          <FileText className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-rose-800 fill-rose-800" />
         );
       case "md":
         return (
-          <FaMarkdown className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-blue-800 fill-blue-800" />
+          <FileText className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-blue-800 fill-blue-800" />
         );
       case "csv":
         return (
-          <BsFiletypeCsv className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-green-800 fill-green-800" />
+          <Table2 className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-green-800 fill-green-800" />
         );
       case "tex":
         return (
-          <SiLatex className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-green-400 fill-green-400" />
+          <SquareSigma className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-green-400 fill-green-400" />
         );
       case "json":
         return (
-          <TbJson className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-yellow-600" />
+          <FileJson className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-yellow-600" />
         );
 
       case "txt":
         return (
-          <TbTxt className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-zinc-600" />
+          <FileText className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-zinc-600" />
         );
     }
     return (
-      <TbTxt className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-zinc-600" />
+      <FileText className="right-0 absolute mr-[.65svw] h-[17px] w-[17px] mt-[1.2svh] stroke-zinc-600" />
     );
   }
 
@@ -288,7 +267,7 @@ export default function SourcesDrawer({
                   <TooltipProvider>
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger asChild>
-                        <FaCircleInfo className="absolute h-[15px] w-[15px] mt-[12px] mr-[60px] cursor-pointer my-auto ml-[5px] right-0 justify-self-end" />
+                        <Info className="absolute h-[15px] w-[15px] mt-[12px] mr-[60px] cursor-pointer my-auto ml-[5px] right-0 justify-self-end" />
                       </TooltipTrigger>
 
                       {createPortal(

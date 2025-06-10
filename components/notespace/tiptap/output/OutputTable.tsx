@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useContext, useState, useEffect } from "react";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import { EllipsisVertical } from "lucide-react";
 import {
   CollapseContext,
  
@@ -28,14 +28,14 @@ import {
   DialogDescription,
   DialogContent,
   Dialog,
-  DialogOverlay,
+ 
 } from "../../../ui/dialog";
-import { BiLogoGraphql } from "react-icons/bi";
+ 
 import { Label } from "../../../ui/label";
 import QuizDialog from "./QuizDialog";
 import GuideDialog from "./GuideDialog";
 import TestDialog from "./TestDialog";
-import { RiCollapseHorizontalFill  } from "react-icons/ri";
+import { FoldHorizontal  } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
 function NoteOptions({
@@ -246,7 +246,7 @@ export default function OutputTable({
     return (
       <div>
         {" "}
-        <RiCollapseHorizontalFill 
+        <FoldHorizontal 
           onClick={() => toggleCollapse()}
           className="hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[5px] cursor-pointer"
           width={40}
@@ -274,7 +274,7 @@ export default function OutputTable({
       <div className="chat-background-2 py-[21.5px] font-roboto rounded-t-xl text-3xl text-white text-left pl-[10px] border-2 border-white border-t-white rounded-xl rounded-b-none">
         <div className="drop-shadow-lg ">
           {" "}
-          <RiCollapseHorizontalFill 
+          <FoldHorizontal 
             onClick={() => toggleCollapse()}
             className=" bg-white/30 rounded hover:text-black text-white w-[20px] h-[20px] absolute right-[5px] top-[-18px] cursor-pointer"
             width={40}
@@ -342,7 +342,7 @@ export default function OutputTable({
                     uri={slug}
                     Router={Router}
                   />
-                  <BsThreeDotsVertical
+                  <EllipsisVertical
                     className="cursor-pointer w-5 h-5"
                     onClick={() => setOpen(!open)}
                   />
@@ -395,7 +395,7 @@ export default function OutputTable({
                     uri={slug}
                     Router={Router}
                   />
-                  <BsThreeDotsVertical
+                  <EllipsisVertical
                     className="cursor-pointer w-5 h-5"
                     onClick={() => setOpen(!open)}
                   />

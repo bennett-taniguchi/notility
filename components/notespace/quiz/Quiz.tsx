@@ -3,7 +3,7 @@ import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import { RadioGroup, RadioGroupItem } from "../../ui/radio-group";
 import { ScrollArea } from "../../ui/scroll-area";
-import { IoMdArrowBack } from "react-icons/io";
+import { ArrowLeft } from "lucide-react";
 import { QuizzesContext, SlugContext } from "../../context/context";
 import prisma from "../../../lib/prisma";
 import { Question } from "@prisma/client";
@@ -266,7 +266,7 @@ function QuizButtons({
             className="  w-[100px]   hover:bg-sky-500 text-white bg-sky-700 border-[1px] border-sky-800 "
             onClick={() => setQuizVisible(false)}
           >
-            <IoMdArrowBack className="ml-[-5px] mr-[5px]" />
+            <ArrowLeft className="ml-[-5px] mr-[5px]" />
             Go Back
           </Button>
         </div>

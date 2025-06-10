@@ -16,7 +16,7 @@
 
   @property --myColor1 {
     syntax: "<color>";
-    initial-value: theme("colors.sky.500");
+    initial-value: theme("colors.sky.300");
     inherits: false;
   }
 

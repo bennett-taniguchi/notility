@@ -1,11 +1,11 @@
 "use client";
-import { CiCirclePlus } from "react-icons/ci";
+import { CirclePlus } from "lucide-react";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  Row,
+ 
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -20,31 +20,13 @@ import {
 } from "../../../ui/table";
 import { useContext, useEffect, useMemo, useState } from "react";
 
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import { EllipsisVertical } from "lucide-react";
 import { Button } from "../../../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../../ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../../../ui/alert-dialog";
+ 
 import Router from "next/router";
 import Link from "next/link";
 import { SelectedRowsContext } from "../../../context/context";
-import { cn } from "../../../lib/utils";
+ 
 
 import {
   Dialog,
@@ -53,7 +35,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+ 
 } from "../../../ui/dialog";
 import { Input } from "../../../ui/input";
 import { Label } from "../../../ui/label";
@@ -62,7 +44,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
+ 
   SelectTrigger,
   SelectValue,
 } from "../../../ui/select";
@@ -194,7 +176,7 @@ export function DataTable<TData, TValue>({
             <Link href={'/learn/flashcard/edit/'+selectedTitle}>
            
             <Button variant={'secondary'} >
-              Edit Terms <CiCirclePlus className="ml-2 w-5 h-5"/>
+              Edit Terms <CirclePlus className="ml-2 w-5 h-5"/>
             </Button>
             </Link></div>
               </Select>
@@ -247,7 +229,7 @@ export function DataTable<TData, TValue>({
                   idx == 0 ? (
                     <TableCell key={cell.id} className={"flex flex-grow"}>
                       {" "}
-                      <DotsVerticalIcon
+                      <EllipsisVertical
                         className="translate-x-[-5px] stroke-gray scale-110 hover:bg-zinc-200 rounded"
                         onClick={() =>
                           editCard(

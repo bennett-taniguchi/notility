@@ -1,7 +1,7 @@
 import Latex from "react-latex-next";
 import { Card, CardHeader, CardTitle, CardContent } from "../../../ui/card";
-import { FaStickyNote } from "react-icons/fa";
-import { ImListNumbered } from "react-icons/im";
+import { StickyNote } from "lucide-react";
+import { ListOrdered } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -98,7 +98,7 @@ function CreateOutputButtons({ handleModal, m }) {
         <Tooltip>
           <TooltipTrigger>
             {" "}
-            <FaStickyNote
+            <StickyNote
               className="w-[15px] h-[15px] cursor-pointer fill-zinc-800 hover:fill-zinc-600/60"
               onClick={() => handleModal(m, "Note")}
             />
@@ -113,7 +113,7 @@ function CreateOutputButtons({ handleModal, m }) {
         <Tooltip>
           <TooltipTrigger>
             {" "}
-            <ImListNumbered
+            <ListOrdered
               className="w-[15px] h-[15px] cursor-pointer fill-zinc-800 hover:fill-zinc-600/60"
               onClick={() => handleModal(m, "Guide")}
             />

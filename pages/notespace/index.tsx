@@ -8,9 +8,8 @@ import {
   TableBody,
   TableCell,
 } from "../../components/ui/table";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { HiViewList } from "react-icons/hi";
-import { PiCardsFill } from "react-icons/pi";
+import { EllipsisVertical,List,Layers } from "lucide-react"
+ 
 import {
   Tooltip,
   TooltipContent,
@@ -36,9 +35,6 @@ import { DeleteDialog, ShareDialog, UserPopover } from "../../components/heading
 import { UserContext } from "../../components/context/context";
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
  
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Interface } from "node:readline";
 
 // retrieve notes and messages with chatbot, don't need to fetch both if only one is needed...
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
@@ -164,7 +160,7 @@ function TableView({ data, Router }) {
       <PopoverTrigger asChild>
       <TableCell className="w-[2svw] h-[5svh] hover:bg-white">
               {" "}
-              <BsThreeDotsVertical className="cursor-pointer w-5 h-5" />
+              <EllipsisVertical className="cursor-pointer w-5 h-5" />
             </TableCell>
       </PopoverTrigger>
       <PopoverContent className="w-40 h-30">
@@ -331,7 +327,7 @@ export default function Notespaces({ notespaces }: Props) {
                 className="cursor-pointer"
                 onClick={(e) => dispatch({ type: "list" })}
               >
-                <HiViewList className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg" />
+                <List className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg" />
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -347,7 +343,7 @@ export default function Notespaces({ notespaces }: Props) {
                 className="cursor-pointer"
                 onClick={(e) => dispatch({ type: "card" })}
               >
-                <PiCardsFill className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg  " />
+                <Layers className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg  " />
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -404,7 +400,7 @@ export default function Notespaces({ notespaces }: Props) {
                     className="cursor-pointer"
                     onClick={(e) => dispatch({ type: "list" })}
                   >
-                    <HiViewList className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg" />
+                    <List className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -420,7 +416,7 @@ export default function Notespaces({ notespaces }: Props) {
                     className="cursor-pointer"
                     onClick={(e) => dispatch({ type: "card" })}
                   >
-                    <PiCardsFill className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg  " />
+                    <Layers className="basis-1/3 h-[3svh] w-[2svw] hover:bg-zinc-100 rounded-lg  " />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>

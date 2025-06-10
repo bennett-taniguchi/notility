@@ -57,47 +57,19 @@ export const getServerSideProps: GetServerSideProps = async ({
     return { props: { notespace: [] } };
   }
 
-  const notespace = await prisma.notespace.findUnique({
-    where: {
-      uri: uuid,
-    },
-  });
+  const [notespace, sources, messages, notes, quizzes, permission] = await Promise.all([
+  prisma.notespace.findUnique({ where: { uri: uuid } }),
+  prisma.upload.findMany({ where: { uri: uuid } }),
+  prisma.message.findMany({ where: { uri: uuid } }),
+  prisma.notes.findMany({ where: { uri: uuid } }),
+  prisma.quiz.findMany({ where: { uri: uuid } }),
+  prisma.permissions.findMany({ where: { uri: uuid, email: session.user.email } })
+]);
 
-  const sources = await prisma.upload.findMany({
-    where: {
-      uri: uuid,
-    },
-  });
-
-  const messages = await prisma.message.findMany({
-    where: {
-      uri: uuid,
-    },
-  });
-
-  const notes = await prisma.notes.findMany({
-    where: {
-      uri: uuid,
-    },
-  });
-
-  const quizzes = await prisma.quiz.findMany({
-    where: {
-      uri: uuid,
-    },
-  });
-
-  let permission = await prisma.permissions.findMany({
-    where: {
-      uri: uuid,
-      email: session.user.email,
-    },
-    select: {
-      email: true,
-    },
-  });
-
-  if (!permission) permission = [];
+  if (!permission){
+    //  permission = [];
+    console.log('Permission not granted on notespace')
+    }
   return {
     props: { notespace, sources, messages, notes, quizzes, permission },
   };

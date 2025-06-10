@@ -10,30 +10,72 @@ import * as pdfjsLib from "pdfjs-dist";
  
 import { jsx } from "react/jsx-runtime";
  
-
-export async function getPdfText(file: any) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = (window as any).location.origin + "/pdf.worker.min.mjs";
  
-  //const pdf1 = await fs.readFile((file.originalFile.file as File).arrayBuffer());
-  let actualFile: File = file
-  const pdf = await pdfjsLib.getDocument(await actualFile.arrayBuffer())
-    .promise;
-  let fullText = "";
+ 
+export async function getPdfText(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('pdf', file);
   
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const textContent = await page.getTextContent();
-
-    fullText += textContent.items.map((item: any) => item.str).join(" ");
+  try {
+    const response = await fetch('/api/pdf/extract', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!response.ok) {
+      throw new Error('PDF processing failed');
+    }
+    
+    const result = await response.json();
+    return result.text;
+  } catch (error) {
+    console.error('Error extracting PDF text:', error);
+    throw error;
   }
- 
-  return fullText;
 }
+// your function
+// export async function getPdfText(file: File): Promise<string> {
+//   // Only load PDF.js when actually needed
+//   const pdfjsLib = await import('pdfjs-dist');
+  
+//   pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+  
+//   const pdf = await pdfjsLib.getDocument(await file.arrayBuffer()).promise;
+//   let fullText = "";
+  
+//   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+//     const page = await pdf.getPage(pageNum);
+//     const textContent = await page.getTextContent();
+//     fullText += textContent.items.map((item: any) => item.str).join(" ");
+//   }
+  
+//   return fullText;
+// }
 
-export function HTMLtoText(text: string): string {
-  text = text.replace(/<[^>]+>/g, "");
-  return text;
-}
+// my function
+// export async function getPdfText(file: any) {
+//   pdfjsLib.GlobalWorkerOptions.workerSrc = (window as any).location.origin + "/pdf.worker.min.mjs";
+ 
+//   //const pdf1 = await fs.readFile((file.originalFile.file as File).arrayBuffer());
+//   let actualFile: File = file
+//   const pdf = await pdfjsLib.getDocument(await actualFile.arrayBuffer())
+//     .promise;
+//   let fullText = "";
+  
+//   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+//     const page = await pdf.getPage(pageNum);
+//     const textContent = await page.getTextContent();
+
+//     fullText += textContent.items.map((item: any) => item.str).join(" ");
+//   }
+ 
+//   return fullText;
+// }
+
+// export function HTMLtoText(text: string): string {
+//   text = text.replace(/<[^>]+>/g, "");
+//   return text;
+// }
 
 
 

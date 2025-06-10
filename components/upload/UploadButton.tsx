@@ -152,7 +152,7 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const extensionType = selectedFile.name.split(".").pop();
 
         if (extensionType == "pdf") {
-          const plainText = await getPdfText(selectedFile);
+          const plainText = await getPdfText(selectedFile as any);
 
           let uri = slug.slug;
           const file = {

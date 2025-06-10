@@ -12,8 +12,8 @@ import ListItem from "@tiptap/extension-list-item";
 // import { Indent } from "./tiptap/indent";
 import React, { useContext } from "react";
 import { Button as NextButton } from "../../ui/button";
-import { LuBookUp } from "react-icons/lu";
-import { FaHashtag } from "react-icons/fa6";
+import { BookUp } from "lucide-react";
+ 
 //  import SVG1 from '../../../public/svg/svg-1.svg'
 import {
   FontBoldIcon,
@@ -27,27 +27,27 @@ import {
   TextAlignRightIcon,
   TextAlignJustifyIcon,
 } from "@radix-ui/react-icons";
-import { LuHeading1, LuHeading2, LuHeading3 } from "react-icons/lu";
-import { FaHighlighter, FaListOl, FaListUl } from "react-icons/fa6";
+import { Heading1, Heading2, Heading3 } from "lucide-react";
+import { Highlighter, ListOrdered, List } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import { Textarea } from "../../ui/textarea";
 import { ScrollArea } from "../../ui/scroll-area";
-import { ResizablePanel } from "../../ui/resizable";
+ 
 import { cn } from "../../lib/utils";
-import { CardTitle } from "../../ui/card";
+ 
 import { CollapseContext, SlugContext, TiptapContext } from "../../context/context";
 import { useRouter } from "next/router";
-import { IoReturnUpBack } from "react-icons/io5";
-import BubbledInput from "../../ui/personal/BubbledInput";
+import { ArrowBigLeft } from "lucide-react";
+ 
 const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
   if (!editor) {
     return null;
   }
 
   let buttonStyle = "mr-1 bg-sky-100/50 border-none hover:bg-sky-400 ";
-  let svgStyle = "stroke-zinc-700  scale-150 ";
-  let textSvgStyle = "text-zinc-700 scale-150";
+  let svgStyle = "stroke-zinc-700  scale-100 ";
+  let textSvgStyle = "text-zinc-700 scale-105";
   return (
     <div className="control-group   overflow-hidden  py-[22px] ">
       <div className="   flex  text-center text-sm justify-center justify-items-center      ">
@@ -58,7 +58,7 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
             "border-2 border-white animated-button mr-[4px] border-cyan-600/40  "
           }
         >
-          <IoReturnUpBack className={svgStyle} />
+          <ArrowBigLeft className={svgStyle} />
         </NextButton>
 
         <NextButton
@@ -71,7 +71,7 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
             buttonStyle 
           )}
         >
-          <LuHeading1 className={svgStyle} />
+          <Heading1 className={svgStyle} />
         </NextButton>
 
         <NextButton
@@ -84,7 +84,7 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
             buttonStyle
           )}
         >
-          <LuHeading2 className={svgStyle} />
+          <Heading2 className={svgStyle} />
         </NextButton>
 
         <NextButton
@@ -97,7 +97,7 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
             buttonStyle
           )}
         >
-          <LuHeading3 className={svgStyle} />
+          <Heading3 className={svgStyle} />
         </NextButton>
 
         <NextButton
@@ -152,7 +152,7 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
             buttonStyle
           )}
         >
-          <FaHighlighter className={textSvgStyle} />
+          <Highlighter className={textSvgStyle} />
         </NextButton>
 
         <NextButton
@@ -207,7 +207,7 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
             buttonStyle
           )}
         >
-          <FaListOl className={textSvgStyle} />
+          <ListOrdered className={textSvgStyle} />
         </NextButton>
 
         <NextButton
@@ -218,7 +218,7 @@ const MenuBar = ({ editor, editorVisible, setEditorVisible }) => {
             buttonStyle
           )}
         >
-          <FaListUl className={textSvgStyle} />
+          <List className={textSvgStyle} />
         </NextButton>
       </div>
     </div>
@@ -377,10 +377,10 @@ const Tiptap = ({
 
           <NextButton
             onClick={() => saveNotes(slug, Router, setContent, setTitle)}
-            className="border-2 border-white animated-button z-auto absolute   rounded-3xl bg-white w-[4svw] h-[6svh] flex flex-col marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-10 bottom-1"
+            className="border-2 z-50 border-white animated-button   absolute   rounded-3xl bg-white w-[4svw] h-[6svh]   marker:hover:bg-sky-800 stroke-black text-black hover:bg-zinc-400 right-10 bottom-1"
           >
             <div className="">Save</div>
-            <LuBookUp className="w-5 h-5 " />
+          
           </NextButton>
 
           <EditorContent

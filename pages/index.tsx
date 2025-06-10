@@ -1,285 +1,156 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import Layout from "../components/Layout";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { useRouter } from "next/router";
-import { Parallax, ParallaxLayer } from "@react-spring/parallax";
-import { a, animated, useScroll, useSpring, useTrail } from "@react-spring/web";
 import { Button } from "../components/ui/button";
 import Link from "next/link";
-import { Separator } from "@radix-ui/react-menubar";
-// import  NotesDemo from '../public/videos/cursorful-notes.mp4' as any
 
-const Blog = () => {
- 
-  const Trail: React.FC<{ open: boolean,children:any}> = ({ open, children }) => {
-    const items = React.Children.toArray(children);
-    const trail = useTrail(items.length, {
-      config: { mass: 20, tension: 2000, friction: 200 },
-      opacity: open ? 1 : 0,
-      x: open ? 0 : 20,
-      height: open ? 110 : 0,
-      from: { opacity: 0, x: 20, height: 0 },
-    });
-    return (
-      <div>
-        {trail.map(({ height, ...style }, index) => (
-          <a.div key={index} style={style}>
-            <a.div style={{ height }}>{items[index]}</a.div>
-          </a.div>
-        ))}
-      </div>
-    );
-  };
- 
-
-  const alignCenter = { display: "flex", alignItems: "center" };
+const SimplifiedLanding = () => {
   return (
     <Layout>
-      
-      <div  className="  bg-gradient-to-r from-yellow-200 from-1% via-emerald-500 via-30% to-yellow-200 to-100%  to h-[100svh] w-[100svw] ">
-        <Parallax pages={7}   className="no-scrollbar">
-          <ParallaxLayer
-            offset={0}
-            speed={0.5}
-            style={{ ...alignCenter, justifyContent: "center" }}
-          >
-            <div
-              className={
-                "w-[20svw] h-[20svh]  bg-transparent border-transparent flex flex-col  "
-              }
+      {/* Hero Section */}
+      <div className="min-h-screen bg-gradient-to-r from-purple-200 via-sky-300 to-cyan-300">
+        
+        {/* Hero Content */}
+        <div className="flex flex-col items-center justify-center min-h-screen px-4">
+          <h1 className="font-roboto text-6xl md:text-8xl font-extrabold text-center text-slate-800 mb-8 drop-shadow-lg">
+            Notility
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-700 text-center max-w-2xl mb-12">
+            Transform your notes with AI-powered insights and collaborative tools
+          </p>
+          <div className="flex gap-4">
+            <Link href="/notespace">
+              <Button className="px-8 py-3 text-lg bg-slate-800 hover:bg-slate-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                Get Started
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              className="px-8 py-3 text-lg border-slate-800 text-slate-800 hover:bg-slate-800 hover:text-white rounded-lg shadow-lg transition-all duration-300"
             >
-              <Trail open={true}>
-                <h1 className=" mt-[2svh] font-roboto text-[70px]  text-center  font-extrabold drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.9)]  text-[rgba(0,0,0,.5)] mb-[5svh]">
-                  Notility
-                </h1>
+              Learn More
+            </Button>
+          </div>
+        </div>
 
-                <div className="text-center font-md text-[rgba(0,0,0,.5)]  mt-[20svh]">
-                  Scroll down
-                </div>
-              </Trail>
-            </div>
-          </ParallaxLayer>
-
-          <ParallaxLayer
-            sticky={{ start: 1, end: 3 }}
-            style={{ ...alignCenter, justifyContent: "flex-start" }}
-          >
-            <Card
-              className={
-                " w-[45svw] h-[65svh] spectrum-background ml-[10svw] border-transparent "
-              }
-            >
-              <CardHeader>
-                <div>
-                  <div className="flex flex-row">
-                    <div className=" font-roboto text-[30px]   font-bold   text-[rgba(0,0,0,.6)] basis-4/5">
-                      Notespace Layout
-                    </div>
-                    <Link href="/notespace/">
-                      <Button className=" basis-1/5 bg-[rgba(0,0,0,.7)] mt-[1svh] ml-[2svw] landingCard">
-                        Notespace
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-                <CardDescription className=" font-roboto text-[15px]   font-lg   text-[rgba(0,0,0,.6)]">
-                  Take your notes online with a rich text editor.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+        {/* Features Section */}
+        <div className="max-w-7xl mx-auto px-4 py-16 space-y-16">
+          
+          {/* Feature 1: Notespace */}
+          <Card className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-8 p-8">
+              <div className="flex flex-col justify-center">
+                <CardHeader className="p-0 mb-6">
+                  <CardTitle className="text-3xl font-bold text-slate-800 mb-4">
+                    Rich Text Editing
+                  </CardTitle>
+                  <CardDescription className="text-lg text-slate-600">
+                    Take your notes online with a powerful rich text editor that adapts to your workflow.
+                  </CardDescription>
+                </CardHeader>
+                <Link href="/notespace">
+                  <Button className="w-fit bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    Try Notespace
+                  </Button>
+                </Link>
+              </div>
+              
+              <div className="relative">
+                {/* Optimized Video */}
                 <video
-                  width="800"
-                  height="700"
-                  controls={false}
-                  preload="auto"
-                  autoPlay={true}
-                  loop
+                  className="w-full h-64 md:h-80 object-cover rounded-xl shadow-lg"
+                  autoPlay
                   muted
+                  loop
+                  playsInline
+                  preload="metadata" // Changed from "auto"
                 >
-                  <source src="/videos/cursorful-notes.mp4" type="video/mp4" />
-                  <track
-                    src="/videos/cursorful-notes.mp4"
-                    kind="subtitles"
-                    srcLang="en"
-                    label="English"
-                  />
-                  Your browser does not support the video tag.
+                  <source src="/videos/editor-demo.mp4" type="video/mp4" />
                 </video>
-              </CardContent>
-            </Card>
-          </ParallaxLayer>
-
-          <ParallaxLayer
-            offset={1.5}
-            speed={1.5}
-            sticky={{ start: 2, end: 3 }}
-            style={{ ...alignCenter, justifyContent: "flex-end" }}
-            className="pointer-events-none"
-          >
-            <div
-              className={
-                "   w-[20svw] h-[20svh] bg-transparent mr-[20svw] border-transparent mb-[20svh]"
-              }
-            >
-              <CardTitle>
-                <p className="font-roboto text-[30px]   font-bold   text-[rgba(0,0,0,.6)] ">
-                  Enhance your note taking with custom AI expertise
-                </p>{" "}
-              </CardTitle>
-              <CardDescription className=" font-roboto text-[18px]   font-lg   text-[rgba(0,0,0,.6)]">
-                <>
-                  Struggling to organize your thoughts or make sense of your
-                  notes? With our online rich text editor, you can easily type
-                  out your ideas, format them however you like, and even share
-                  them with an AI chatbot. Why would you want to do that?
-                  Because the AI can help you understand what you're trying to
-                  say, offer suggestions, or even explain your notes back to you
-                  in a way that makes sense. It's like having a super-smart
-                  study buddy or brainstorming partner always ready to help. No
-                  tech skills needed—just start typing, and let the AI do the
-                  heavy lifting!
-                </>
-              </CardDescription>
+                {/* Fallback poster */}
+               
+              </div>
             </div>
-          </ParallaxLayer>
+          </Card>
 
-          <ParallaxLayer
-            offset={2.5}
-            speed={1.5}
-            sticky={{ start: 4, end: 5 }}
-            style={{ ...alignCenter, justifyContent: "flex-end" }}
-          >
-            <Card
-              className={
-                "w-[45svw] h-[65svh] spectrum-background mr-[5svw] border-transparent "
-              }
-            >
-              <CardHeader>
-                <CardTitle>
-                  {" "}
-                  <div className="flex flex-row">
-                    <div className=" font-roboto text-[30px]   font-bold   text-[rgba(0,0,0,.6)] basis-4/5">
-                      Premium
-                    </div>
-                    <Link href="/premium/index">
-                      <Button className=" basis-1/5 bg-[rgba(0,0,0,.7)] z-20 mt-[1svh] ml-[2svw] landingCard">
-                        Go to Premium
-                      </Button>{" "}
-                    </Link>
-                  </div>
-                </CardTitle>
-                <CardDescription className=" font-roboto text-[15px]   font-lg   text-[rgba(0,0,0,.6)]">
-                  Select your notes and create a custom chatbot that is an
-                  expert of your choice
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+          {/* Feature 2: AI Chat */}
+          <Card className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-8 p-8">
+              
+              <div className="relative order-2 md:order-1">
                 <video
-                  width="800"
-                  height="700"
-                  controls={false}
-                  preload="auto"
-                  autoPlay={true}
-                  loop
+                  className="w-full h-64 md:h-80 object-cover rounded-xl shadow-lg"
+                  autoPlay
                   muted
+                  loop
+                  playsInline
+                  preload="metadata"
                 >
                   <source src="/videos/cursorful-chat.mp4" type="video/mp4" />
-                  <track
-                    src="/videos/cursorful-notes.mp4"
-                    kind="subtitles"
-                    srcLang="en"
-                    label="English"
-                  />
-                  Your browser does not support the video tag.
                 </video>
-              </CardContent>
-            </Card>
-          </ParallaxLayer>
-
-          <ParallaxLayer
-            offset={2.5}
-            speed={1.5}
-            sticky={{ start: 4, end: 5 }}
-            style={{ ...alignCenter, justifyContent: "flex-start" }}
-            className="pointer-events-none"
-          >
-            <div
-              className={
-                "mb-[22svh] ml-[20svw]   w-[20svw] h-[20svh] bg-transparent   border-transparent "
-              }
-            >
-              <CardTitle>
-                <p className="font-roboto text-[30px]   font-bold   text-[rgba(0,0,0,.6)] ">
-                  Improve your understanding by talking to AI
-                </p>{" "}
-              </CardTitle>
-              <CardDescription className=" font-roboto text-[18px]   font-lg   text-[rgba(0,0,0,.6)]">
-                <div>
-                  Need help mastering your notes? Our chat feature lets you
-                  select notes and send it to an AI chatbot that’s like an
-                  expert on whatever you’re working on. Whether you’re studying
-                  for an exam, trying to understand a tricky concept, or
-                  brainstorming ideas, the chatbot breaks things down, answers
-                  questions, and gives insights tailored to your notes. It’s the
-                  ultimate tool for learning smarter and getting clarity on
-                  complex topics—all with just a few clicks.
+                <div className="absolute inset-0 bg-gradient-to-br from-sky-100 to-purple-100 rounded-xl flex items-center justify-center">
+                  <p className="text-slate-600">AI Chat Demo</p>
                 </div>
-              </CardDescription>
-            </div>
-          </ParallaxLayer>
-
-          <ParallaxLayer
-            offset={2.5}
-            speed={1.5}
-            sticky={{ start: 6, end: 7 }}
-            style={{ ...alignCenter, justifyContent: "flex-start" }}
-            className="pointer-events-none"
-          >
-            <div
-              className={
-                "mb-[22svh] mx-auto w-[20svw] h-[20svh] bg-transparent   border-transparent "
-              }
-            >
-              <CardTitle>
-                <p className="font-roboto text-[30px]   font-bold   text-[rgba(0,0,0,.6)] ">
-                  Solidify your knowledge with specialized learning
-                </p>{" "}
-              </CardTitle>
-              <CardDescription className=" font-roboto text-[18px]   font-lg   text-[rgba(0,0,0,.6)]">
-                <div>
-                  Level up your studying with our flashcards! Create custom
-                  cards, test yourself, and track what you’ve mastered—all in
-                  one place. Whether you’re prepping for an exam or just trying
-                  to nail the basics, our flashcard feature makes it easy to
-                  stay focused and retain what you’ve learned. Plus, the
-                  built-in testing helps you see what needs more work, so you
-                  can study smarter, not harder.
-                </div>
-                <div className="align-items-center">
-
+              </div>
               
-                <Link href='/learn'>
-                <Button  className=" pointer-events-auto basis-1/5 bg-[rgba(0,0,0,.7)] mt-[5svh] ml-[6svw]   landingCard">
-                  Try it out
-                </Button>
+              <div className="flex flex-col justify-center order-1 md:order-2">
+                <CardHeader className="p-0 mb-6">
+                  <CardTitle className="text-3xl font-bold text-slate-800 mb-4">
+                    AI-Powered Insights
+                  </CardTitle>
+                  <CardDescription className="text-lg text-slate-600">
+                    Chat with an AI expert about your notes. Get explanations, insights, and answers tailored to your content.
+                  </CardDescription>
+                </CardHeader>
+                <Link href="/premium">
+                  <Button className="w-fit bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    Go Premium
+                  </Button>
                 </Link>
-                </div>
-
-              </CardDescription>
+              </div>
             </div>
-          </ParallaxLayer>
-          
-        </Parallax>
+          </Card>
+
+          {/* Feature 3: Learning Tools */}
+          <Card className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl overflow-hidden">
+            <div className="text-center p-12">
+              <CardHeader className="p-0 mb-8">
+                <CardTitle className="text-3xl font-bold text-slate-800 mb-4">
+                  Enhanced Learning
+                </CardTitle>
+                <CardDescription className="text-lg text-slate-600 max-w-2xl mx-auto">
+                  Create flashcards, take quizzes, and track your progress. Transform your notes into interactive learning experiences.
+                </CardDescription>
+              </CardHeader>
+              <Link href="/learn">
+                <Button className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                  Start Learning
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
+
+        {/* Footer CTA */}
+        <div className="text-center py-16 px-4">
+          <h2 className="text-4xl font-bold text-slate-800 mb-6">
+            Ready to transform your notes?
+          </h2>
+          <Link href="/notespace">
+            <Button className="bg-slate-800 hover:bg-slate-700 text-white px-12 py-4 text-xl rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              Get Started Free
+            </Button>
+          </Link>
+        </div>
       </div>
     </Layout>
   );
 };
 
-export default Blog;
+export default SimplifiedLanding;
