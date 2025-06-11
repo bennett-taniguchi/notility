@@ -1,4 +1,4 @@
-import Latex from "react-latex-next";
+
 import { Card, CardHeader, CardTitle, CardContent } from "../../../ui/card";
 import { StickyNote } from "lucide-react";
 import { ListOrdered } from "lucide-react";
@@ -267,6 +267,14 @@ export default function MessageList({ messagesLoaded }) {
     setContent(message.content);
   }
 
+  // Sort messages by index field to ensure correct chronological order
+  const sortedMessages = messagesLoaded 
+    ? [...messagesLoaded].sort((a, b) => a.index - b.index)
+    : [];
+
+  console.log('Original messages:', messagesLoaded);
+  console.log('Sorted messages:', sortedMessages);
+
   return (
     <div className="flex flex-col justify-items-center justify-self-center gap-y-2 ">
       <NoteModal
@@ -287,11 +295,11 @@ export default function MessageList({ messagesLoaded }) {
         Router={Router}
         slug={slug}
       />
-      {messagesLoaded && messagesLoaded.length != 0 ? (
-        messagesLoaded.map((m: any, idx) => (
+      {sortedMessages && sortedMessages.length != 0 ? (
+        sortedMessages.map((m: any, idx) => (
           <div
-            key={idx}
-            id={idx}
+            key={m.index} // Use m.index instead of idx for React key
+            id={idx+""}
             className={
               m.role === "user"
                 ? "ml-[3svw] flex justify-end"
@@ -316,10 +324,7 @@ export default function MessageList({ messagesLoaded }) {
                 </CardHeader>
                 <span className=" text-slate-600">
                   <CardContent>
-                    {/* <Latex>{m.content}</Latex> */}
-                  
-                <ReactMarkdown>{m.content}</ReactMarkdown>
-            
+                    <ReactMarkdown>{m.content}</ReactMarkdown>
                     <MatchScoreArea m={m} />
                     <CreateOutputButtons m={m} handleModal={handleModal} />
                   </CardContent>

@@ -35,6 +35,12 @@ async function getOverallSummary(chunks: string[]) {
  
 }
 
+function sanitizeText(text) {
+  if (!text || typeof text !== 'string') return '';
+  return text.replace(/\0/g, '').replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+}
+
+
 export default async function handle(req, res) {
  
  
@@ -52,7 +58,7 @@ export default async function handle(req, res) {
 
   const chunks = chunkTextByMultiParagraphs(plainText); // Chunk on max words
 
-  const overallSummary = await getOverallSummary(chunks);
+  const overallSummary = sanitizeText(await getOverallSummary(chunks));
   const denseEmbeddings = await embedChunksDense(chunks); // Chunks -> Dense Vectors
   const vecs = await createVectorRecords(
     denseEmbeddings,
