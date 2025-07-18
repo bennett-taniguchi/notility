@@ -1,5 +1,3 @@
- 
-
 import React, { useContext, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { chunkTextByMultiParagraphs, getPdfText } from "../../utils/parse_text";
@@ -9,6 +7,7 @@ import { toast } from "../../hooks/use-toast";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { Separator } from "../ui/separator";
+import { Upload, File, AlertCircle } from "lucide-react";
 
 type FileType = {
   name: string;
@@ -48,35 +47,96 @@ const buttonVariants = cva(
   }
 );
 
-function FileSelector({onFileChange,fileName}) {
-  const hiddenFileInput = useRef(null); 
+function FileSelector({ onFileChange, fileName, selectedFile }) {
+  const hiddenFileInput = useRef(null);
 
-  const handleClick = event => {
-    (hiddenFileInput!.current! as any).click();   
+  const handleClick = (event) => {
+    (hiddenFileInput.current as any)?.click();
   };
 
- let redText = false
-  if(fileName.includes('Error: file extension not allowed:') && fileName.includes('is not one of: .csv, .pdf, .md, .tex, .json, .txt')) {
-    redText = true
-    console.log('redText',redText)
-  }
+  const isError = fileName.includes('Error: file extension not allowed:');
+
   return (
-    <>
-     <div className="flex flex-col">
-          <Button   onClick={handleClick} className="animated-button w-[200px] mx-auto">Select File</Button>
-            <input  type="file" onChange={onFileChange} ref={hiddenFileInput} style={{display:'none'}}/>
-            {fileName ? <p style={{color: redText ? 'red' : 'black',fontWeight: redText ? 'lighter' : 'bold', marginTop:'1px'}}>Uploaded file: {fileName}</p> : null}
+    <div className="space-y-3">
+      {/* File selection area */}
+      <div 
+        onClick={handleClick}
+        className="
+          relative border-2 border-dashed border-gray-300 rounded-lg p-6
+          hover:border-gray-400 hover:bg-gray-50 
+          transition-colors duration-200 cursor-pointer
+          focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20
+        "
+      >
+        <input
+          type="file"
+          onChange={onFileChange}
+          ref={hiddenFileInput}
+          className="sr-only"
+          accept=".csv,.pdf,.md,.tex,.json,.txt"
+        />
+        
+        <div className="text-center">
+          <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+          <div className="text-sm text-gray-600 mb-1">
+            <span className="font-medium text-blue-600 hover:text-blue-500">
+              Click to upload
+            </span>
+            {" "}or drag and drop
           </div>
-    </>
-  )
+          <p className="text-xs text-gray-500">
+            PDF, TXT, MD, TEX, JSON, CSV files only
+          </p>
+        </div>
+      </div>
+
+      {/* File status display */}
+      {fileName && (
+        <div className={`
+          p-3 rounded-md border
+          ${isError 
+            ? 'bg-red-50 border-red-200 text-red-700' 
+            : 'bg-green-50 border-green-200 text-green-700'
+          }
+        `}>
+          <div className="flex items-start gap-2">
+            {isError ? (
+              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+            ) : (
+              <File className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">
+                {isError ? 'Upload Error' : 'File Selected'}
+              </p>
+              <p className="text-xs break-words">
+                {isError ? fileName : `${fileName}`}
+              </p>
+              {selectedFile && !isError && (
+                <p className="text-xs opacity-75 mt-1">
+                  {(selectedFile.size / 1024).toFixed(1)} KB • {selectedFile.type || 'Unknown type'}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean; 
+  asChild?: boolean;
   setFileContent: any;
   fileContent: any;
-  setLoading:any;
+  setLoading: any;
+  onUploadStart?: (filename: string, originalFileName: string) => void;
+  onUploadComplete?: (filename: string, sourceData: any) => void;
+  onUploadError?: (filename: string, error: string) => void;
+  setSources?: any;
+  sources?: any;
 }
 
 const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -86,14 +146,13 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
     const [fileDetails, setFileDetails] = useState<JSX.Element | null>(null);
     const [errorMessage, setErrorMessage] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
     const Router = useRouter();
     const allowedFiletypes = [".csv", ".pdf", ".md", ".tex", ".json", ".txt"];
     const slug = useContext(SlugContext);
 
     // On file select (from the pop up)
     const onFileChange = (event) => {
-      // Reset error state
-     
       setErrorMessage("");
 
       if (!event.target.files || event.target.files.length === 0) {
@@ -117,113 +176,175 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         return;
       }
 
-      // Size checking removed to allow large files
-
       // File passed validation
       setSelectedFile(file);
       setFileName(file.name);
-      
-      // Update file details display
-      setFileDetails(
-        <div>
-          <p>File Name: {file.name}</p>
-          <p>File Type: {file.type}</p>
-        </div>
-      );
     };
 
-    // Take uploaded file (if it exists) and converts then inserts -> neo4j
     const onClickSubmit = async (e: any) => {
       e.preventDefault();
 
       if (!session) {
         toast({
-          title: " User is not logged in!",
+          title: "User is not logged in!",
           description: "Please login",
         });
+        return;
       }
+
       if (!selectedFile) {
         setErrorMessage("Please select a file to upload");
         return;
       }
-      // new
+
+      const filename = selectedFile.name.split(".")[0];
+      const extensionType = selectedFile.name.split(".").pop();
+
+      // Start the upload process
+      setIsUploading(true);
+      props.onUploadStart?.(filename, selectedFile.name);
+      props.setLoading?.(true);
+
       try {
-        const filename = selectedFile.name.split(".")[0];
-        const extensionType = selectedFile.name.split(".").pop();
-
-        if (extensionType == "pdf") {
-          const plainText = await getPdfText(selectedFile as any);
-
-          let uri = slug.slug;
-          const file = {
-            uri: uri,
-            originalFileName: selectedFile.name,
-            title: filename,
-            owner: session!.user!.email,
-            filetype: extensionType,
-            summary: null,
-          };
-          const body = { plainText, filename, uri, file };
-          await fetch("/api/chat/analyze", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          });
-
-          // addToLocalStorage()
-          Router.push("/notespace/" + uri);
-        } else if (extensionType == "txt") {
-          const plainText = await (selectedFile as any).text();
-
-          let uri = slug.slug;
-          const file = {
-            uri: uri,
-            originalFileName: selectedFile.name,
-            title: filename,
-            owner: session!.user!.email,
-            filetype: extensionType,
-            summary: null,
-          };
-          const body = { plainText, filename, uri, file };
-          await fetch("/api/chat/analyze", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          });
-
-          // addToLocalStorage()
-          Router.push("/notespace/" + uri);
+        let plainText = "";
+        
+        if (extensionType === "pdf") {
+          plainText = await getPdfText(selectedFile as any);
+        } else if (extensionType === "txt") {
+          plainText = await (selectedFile as any).text();
+        } else {
+          throw new Error(`Unsupported file type: ${extensionType}`);
         }
-      } catch (e) {
-        toast({
-          title: "Uh Oh",
-          description:
-            "Something went wrong with file upload please try again!",
+
+        let uri = slug.slug;
+        const file = {
+          uri: uri,
+          originalFileName: selectedFile.name,
+          title: filename,
+          owner: session!.user!.email,
+          filetype: extensionType,
+          summary: null,
+        };
+
+        const body = { plainText, filename, uri, file };
+
+        const response = await fetch("/api/chat/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
         });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        const newSource = {
+          title: filename,
+          filetype: extensionType,
+          summary: result.result?.summary || null,
+          originalFileName: selectedFile.name,
+          uri: uri,
+          owner: session!.user!.email,
+        };
+
+        // Notify completion
+        props.onUploadComplete?.(filename, newSource);
+
+        // Reset form
+        setSelectedFile(null);
+        setFileName("");
+        setFileDetails(null);
+        setErrorMessage("");
+
+        toast({
+          title: "Upload Successful",
+          description: `${selectedFile.name} has been added to your sources`,
+        });
+
+      } catch (error) {
+        console.error("Upload error:", error);
+        const errorMessage = error.message || "Upload failed";
+        props.onUploadError?.(filename, errorMessage);
+
+        toast({
+          title: "Upload Failed",
+          description: errorMessage,
+        });
+      } finally {
+        setIsUploading(false);
+        props.setLoading?.(false);
       }
     };
 
+    const getFileTypeDisplay = (extension) => {
+      const types = {
+        pdf: "PDF Document",
+        txt: "Text File", 
+        md: "Markdown File",
+        tex: "LaTeX Document",
+        json: "JSON Data",
+        csv: "CSV Spreadsheet"
+      };
+      return types[extension] || "Unknown File Type";
+    };
 
     return (
-      <div className="flex flex-row  w-[33.5svw] ml-[-6.5svw]">
-        
-        <div className="flex flex-col mx-auto text-sm">
-      
-          <div className="text-center text-zinc-600 text-extrabold mb-2">
-            Upload a File:
-          </div>
-   
-         <FileSelector onFileChange={onFileChange} fileName={fileName}/>
-          <Button
-            className=" bg-indigo-500 mx-auto mt-[10px] w-[130px] "
-            onClick={onClickSubmit}
-            disabled={!selectedFile}
-          >
-            Add Source
-          </Button>
+      <div className="w-full space-y-4">
+        {/* Header */}
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            Add New Source
+          </h3>
+          <p className="text-sm text-gray-600">
+            Upload a document to add it to your knowledge base
+          </p>
         </div>
-  
-  
+
+        <Separator />
+
+        {/* File selector */}
+        <FileSelector 
+          onFileChange={onFileChange} 
+          fileName={fileName}
+          selectedFile={selectedFile}
+        />
+
+        {/* Error message */}
+        {errorMessage && !fileName.includes('Error:') && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-red-500" />
+              <p className="text-sm text-red-700">{errorMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Upload button */}
+        <Button
+          onClick={onClickSubmit}
+          disabled={!selectedFile || isUploading || fileName.includes('Error:')}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5"
+        >
+          {isUploading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Processing...
+            </>
+          ) : (
+            <>
+              <Upload className="h-4 w-4 mr-2" />
+              Add Source
+            </>
+          )}
+        </Button>
+
+        {/* Help text */}
+        <div className="text-xs text-gray-500 text-center space-y-1">
+          <p>Supported formats: PDF, TXT, MD, TEX, JSON, CSV</p>
+          <p>Files are processed and embedded for AI search</p>
+        </div>
       </div>
     );
   }
