@@ -16,98 +16,103 @@ const pc = new Pinecone({
 // {"role": "system", "content": "You are a helpful assistant."},
 // {"role": "user", "content": "message 1 content."},
 export default async function handle(req, res) {
-
   ///
   //TITLE PROBLEM NEED TO OPT TO DEFAULT QUERY BRANCH IF SELECTEDARR BLANK AS TITLE IS FOR THE NOTESPACE NOT RELATED TO THE SOURCES UPLOADED
   ///
   const { prompt, messages, uri, selectedArr, title } = req.body;
- 
+
   const session = await getServerSession(req, res, authOptions);
 
   /// for context query:
   // 1) embed query
   const response = await openai.embeddings.create({
     model: "text-embedding-3-small",
-    input: prompt+" from sources including: ",
+    input: prompt + " from sources including: ",
     encoding_format: "float",
     dimensions: 1536,
   });
-  const embedded =  response.data;
- 
+  const embedded = response.data;
+
   // create vec index if not exists for neo4j
   // CREATE VECTOR INDEX vecs IF NOT EXISTS
-// FOR (d:Document)
-// ON d.embedding
-// OPTIONS { indexConfig: {
-//  `vector.dimensions`: 1536,
-//  `vector.similarity_function`: 'cosine'
-// }}
+  // FOR (d:Document)
+  // ON d.embedding
+  // OPTIONS { indexConfig: {
+  //  `vector.dimensions`: 1536,
+  //  `vector.similarity_function`: 'cosine'
+  // }}
 
   // query on nodes
-//   MATCH (d:Document {title: 'hungergames'})
-// CALL db.index.vector.queryNodes('vecs', 5, d.embedding)
-// YIELD node AS doc, score
-// RETURN doc.title AS title, doc.text AS text
+  //   MATCH (d:Document {title: 'hungergames'})
+  // CALL db.index.vector.queryNodes('vecs', 5, d.embedding)
+  // YIELD node AS doc, score
+  // RETURN doc.title AS title, doc.text AS text
   //
-
 
   // 2) use embedded to query pinecone
   let index = pc.index("notespace");
-  let namespace = uri
+  let namespace = uri;
 
-  let titleArr = selectedArr.length != 0 ?  selectedArr : [title]
+  let titleArr = selectedArr.length != 0 ? selectedArr : [title];
   const queryResponse = await index.namespace(namespace).query({
     vector: embedded[0].embedding,
     topK: 3,
     includeMetadata: true,
     filter: {
-     "name": {"$in": titleArr}
-    }
+      name: { $in: titleArr },
+    },
   });
- 
-  const preFiltered = queryResponse.matches;
-//const matches = preFiltered;
-  const matches = preFiltered.length >= 5 ? preFiltered.filter(
-    //match => match.score! >= 0.25  
-    match => match.score! >= 0.25  
-  ) : preFiltered
-  ;
 
-  let top_matches : any[] = [] //
-  let top_score : number = 0.0
-  
-  let metadata = '';
+  const preFiltered = queryResponse.matches;
+  //const matches = preFiltered;
+  const matches =
+    preFiltered.length >= 5
+      ? preFiltered.filter(
+          //match => match.score! >= 0.25
+          (match) => match.score! >= 0.25
+        )
+      : preFiltered;
+  let top_matches: any[] = []; //
+  let top_score: number = 0.0;
+
+  let metadata = "";
 
   // MESSAGE SPECIFIC TOP 3
-  let top_five_match = ""
-  let top_five_matchScore = ""
+  let top_five_match = "";
+  let top_five_matchScore = "";
   // MESSAGE SPECIFIC TOP 3
 
   for (let i = 0; i < matches.length; i++) {
-    if(i==0) top_score = matches[i].score as number
+    if (i == 0) top_score = matches[i].score as number;
 
-    if(top_matches.length <= 2 && (matches[i].score as number) - top_score <= .2) {
-      let matchText = matches[i]!.metadata!.text! as any
-      matchText =  matchText.replace('*',"")
-      top_matches.push({text: matchText, 
-       
-        relevance:  Math.round((matches[i].score! + Number.EPSILON) * 100) / 100})
+    if (
+      top_matches.length <= 2 &&
+      (matches[i].score as number) - top_score <= 0.2
+    ) {
+      let matchText = matches[i]!.metadata!.text! as any;
+      matchText = matchText.replace("*", "");
+      top_matches.push({
+        text: matchText,
 
-        
-      
-        if(i < 5) {
-          top_five_match += '*' +  matchText;
-          top_five_matchScore += "*"+Math.round((matches[i].score! + Number.EPSILON) * 100) / 100
-        }
+        relevance: Math.round((matches[i].score! + Number.EPSILON) * 100) / 100,
+      });
+
+      if (i < 5) {
+        top_five_match += "*" + matchText;
+        top_five_matchScore +=
+          "*" + Math.round((matches[i].score! + Number.EPSILON) * 100) / 100;
+      }
     }
 
     metadata +=
-      "Source " + matches[0].id + (matches[0].metadata as RecordMetadata).text + ' ';
+      "Source " +
+      matches[0].id +
+      (matches[0].metadata as RecordMetadata).text +
+      " ";
   }
 
   //  match: top_matches && top_matches.length > 1 ? top_matches[0].text : 'No Matches',
   //   matchScore: top_matches && top_matches.length > 1 ? top_matches[0].relevance+"" : 0.+""
-
 
   // Returns:
   // {
@@ -133,7 +138,7 @@ export default async function handle(req, res) {
   // }
 
   let context = metadata + " Users Question: " + prompt;
- 
+
   // 3) use result in content :
   // 	content: {
   // 		rules {
@@ -172,7 +177,11 @@ export default async function handle(req, res) {
 
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: "Given a user query, analytically anaswer it to the best of your knowledge while maintaining the original intent. Include relevant synonyms and related concepts." },
+      {
+        role: "system",
+        content:
+          "Given a user query, analytically anaswer it to the best of your knowledge while maintaining the original intent. Include relevant synonyms and related concepts.",
+      },
       ...truncated.map((m) => ({
         role: m.role,
         // content: m.content,
@@ -199,7 +208,7 @@ export default async function handle(req, res) {
       })),
       { role: "user", content: prompt },
     ],
-    model: "gpt-4o-mini",
+    model: "gpt-4.1-nano",
   });
 
   //console.log(completion.choices[0]); // do use this
@@ -210,27 +219,31 @@ export default async function handle(req, res) {
   // response (role = 'system') items
   let content_system = completion.choices[0].message.content as string;
 
-  let queriedTitles = selectedArr.length != 0 ? selectedArr.toString() : title
+  let queriedTitles = selectedArr.length != 0 ? selectedArr.toString() : title;
 
   const result = await prisma.message.createMany({
     data: [
       {
-        uri:uri,
-      
+        uri: uri,
+
         content: content_user,
         authorId: session.id,
         role: "user",
         title: queriedTitles,
       },
       {
-        uri:uri,
-      
+        uri: uri,
+
         content: content_system,
         authorId: session.id,
         role: "system",
         title: queriedTitles,
-        match: top_matches && top_matches.length > 1 ? top_five_match : 'No Matches',
-        matchScore: top_matches && top_matches.length > 1 ? top_five_matchScore+"" : 0.+""
+        match:
+          top_matches && top_matches.length > 1 ? top_five_match : "No Matches",
+        matchScore:
+          top_matches && top_matches.length > 1
+            ? top_five_matchScore + ""
+            : 0 + "",
       },
     ],
   });

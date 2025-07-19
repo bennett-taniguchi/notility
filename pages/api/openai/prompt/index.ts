@@ -22,7 +22,7 @@ export default async function handle(req, res) {
       })),
       { role: "user", content: prompt },
     ],
-    model: "gpt-4o-mini",
+    model: "gpt-4.1-nano",
   });
 
   res.json(completion);

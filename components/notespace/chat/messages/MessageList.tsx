@@ -1,6 +1,5 @@
-
 import { Card, CardHeader, CardTitle, CardContent } from "../../../ui/card";
-import { StickyNote } from "lucide-react";
+import { ChevronDown, FileText, Info, StickyNote } from "lucide-react";
 import { ListOrdered } from "lucide-react";
 import {
   Tooltip,
@@ -42,52 +41,121 @@ async function createAsNote({ m }) {
   });
 }
 
-function MatchesList({ m, s }) {
+function MatchesList({ m, s, isOpen }) {
   let splitMatches = m.split("*");
   let splitScores = s.split("*");
-  if (splitMatches[0] == "") {
-    splitMatches = splitMatches.slice(1, splitMatches.length);
-  }
-  if (splitScores[0] == "") {
-    splitScores = splitScores.slice(1, splitScores.length);
-  }
-  return (
-    <>
-      {splitMatches.map((match, idx) => (
-        <div  >
-          <div className="text-large font-bold text-black"> Source {idx + 1}</div>
 
-          <blockquote className="  italic line-clamp-2 hover:line-clamp-none  mt-1 text-xs text-black/80 border-l-2 border-sky-800/40 pl-3 ">{"... " + match + " ..."}</blockquote>
-          <p className="mt-1 text-xs text-black/50 italic">
-            Relevance score: {Math.round(splitScores[idx] * 100)}%
-          </p>
+  if (splitMatches[0] === "") {
+    splitMatches = splitMatches.slice(1);
+  }
+  if (splitScores[0] === "") {
+    splitScores = splitScores.slice(1);
+  }
+
+  return (
+    <div
+      className={cn(
+        "overflow-hidden transition-all duration-300 ease-in-out",
+        isOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
+      )}
+    >
+      {/* ScrollArea with fixed height when open */}
+      <ScrollArea
+        viewportRef={null}
+        className={cn("transition-all duration-300", isOpen ? "h-80" : "h-0")}
+      >
+        <div className="space-y-3 p-3">
+          {splitMatches.map((match, idx) => (
+            <div
+              key={idx}
+              className="group bg-white/50 rounded-lg p-3 border border-white/20 hover:bg-white/70 transition-all duration-200"
+              style={{
+                animationDelay: `${idx * 100}ms`,
+                animation: isOpen ? "fadeInUp 0.3s ease-out forwards" : "none",
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="h-4 w-4 text-indigo-600" />
+                <span className="font-semibold text-gray-900">
+                  Source {idx + 1}
+                </span>
+                <div className="ml-auto flex items-center gap-1">
+                  <span className="text-xs font-medium text-indigo-600">
+                    {Math.round(parseFloat(splitScores[idx]) * 100)}%
+                  </span>
+                  <div
+                    className={cn(
+                      "h-2 w-8 rounded-full bg-gray-200 overflow-hidden"
+                    )}
+                  >
+                    <div
+                      className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-500"
+                      style={{
+                        width: `${Math.round(
+                          parseFloat(splitScores[idx]) * 100
+                        )}%`,
+                        transitionDelay: isOpen
+                          ? `${idx * 150 + 200}ms`
+                          : "0ms",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <blockquote className="text-sm text-gray-700 italic border-l-4 border-indigo-500 pl-3 leading-relaxed">
+                "...{match.trim()}..."
+              </blockquote>
+            </div>
+          ))}
         </div>
-      ))}
-    </>
+      </ScrollArea>
+    </div>
   );
 }
 function MatchScoreArea({ m }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (m.role === "user" || !m.match || m.match.length === 0) {
+    return null;
+  }
+
+  const matchCount = m.match.split("*").filter(Boolean).length;
+
   return (
-    <>
-      {m.role !== "user" && m.match && m.match.length != 0 ? (
-        <>
-          <div className="flex flex-col gap-2 px-2 rounded-lg bg-indigo-600/20 shadow-sm mt-5">
-            {true && (
-              <div className=" ">
-                <div className=" bg-transparent rounded-md mb-2 ">
-                 
-                 
-                    <MatchesList m={m.match} s={m.matchScore} />
-                  
-                </div>
-              </div>
-            )}
+    <div className="mt-4">
+      <div className=" bg-gradient-to-r from-indigo-500/10 to-blue-500/10 rounded-lg border border-indigo-200/50 backdrop-blur-sm overflow-hidden">
+        {/* Clickable header */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between p-3 bg-white/50 hover:bg-white/30 transition-all duration-200 group"
+        >
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-indigo-600" />
+            <span className="text-sm font-medium text-gray-900 ">
+              Sources Referenced ({matchCount})
+            </span>
           </div>
-        </>
-      ) : (
-        <></>
-      )}
-    </>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors">
+              {isOpen ? "Hide" : "Show"} sources
+            </span>
+            <div
+              className={cn(
+                "transition-transform duration-200",
+                isOpen ? "rotate-180" : "rotate-0"
+              )}
+            >
+              <ChevronDown className="h-4 w-4 text-gray-500" />
+            </div>
+          </div>
+        </button>
+
+        {/* Animated content */}
+        <MatchesList m={m.match} s={m.matchScore} isOpen={isOpen as any} />
+      </div>
+    </div>
   );
 }
 
@@ -268,15 +336,15 @@ export default function MessageList({ messagesLoaded }) {
   }
 
   // Sort messages by index field to ensure correct chronological order
-  const sortedMessages = messagesLoaded 
+  const sortedMessages = messagesLoaded
     ? [...messagesLoaded].sort((a, b) => a.index - b.index)
     : [];
 
-  console.log('Original messages:', messagesLoaded);
-  console.log('Sorted messages:', sortedMessages);
+  console.log("Original messages:", messagesLoaded);
+  console.log("Sorted messages:", sortedMessages);
 
   return (
-    <div className="flex flex-col justify-items-center justify-self-center gap-y-2 ">
+    <div className="flex flex-col justify-items-center justify-self-center  ">
       <NoteModal
         openNoteModal={openNoteModal}
         setOpenNoteModal={setOpenNoteModal}
@@ -299,7 +367,7 @@ export default function MessageList({ messagesLoaded }) {
         sortedMessages.map((m: any, idx) => (
           <div
             key={m.index} // Use m.index instead of idx for React key
-            id={idx+""}
+            id={idx + ""}
             className={
               m.role === "user"
                 ? "ml-[3svw] flex justify-end"
@@ -309,11 +377,11 @@ export default function MessageList({ messagesLoaded }) {
             <Card
               className={
                 m.role === "user"
-                  ? "reverse-chat-background drop-shadow-lg  border-2  border-white   min-w-[10svw]"
+                  ? "reverse-chat-background drop-shadow-lg  border-2  border-white   min-w-[10svw] my-3"
                   : "chat-background drop-shadow-lg shadow-inner border-2 border-white min-w-[10svw]"
               }
             >
-              <div key={m.id} className="whitespace-pre-wrap">
+              <div key={m.id} className="   ">
                 <CardHeader>
                   <CardTitle
                     style={{ textAlign: m.role == "user" ? "right" : "left" }}
@@ -322,7 +390,7 @@ export default function MessageList({ messagesLoaded }) {
                     {m.role === "user" ? "User: " : "AI: "}
                   </CardTitle>
                 </CardHeader>
-                <span className=" text-slate-600">
+                <span className=" text-slate-600 ">
                   <CardContent>
                     <ReactMarkdown>{m.content}</ReactMarkdown>
                     <MatchScoreArea m={m} />

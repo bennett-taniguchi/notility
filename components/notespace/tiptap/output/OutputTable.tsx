@@ -143,7 +143,7 @@ function OutputContentButtons({ setEditorVisible, Router, setSelectedNote, setQu
   }
 
   return (
-    <div className={"justify-center   w-[46svw] whitespace-nowrap overflow-none  justify-self-center mt-[20px] align-bottom flex flex-row-4 gap-2 bg-sky-100"}>
+    <div className={"justify-center w-40 sm:w-32  flex-col lg:flex lg:flex-row md:flex md:flex-col  whitespace-nowrap overflow-none  justify-self-center mt-[20px] align-bottom flex flex-row-4 gap-2 bg-sky-100"}>
       <Button
         variant={"outline"}
         className="    whitespace-nowrap  animated-row border-2 border-white"

@@ -18,7 +18,7 @@ async function getOverallSummary(chunks: string[]) {
 
   const chunk = chunks[0]
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4.1-nano",
     messages: [
       {
         role: "system",
