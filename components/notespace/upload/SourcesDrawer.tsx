@@ -336,7 +336,7 @@ export default function SourcesDrawer({
                   <div
                     key={source.title}
                     className="
-                      w-full px-3 py-3 rounded-md border border-gray-200
+                      w-[550px] px-3 py-3 rounded-md border border-gray-200
                       hover:border-cyan-300 hover:shadow-md 
                       transition-all duration-200 bg-white
                       flex items-center justify-between gap-3

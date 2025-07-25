@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { chunkTextByMultiParagraphs, getPdfText } from "../../utils/parse_text";
 import { cva, VariantProps } from "class-variance-authority";
@@ -47,19 +47,21 @@ const buttonVariants = cva(
   }
 );
 
-function FileSelector({ onFileChange, fileName, selectedFile }) {
+function FileSelector({ onFileChange, fileName, selectedFile,setErrorMessage }) {
   const hiddenFileInput = useRef(null);
 
   const handleClick = (event) => {
     (hiddenFileInput.current as any)?.click();
+   setErrorMessage("")
+    
   };
 
-  const isError = fileName.includes('Error: file extension not allowed:');
+  const isError = fileName.includes("Error:");
 
   return (
     <div className="space-y-3">
       {/* File selection area */}
-      <div 
+      <div
         onClick={handleClick}
         className="
           relative border-2 border-dashed border-gray-300 rounded-lg p-6
@@ -75,14 +77,14 @@ function FileSelector({ onFileChange, fileName, selectedFile }) {
           className="sr-only"
           accept=".csv,.pdf,.md,.tex,.json,.txt"
         />
-        
+
         <div className="text-center">
           <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
           <div className="text-sm text-gray-600 mb-1">
             <span className="font-medium text-blue-600 hover:text-blue-500">
               Click to upload
-            </span>
-            {" "}or drag and drop
+            </span>{" "}
+            or drag and drop
           </div>
           <p className="text-xs text-gray-500">
             PDF, TXT, MD, TEX, JSON, CSV files only
@@ -92,13 +94,16 @@ function FileSelector({ onFileChange, fileName, selectedFile }) {
 
       {/* File status display */}
       {fileName && (
-        <div className={`
+        <div
+          className={`
           p-3 rounded-md border
-          ${isError 
-            ? 'bg-red-50 border-red-200 text-red-700' 
-            : 'bg-green-50 border-green-200 text-green-700'
+          ${
+            isError != ""
+              ? "bg-red-50 border-red-200 text-red-700"
+              : "bg-green-50 border-green-200 text-green-700"
           }
-        `}>
+        `}
+        >
           <div className="flex items-start gap-2">
             {isError ? (
               <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
@@ -107,14 +112,15 @@ function FileSelector({ onFileChange, fileName, selectedFile }) {
             )}
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">
-                {isError ? 'Upload Error' : 'File Selected'}
+                {isError ? "Upload Error" : "File Selected"}
               </p>
               <p className="text-xs break-words">
                 {isError ? fileName : `${fileName}`}
               </p>
               {selectedFile && !isError && (
                 <p className="text-xs opacity-75 mt-1">
-                  {(selectedFile.size / 1024).toFixed(1)} KB • {selectedFile.type || 'Unknown type'}
+                  {(selectedFile.size / 1024).toFixed(1)} KB •{" "}
+                  {selectedFile.type || "Unknown type"}
                 </p>
               )}
             </div>
@@ -154,6 +160,8 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // On file select (from the pop up)
     const onFileChange = (event) => {
       setErrorMessage("");
+      setFileName("");
+      setSelectedFile(null);
 
       if (!event.target.files || event.target.files.length === 0) {
         setSelectedFile(null);
@@ -163,6 +171,24 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
       const file = event.target.files[0];
       const extension = "." + file.name.split(".").pop();
+
+      if (file.name.includes("Error")) {
+        const errorMsg = `Error: file name cannot contain: "Error" `;
+        setErrorMessage(errorMsg);
+        setFileName(errorMsg);
+        event.target.value = "";
+        setSelectedFile(null);
+        return;
+      }
+
+      if (file.size > 26214400) { // 25MB
+        const errorMsg = `Error: file size greater than 25MB not allowed`;
+        setErrorMessage(errorMsg);
+        setFileName(errorMsg);
+        event.target.value = "";
+        setSelectedFile(null);
+        return;
+      }
 
       // Validate file type
       if (!allowedFiletypes.includes(extension)) {
@@ -206,63 +232,106 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       props.setLoading?.(true);
 
       try {
-        let plainText = "";
-        
-        if (extensionType === "pdf") {
-          plainText = await getPdfText(selectedFile as any);
-        } else if (extensionType === "txt") {
-          plainText = await (selectedFile as any).text();
-        } else {
-          throw new Error(`Unsupported file type: ${extensionType}`);
-        }
+       let plainText = "";
+  if (extensionType === "pdf") {
+    plainText = await getPdfText(selectedFile as any);
+  } else if (extensionType === "txt") {
+    plainText = await (selectedFile as any).text();
+  } else {
+    throw new Error(`Unsupported file type: ${extensionType}`);
+  }
 
-        let uri = slug.slug;
-        const file = {
-          uri: uri,
-          originalFileName: selectedFile.name,
-          title: filename,
-          owner: session!.user!.email,
-          filetype: extensionType,
-          summary: null,
-        };
+  let uri = slug.slug;
+  const file = {
+    uri: uri,
+    originalFileName: selectedFile.name,
+    title: filename,
+    owner: session!.user!.email,
+    filetype: extensionType,
+    summary: null,
+  };
 
-        const body = { plainText, filename, uri, file };
+  // Batching configuration
+  const BATCH_SIZE = 500 * 1750; // ~875KB per batch (well under 1MB limit)
+  const totalBatches = Math.ceil(plainText.length / BATCH_SIZE);
+  
+  console.log(`Processing ${plainText.length} characters in ${totalBatches} batches`);
+  
+  let allResults = [] as any;
+  let overallSummary = null;
 
-        const response = await fetch("/api/chat/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
+  // Process each batch
+  for (let i = 0; i < totalBatches; i++) {
+    const startIndex = i * BATCH_SIZE;
+    const endIndex = Math.min(startIndex + BATCH_SIZE, plainText.length);
+    const batchText = plainText.slice(startIndex, endIndex);
+    
+    // Create chunks for this batch
+    const batchChunks = chunkTextByMultiParagraphs(batchText);
+    
+    const batchBody = {
+      plainText: batchText, // for pinecone
+      filename: `${filename}`,
+      uri,
+      file: {
+        ...file,
+        title: `${filename}` // for postgresql
+      },
+      batchInfo: {
+        currentBatch: i + 1,
+        totalBatches: totalBatches,
+        isLastBatch: i === totalBatches - 1
+      }
+    };
 
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
-        }
+    console.log(`Uploading batch ${i + 1}/${totalBatches}...`);
 
-        const result = await response.json();
+    const response = await fetch("/api/chat/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(batchBody),
+    });
 
-        const newSource = {
-          title: filename,
-          filetype: extensionType,
-          summary: result.result?.summary || null,
-          originalFileName: selectedFile.name,
-          uri: uri,
-          owner: session!.user!.email,
-        };
+    if (!response.ok) {
+      throw new Error(`Batch ${i + 1} upload failed: ${response.statusText}`);
+    }
 
-        // Notify completion
-        props.onUploadComplete?.(filename, newSource);
+    const result = await response.json();
+    allResults.push(result);
+    
+    // Store summary from the first batch or last batch
+    if (i === 0 || result.result?.summary) {
+      overallSummary = result.result?.summary;
+    }
 
-        // Reset form
-        setSelectedFile(null);
-        setFileName("");
-        setFileDetails(null);
-        setErrorMessage("");
+    console.log(`Batch ${i + 1} completed successfully`);
+  }
 
-        toast({
-          title: "Upload Successful",
-          description: `${selectedFile.name} has been added to your sources`,
-        });
+  // Only reload and update UI after ALL batches are complete
+  Router.reload();
 
+  const newSource = {
+    title: filename,
+    filetype: extensionType,
+    summary: overallSummary || null,
+    originalFileName: selectedFile.name,
+    uri: uri,
+    owner: session!.user!.email,
+  };
+
+  // Notify completion
+  props.onUploadComplete?.(filename, newSource);
+
+  // Reset form
+  setSelectedFile(null);
+  setFileName("");
+  setFileDetails(null);
+  setErrorMessage("");
+
+  toast({
+    title: "Upload Successful",
+    description: `${selectedFile.name} has been processed in ${totalBatches} batches and added to your sources`,
+  });
       } catch (error) {
         console.error("Upload error:", error);
         const errorMessage = error.message || "Upload failed";
@@ -281,15 +350,15 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const getFileTypeDisplay = (extension) => {
       const types = {
         pdf: "PDF Document",
-        txt: "Text File", 
+        txt: "Text File",
         md: "Markdown File",
         tex: "LaTeX Document",
         json: "JSON Data",
-        csv: "CSV Spreadsheet"
+        csv: "CSV Spreadsheet",
       };
       return types[extension] || "Unknown File Type";
     };
-
+ 
     return (
       <div className="w-full space-y-4">
         {/* Header */}
@@ -305,14 +374,15 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <Separator />
 
         {/* File selector */}
-        <FileSelector 
-          onFileChange={onFileChange} 
+        <FileSelector
+          onFileChange={onFileChange}
           fileName={fileName}
           selectedFile={selectedFile}
+          setErrorMessage={setErrorMessage}
         />
 
         {/* Error message */}
-        {errorMessage && !fileName.includes('Error:') && (
+        {errorMessage && !fileName.includes("Error:") && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-red-500" />
@@ -324,7 +394,7 @@ const UploadButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {/* Upload button */}
         <Button
           onClick={onClickSubmit}
-          disabled={!selectedFile || isUploading || fileName.includes('Error:')}
+          disabled={!selectedFile || isUploading || fileName.includes("Error:")}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5"
         >
           {isUploading ? (

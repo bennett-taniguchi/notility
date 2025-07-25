@@ -9,14 +9,23 @@ import {
 import OpenAI from "openai";
  
  
-
-// moving to summarize by first chunk out of laziness
+ export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '4.5mb',  
+    },
+    responseLimit: false,
+  },
+}
+ 
 async function getOverallSummary(chunks: string[]) {
   const openai = new OpenAI({
     apiKey: process.env["OPENAI_API_KEY"],
   });
 
-  const chunk = chunks[0]
+  const chunk = (chunks.slice(0,5)).join(" ")
+   const byteSize = chunk => Buffer.byteLength(chunk, 'utf8');
+   console.log("byteSize",byteSize)
   const completion = await openai.chat.completions.create({
     model: "gpt-4.1-nano",
     messages: [
@@ -56,7 +65,7 @@ export default async function handle(req, res) {
 
   //const parsed = HTMLtoText(notes_contents); // remove html tags
 
-  const chunks = chunkTextByMultiParagraphs(plainText); // Chunk on max words
+  const chunks = chunkTextByMultiParagraphs(plainText); // Chunk on max # of  words
 
   const overallSummary = sanitizeText(await getOverallSummary(chunks));
   const denseEmbeddings = await embedChunksDense(chunks); // Chunks -> Dense Vectors
